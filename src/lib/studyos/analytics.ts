@@ -77,7 +77,7 @@ export function studyScore(sessions: StudySession[], profile: Profile): number {
   const consistency = byDay.size / 30;
   const goalRate = goalDays / 30;
   const volume = Math.min(1, totalMinutes(last30) / (goalMin * 30 || 1));
-  return Math.round((consistency * 40 + goalRate * 35 + volume * 25) * 100) / 1 / 1;
+  return Math.min(100, Math.round(consistency * 40 + goalRate * 35 + volume * 25));
 }
 
 export function consistencyPct(sessions: StudySession[], days = 30): number {
