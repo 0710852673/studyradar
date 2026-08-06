@@ -61,7 +61,10 @@ function SettingsPage() {
   const toggleSubject = (s: string) => {
     const optional = profile.track === "AL" ? profile.subjects : chosenOptional;
     let next = optional.includes(s) ? optional.filter((x) => x !== s) : [...optional, s];
-    if (next.length > 3) return toast.error("Pick exactly 3 subjects");
+    if (next.length > 3) {
+      toast.error("Pick exactly 3 subjects");
+      return;
+    }
     next = next.slice(0, 3);
     updateProfile({
       subjects: profile.track === "AL" ? next : [...OL_COMPULSORY, ...next],

@@ -15,6 +15,7 @@ import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as MarksRouteImport } from './routes/marks'
 import { Route as RevisionRouteImport } from './routes/revision'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as TimerRouteImport } from './routes/timer'
 
 const IndexRoute = IndexRouteImport.update({
@@ -47,6 +48,11 @@ const RevisionRoute = RevisionRouteImport.update({
   path: '/revision',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TimerRoute = TimerRouteImport.update({
   id: '/timer',
   path: '/timer',
@@ -60,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/calendar': typeof CalendarRoute
   '/marks': typeof MarksRoute
   '/revision': typeof RevisionRoute
+  '/settings': typeof SettingsRoute
   '/timer': typeof TimerRoute
 }
 export interface FileRoutesByTo {
@@ -69,6 +76,7 @@ export interface FileRoutesByTo {
   '/calendar': typeof CalendarRoute
   '/marks': typeof MarksRoute
   '/revision': typeof RevisionRoute
+  '/settings': typeof SettingsRoute
   '/timer': typeof TimerRoute
 }
 export interface FileRoutesById {
@@ -79,6 +87,7 @@ export interface FileRoutesById {
   '/calendar': typeof CalendarRoute
   '/marks': typeof MarksRoute
   '/revision': typeof RevisionRoute
+  '/settings': typeof SettingsRoute
   '/timer': typeof TimerRoute
 }
 export interface FileRouteTypes {
@@ -90,6 +99,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/marks'
     | '/revision'
+    | '/settings'
     | '/timer'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -99,6 +109,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/marks'
     | '/revision'
+    | '/settings'
     | '/timer'
   id:
     | '__root__'
@@ -108,6 +119,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/marks'
     | '/revision'
+    | '/settings'
     | '/timer'
   fileRoutesById: FileRoutesById
 }
@@ -118,6 +130,7 @@ export interface RootRouteChildren {
   CalendarRoute: typeof CalendarRoute
   MarksRoute: typeof MarksRoute
   RevisionRoute: typeof RevisionRoute
+  SettingsRoute: typeof SettingsRoute
   TimerRoute: typeof TimerRoute
 }
 
@@ -165,6 +178,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RevisionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/timer': {
       id: '/timer'
       path: '/timer'
@@ -182,6 +202,7 @@ const rootRouteChildren: RootRouteChildren = {
   CalendarRoute: CalendarRoute,
   MarksRoute: MarksRoute,
   RevisionRoute: RevisionRoute,
+  SettingsRoute: SettingsRoute,
   TimerRoute: TimerRoute,
 }
 export const routeTree = rootRouteImport
