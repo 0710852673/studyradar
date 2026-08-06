@@ -119,18 +119,16 @@ function RootShell({ children }: { children: ReactNode }) {
 function Gate() {
   const { ready, profile } = useStudyOS();
 
-  if (!ready) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-muted border-t-primary" />
-      </div>
-    );
-  }
-
-  if (!profile) return <Onboarding />;
-
-  return <Outlet />;
+  // Always render <Outlet /> so the SSR tree matches the first client render;
+  // stored state only exists in the browser and arrives after hydration.
+  return (
+    <>
+      <Outlet />
+      {ready && !profile ? <Onboarding /> : null}
+    </>
+  );
 }
+
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
