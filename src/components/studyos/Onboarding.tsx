@@ -91,7 +91,7 @@ export function Onboarding() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-background px-4 py-10 sm:items-center">
       <div className="panel rise w-full max-w-2xl p-6 sm:p-8">
         <div className="mb-6 flex items-center gap-3">
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
