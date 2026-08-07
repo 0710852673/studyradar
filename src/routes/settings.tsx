@@ -1,22 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/studyos/AppShell";
 import { Panel } from "@/components/studyos/Primitives";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { useStudyOS } from "@/lib/studyos/store";
 import { AL_STREAMS, OL_COMPULSORY, OL_OPTIONAL, defaultExamDate } from "@/lib/studyos/subjects";
@@ -24,19 +13,19 @@ import { AL_STREAMS, OL_COMPULSORY, OL_OPTIONAL, defaultExamDate } from "@/lib/s
 export const Route = createFileRoute("/settings")({
   head: () => ({
     meta: [
-      { title: "Settings — StudyOS" },
+      { title: "Profile — Study Radar" },
       {
         name: "description",
-        content: "Adjust study goals, subjects, exam year, theme and notifications.",
+        content: "Update your name, exam year, subjects and daily study target.",
       },
-      { property: "og:title", content: "Settings — StudyOS" },
+      { property: "og:title", content: "Profile — Study Radar" },
       {
         property: "og:description",
-        content: "Tune StudyOS to the way you actually study.",
+        content: "Your account, subjects and study target in one place.",
       },
     ],
   }),
-  component: SettingsPage,
+  component: ProfilePage,
 });
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
@@ -48,101 +37,114 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
   );
 }
 
-function SettingsPage() {
-  const { profile, updateProfile, reset } = useStudyOS();
+function ProfilePage() {
+  const { profile, user, updateProfile, signOut } = useStudyOS();
   if (!profile) return null;
 
-  const pool =
-    profile.track === "AL"
-      ? (AL_STREAMS[profile.stream ?? ""] ?? [])
-      : OL_OPTIONAL;
+  const thisYear = new Date().getFullYear();
+  const optionalPool =
+    profile.track === "AL" ? (AL_STREAMS[profile.stream ?? ""] ?? []) : OL_OPTIONAL;
   const chosenOptional = profile.subjects.filter((s) => !OL_COMPULSORY.includes(s));
 
   const toggleSubject = (s: string) => {
-    const optional = profile.track === "AL" ? profile.subjects : chosenOptional;
-    let next = optional.includes(s) ? optional.filter((x) => x !== s) : [...optional, s];
-    if (next.length > 3) {
-      toast.error("Pick exactly 3 subjects");
-      return;
-    }
-    next = next.slice(0, 3);
-    updateProfile({
-      subjects: profile.track === "AL" ? next : [...OL_COMPULSORY, ...next],
-    });
+    const has = chosenOptional.includes(s);
+    if (!has && chosenOptional.length >= 3) return;
+    const next = has ? chosenOptional.filter((x) => x !== s) : [...chosenOptional, s];
+    const subjects = profile.track === "AL" ? next : [...OL_COMPULSORY, ...next];
+    void updateProfile({ subjects });
   };
 
   return (
-    <AppShell title="Settings" subtitle="Tune StudyOS to your routine">
+    <AppShell title="Profile" subtitle={user?.email ?? undefined}>
       <div className="mx-auto max-w-2xl space-y-4">
-        <Panel title="Goals">
-          <Row label={`Daily goal · ${profile.dailyGoalHours}h`}>
-            <Slider
-              className="w-48"
-              value={[profile.dailyGoalHours]}
-              min={1}
-              max={14}
-              step={0.5}
-              onValueChange={([v]) => updateProfile({ dailyGoalHours: v ?? 1 })}
-            />
-          </Row>
-          <Row label={`Weekly goal · ${profile.weeklyGoalHours}h`}>
-            <Slider
-              className="w-48"
-              value={[profile.weeklyGoalHours]}
-              min={5}
-              max={90}
-              step={1}
-              onValueChange={([v]) => updateProfile({ weeklyGoalHours: v ?? 5 })}
-            />
-          </Row>
-          {profile.track === "AL" ? (
-            <Row label="Target Z-Score">
-              <Input
-                type="number"
-                step="0.01"
-                className="w-28"
-                value={profile.targetZScore ?? 0}
-                onChange={(e) => updateProfile({ targetZScore: Number(e.target.value) })}
-              />
-            </Row>
-          ) : null}
-        </Panel>
-
-        <Panel title="Exam">
-          <Row label="Exam year">
+        <Panel title="Account">
+          <Row label="Name">
             <Input
-              type="number"
-              className="w-28"
-              value={profile.examYear}
-              onChange={(e) => {
-                const y = Number(e.target.value);
-                updateProfile({ examYear: y, examDate: defaultExamDate(profile.track, y) });
+              defaultValue={profile.name}
+              onBlur={(e) => {
+                const v = e.target.value.trim();
+                if (v && v !== profile.name) {
+                  void updateProfile({ name: v });
+                  toast.success("Name updated");
+                }
               }}
+              className="w-48"
             />
           </Row>
-          <Row label="Exam start date">
-            <Input
-              type="date"
-              className="w-44"
-              value={profile.examDate}
-              onChange={(e) => updateProfile({ examDate: e.target.value })}
-            />
+          <Row label="Exam">
+            <span className="text-sm text-muted-foreground">
+              GCE {profile.track === "AL" ? "Advanced" : "Ordinary"} Level
+              {profile.stream ? ` · ${profile.stream}` : ""}
+            </span>
+          </Row>
+          <Row label="Exam year">
+            <div className="flex gap-2">
+              {[thisYear, thisYear + 1, thisYear + 2].map((y) => (
+                <button
+                  key={y}
+                  onClick={() =>
+                    void updateProfile({
+                      examYear: y,
+                      examDate: defaultExamDate(profile.track, y),
+                    })
+                  }
+                  className={cn(
+                    "rounded-full border px-3.5 py-1.5 text-sm transition-colors",
+                    profile.examYear === y
+                      ? "border-primary bg-brand-soft text-primary"
+                      : "border-border bg-elevated text-muted-foreground",
+                  )}
+                >
+                  {y}
+                </button>
+              ))}
+            </div>
           </Row>
         </Panel>
 
-        <Panel title={profile.track === "AL" ? "Subjects (3)" : "Optional subjects (3)"}>
-          <div className="flex flex-wrap gap-2">
-            {pool.map((s) => {
-              const active = profile.subjects.includes(s);
+        <Panel title="Daily target">
+          <div className="mb-3 flex items-baseline justify-between">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Hours per day</p>
+            <span className="num text-lg font-semibold">{profile.dailyGoalHours}h</span>
+          </div>
+          <Slider
+            value={[profile.dailyGoalHours]}
+            min={1}
+            max={14}
+            step={0.5}
+            onValueChange={([v]) => void updateProfile({ dailyGoalHours: v ?? 1 })}
+          />
+          <p className="mt-3 text-xs text-muted-foreground">
+            Weekly target: {profile.dailyGoalHours * 7}h
+          </p>
+        </Panel>
+
+        <Panel title={profile.track === "AL" ? "Subjects" : "Optional subjects"}>
+          {profile.track === "OL" ? (
+            <div className="mb-4 flex flex-wrap gap-2">
+              {OL_COMPULSORY.map((s) => (
+                <span
+                  key={s}
+                  className="rounded-full border border-border bg-elevated px-3 py-1.5 text-xs text-muted-foreground"
+                >
+                  {s}
+                </span>
+              ))}
+            </div>
+          ) : null}
+          <div className="grid gap-2 sm:grid-cols-3">
+            {optionalPool.map((s) => {
+              const active = chosenOptional.includes(s);
               return (
                 <button
                   key={s}
                   onClick={() => toggleSubject(s)}
+                  disabled={!active && chosenOptional.length >= 3}
                   className={cn(
-                    "rounded-full border px-3.5 py-2 text-sm transition-colors",
+                    "rounded-xl border p-3 text-left text-sm transition-colors",
                     active
                       ? "border-primary bg-brand-soft text-primary"
-                      : "border-border bg-elevated text-muted-foreground hover:text-foreground",
+                      : "border-border bg-elevated text-muted-foreground disabled:opacity-40",
                   )}
                 >
                   {s}
@@ -150,48 +152,12 @@ function SettingsPage() {
               );
             })}
           </div>
-          {profile.track === "OL" ? (
-            <p className="mt-3 text-xs text-muted-foreground">
-              Compulsory: {OL_COMPULSORY.join(", ")}
-            </p>
-          ) : null}
         </Panel>
 
-        <Panel title="Preferences">
-          <Row label="Dark theme">
-            <Switch
-              checked={profile.theme === "dark"}
-              onCheckedChange={(v) => updateProfile({ theme: v ? "dark" : "light" })}
-            />
-          </Row>
-          <Row label="In-app notifications">
-            <Switch
-              checked={profile.notifications}
-              onCheckedChange={(v) => updateProfile({ notifications: v })}
-            />
-          </Row>
-        </Panel>
-
-        <Panel title="Danger zone">
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive" size="sm">
-                Reset all data
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Reset StudyOS?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This erases every session, mark and lesson on this device. It cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={reset}>Reset everything</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+        <Panel>
+          <Button variant="secondary" className="w-full" onClick={() => void signOut()}>
+            <LogOut className="h-4 w-4" /> Sign out
+          </Button>
         </Panel>
       </div>
     </AppShell>
