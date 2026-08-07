@@ -161,7 +161,7 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
       refresh,
       updateProfile: async (p) => {
         if (!userId) return;
-        const patch: Record<string, unknown> = {};
+        const patch: Record<string, any> = {};
         if (p.name !== undefined) patch['name'] = p.name;
         if (p.track !== undefined) patch['track'] = p.track;
         if (p.examYear !== undefined) patch['exam_year'] = p.examYear;
