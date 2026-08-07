@@ -14,16 +14,174 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      chapters: {
+        Row: {
+          created_at: string
+          id: string
+          position: number
+          status: string
+          subject: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          position?: number
+          status?: string
+          subject: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          position?: number
+          status?: string
+          subject?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      marks: {
+        Row: {
+          created_at: string
+          date: string
+          exam_name: string
+          id: string
+          marks: number
+          subject: string
+          total: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          exam_name: string
+          id?: string
+          marks: number
+          subject: string
+          total?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          exam_name?: string
+          id?: string
+          marks?: number
+          subject?: string
+          total?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          daily_target_hours: number
+          exam_date: string | null
+          exam_year: number
+          id: string
+          name: string
+          onboarded: boolean
+          stream: string | null
+          subjects: string[]
+          track: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          daily_target_hours?: number
+          exam_date?: string | null
+          exam_year?: number
+          id: string
+          name?: string
+          onboarded?: boolean
+          stream?: string | null
+          subjects?: string[]
+          track?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          daily_target_hours?: number
+          exam_date?: string | null
+          exam_year?: number
+          id?: string
+          name?: string
+          onboarded?: boolean
+          stream?: string | null
+          subjects?: string[]
+          track?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      study_sessions: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          minutes: number
+          note: string | null
+          subject: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          id?: string
+          minutes: number
+          note?: string | null
+          subject: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          minutes?: number
+          note?: string | null
+          subject?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "student"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +308,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "student"],
+    },
   },
 } as const
