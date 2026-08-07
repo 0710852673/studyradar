@@ -72,21 +72,20 @@ export function Onboarding() {
           : picked.length === 3
         : true;
 
-  const finish = () => {
-    if (!track) return;
+  const finish = async () => {
+    if (!track || saving) return;
+    setSaving(true);
     const subjects = track === "AL" ? picked : [...OL_COMPULSORY, ...picked];
-    setProfile({
+    await updateProfile({
       track,
       examYear,
       examDate: defaultExamDate(track, examYear),
       stream: track === "AL" ? stream : undefined,
       subjects,
       dailyGoalHours: daily,
-      weeklyGoalHours: weekly,
-      targetZScore: track === "AL" ? zscore : undefined,
-      theme: "dark",
-      notifications: true,
+      onboarded: true,
     });
+    setSaving(false);
   };
 
   return (
