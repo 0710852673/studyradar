@@ -1,41 +1,28 @@
 export type ExamTrack = "AL" | "OL";
 
-export type StudyType = "Theory" | "Revision" | "Paper" | "Class" | "Assignment";
+/** Syllabus chapter state — deliberately only three. */
+export type ChapterStatus = "todo" | "doing" | "done";
 
-export const STUDY_TYPES: StudyType[] = [
-  "Theory",
-  "Revision",
-  "Paper",
-  "Class",
-  "Assignment",
-];
+export const CHAPTER_STATUSES: ChapterStatus[] = ["todo", "doing", "done"];
 
-export type LessonStatus =
-  | "Not Started"
-  | "Learning"
-  | "Revision 1"
-  | "Revision 2"
-  | "Mastered";
-
-export const LESSON_STATUSES: LessonStatus[] = [
-  "Not Started",
-  "Learning",
-  "Revision 1",
-  "Revision 2",
-  "Mastered",
-];
+export const CHAPTER_LABEL: Record<ChapterStatus, string> = {
+  todo: "Not started",
+  doing: "In progress",
+  done: "Done",
+};
 
 export interface Profile {
+  id: string;
+  name: string;
   track: ExamTrack;
   examYear: number;
   examDate: string; // yyyy-MM-dd
   stream?: string | undefined;
   subjects: string[];
   dailyGoalHours: number;
+  /** Derived: daily target x 7, used by weekly report. */
   weeklyGoalHours: number;
-  targetZScore?: number | undefined;
-  theme: "dark" | "light";
-  notifications: boolean;
+  onboarded: boolean;
 }
 
 export interface StudySession {
@@ -43,7 +30,6 @@ export interface StudySession {
   date: string; // yyyy-MM-dd
   subject: string;
   minutes: number;
-  type: StudyType;
   note?: string | undefined;
   createdAt: number;
 }
@@ -57,27 +43,17 @@ export interface MarkEntry {
   total: number;
 }
 
-export interface Lesson {
+export interface Chapter {
   id: string;
   subject: string;
   title: string;
-  status: LessonStatus;
+  status: ChapterStatus;
 }
 
 export interface StudyOSData {
-  version: 1;
-  profile: Profile | null;
   sessions: StudySession[];
   marks: MarkEntry[];
-  lessons: Lesson[];
-  unlocked: string[];
+  chapters: Chapter[];
 }
 
-export const EMPTY_DATA: StudyOSData = {
-  version: 1,
-  profile: null,
-  sessions: [],
-  marks: [],
-  lessons: [],
-  unlocked: [],
-};
+export const EMPTY_DATA: StudyOSData = { sessions: [], marks: [], chapters: [] };
