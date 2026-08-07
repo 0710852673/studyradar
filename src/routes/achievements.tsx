@@ -35,7 +35,6 @@ function AchievementsPage() {
     totalHours: totalMinutes(data.sessions) / 60,
     currentStreak: s.current,
     longestStreak: s.longest,
-    papers: data.sessions.filter((x) => x.type === "Paper").length,
     sessions: data.sessions,
   };
 
