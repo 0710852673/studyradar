@@ -238,35 +238,9 @@ export function Onboarding() {
                 onValueChange={([v]) => setDaily(v ?? 1)}
               />
             </div>
-            <div>
-              <div className="mb-3 flex items-baseline justify-between">
-                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Weekly goal
-                </p>
-                <span className="num text-lg font-semibold">{weekly}h</span>
-              </div>
-              <Slider
-                value={[weekly]}
-                min={5}
-                max={90}
-                step={1}
-                onValueChange={([v]) => setWeekly(v ?? 5)}
-              />
-            </div>
-            {track === "AL" ? (
-              <div>
-                <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Target Z-Score
-                </p>
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={zscore}
-                  onChange={(e) => setZscore(Number(e.target.value))}
-                  className="w-36"
-                />
-              </div>
-            ) : null}
+            <p className="text-xs text-muted-foreground">
+              You can change this any time from your profile.
+            </p>
           </div>
         ) : null}
 
