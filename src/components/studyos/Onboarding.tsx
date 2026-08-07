@@ -44,7 +44,7 @@ function Selectable({
 }
 
 export function Onboarding() {
-  const { setProfile } = useStudyOS();
+  const { profile, updateProfile } = useStudyOS();
   const thisYear = new Date().getFullYear();
 
   const [step, setStep] = useState(0);
@@ -53,8 +53,7 @@ export function Onboarding() {
   const [stream, setStream] = useState<string>("");
   const [picked, setPicked] = useState<string[]>([]);
   const [daily, setDaily] = useState(4);
-  const [weekly, setWeekly] = useState(28);
-  const [zscore, setZscore] = useState(1.8);
+  const [saving, setSaving] = useState(false);
 
   const optionalPool = track === "AL" ? (AL_STREAMS[stream] ?? []) : OL_OPTIONAL;
 
