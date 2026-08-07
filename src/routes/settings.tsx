@@ -55,7 +55,7 @@ function ProfilePage() {
   };
 
   return (
-    <AppShell title="Profile" subtitle={user?.email ?? undefined}>
+    <AppShell title="Profile" subtitle={user?.email ?? "Your account"}>
       <div className="mx-auto max-w-2xl space-y-4">
         <Panel title="Account">
           <Row label="Name">
