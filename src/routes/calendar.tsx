@@ -116,8 +116,8 @@ function CalendarPage() {
               <p className="num text-lg font-semibold">{fmtHours(byDay.get(selected) ?? 0)}</p>
             </div>
             <div className="rounded-xl bg-elevated p-3">
-              <p className="text-xs text-muted-foreground">Papers</p>
-              <p className="num text-lg font-semibold">{papers}</p>
+              <p className="text-xs text-muted-foreground">Sessions</p>
+              <p className="num text-lg font-semibold">{daySessions.length}</p>
             </div>
           </div>
 
