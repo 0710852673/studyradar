@@ -161,15 +161,24 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
       refresh,
       updateProfile: async (p) => {
         if (!userId) return;
-        const patch: Record<string, any> = {};
-        if (p.name !== undefined) patch['name'] = p.name;
-        if (p.track !== undefined) patch['track'] = p.track;
-        if (p.examYear !== undefined) patch['exam_year'] = p.examYear;
-        if (p.examDate !== undefined) patch['exam_date'] = p.examDate;
-        if (p.stream !== undefined) patch['stream'] = p.stream;
-        if (p.subjects !== undefined) patch['subjects'] = p.subjects;
-        if (p.dailyGoalHours !== undefined) patch['daily_target_hours'] = p.dailyGoalHours;
-        if (p.onboarded !== undefined) patch['onboarded'] = p.onboarded;
+        const patch: {
+          name?: string;
+          track?: string;
+          exam_year?: number;
+          exam_date?: string | null;
+          stream?: string | null;
+          subjects?: string[];
+          daily_target_hours?: number;
+          onboarded?: boolean;
+        } = {};
+        if (p.name !== undefined) patch.name = p.name;
+        if (p.track !== undefined) patch.track = p.track;
+        if (p.examYear !== undefined) patch.exam_year = p.examYear;
+        if (p.examDate !== undefined) patch.exam_date = p.examDate;
+        if (p.stream !== undefined) patch.stream = p.stream ?? null;
+        if (p.subjects !== undefined) patch.subjects = p.subjects;
+        if (p.dailyGoalHours !== undefined) patch.daily_target_hours = p.dailyGoalHours;
+        if (p.onboarded !== undefined) patch.onboarded = p.onboarded;
         await supabase.from("profiles").update(patch).eq("id", userId);
         await load(userId);
       },
