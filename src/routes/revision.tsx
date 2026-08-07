@@ -5,134 +5,144 @@ import { AppShell } from "@/components/studyos/AppShell";
 import { EmptyState, Panel } from "@/components/studyos/Primitives";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { useStudyOS } from "@/lib/studyos/store";
-import { LESSON_STATUSES, type LessonStatus } from "@/lib/studyos/types";
+import { CHAPTER_LABEL, CHAPTER_STATUSES, type ChapterStatus } from "@/lib/studyos/types";
 
 export const Route = createFileRoute("/revision")({
   head: () => ({
     meta: [
-      { title: "Revision Tracker — StudyOS" },
+      { title: "Syllabus Tracker — Study Radar" },
       {
         name: "description",
-        content: "Track every lesson from Not Started to Mastered with automatic progress bars.",
+        content: "Track every chapter of your GCE syllabus: not started, in progress or done.",
       },
-      { property: "og:title", content: "Revision Tracker — StudyOS" },
+      { property: "og:title", content: "Syllabus Tracker — Study Radar" },
       {
         property: "og:description",
-        content: "Lesson-by-lesson mastery tracking for each of your subjects.",
+        content: "See exactly how much of each subject you have covered.",
       },
     ],
   }),
-  component: RevisionPage,
+  component: SyllabusPage,
 });
 
-const WEIGHT: Record<LessonStatus, number> = {
-  "Not Started": 0,
-  Learning: 0.3,
-  "Revision 1": 0.6,
-  "Revision 2": 0.8,
-  Mastered: 1,
+const DOT: Record<ChapterStatus, string> = {
+  todo: "bg-muted",
+  doing: "bg-amber-400",
+  done: "bg-emerald-400",
 };
 
-function RevisionPage() {
-  const { data, profile, addLesson, setLessonStatus, removeLesson } = useStudyOS();
-  const [subject, setSubject] = useState(profile?.subjects[0] ?? "");
+const NEXT: Record<ChapterStatus, ChapterStatus> = {
+  todo: "doing",
+  doing: "done",
+  done: "todo",
+};
+
+function SyllabusPage() {
+  const { profile, data, addChapter, setChapterStatus, removeChapter } = useStudyOS();
+  const [subject, setSubject] = useState<string>("");
   const [title, setTitle] = useState("");
 
   if (!profile) return null;
   const active = subject || profile.subjects[0] || "";
-  const lessons = data.lessons.filter((l) => l.subject === active);
-  const pct = lessons.length
-    ? Math.round((lessons.reduce((a, l) => a + WEIGHT[l.status], 0) / lessons.length) * 100)
-    : 0;
+  const chapters = data.chapters.filter((c) => c.subject === active);
+  const done = chapters.filter((c) => c.status === "done").length;
+  const pct = chapters.length ? Math.round((done / chapters.length) * 100) : 0;
+
+  const add = async () => {
+    const t = title.trim();
+    if (!t || !active) return;
+    setTitle("");
+    await addChapter(active, t);
+  };
 
   return (
-    <AppShell title="Revision Tracker" subtitle="From first read to mastered">
+    <AppShell title="Syllabus" subtitle="Chapter by chapter, subject by subject">
       <div className="mb-4 flex flex-wrap gap-2">
-        {profile.subjects.map((s) => {
-          const subs = data.lessons.filter((l) => l.subject === s);
-          const p = subs.length
-            ? Math.round((subs.reduce((a, l) => a + WEIGHT[l.status], 0) / subs.length) * 100)
-            : 0;
-          return (
-            <button
-              key={s}
-              onClick={() => setSubject(s)}
-              className={cn(
-                "rounded-full border px-3.5 py-2 text-sm transition-colors",
-                s === active
-                  ? "border-primary bg-brand-soft text-primary"
-                  : "border-border bg-surface text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {s} <span className="num opacity-70">{p}%</span>
-            </button>
-          );
-        })}
+        {profile.subjects.map((s) => (
+          <button
+            key={s}
+            onClick={() => setSubject(s)}
+            className={cn(
+              "rounded-full border px-4 py-2 text-sm transition-colors",
+              s === active
+                ? "border-primary bg-brand-soft text-primary"
+                : "border-border bg-elevated text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {s}
+          </button>
+        ))}
       </div>
 
-      <Panel title={`${active} · ${pct}% mastered`}>
-        <Progress value={pct} className="h-2" />
+      <Panel
+        title={`${active} · ${done}/${chapters.length} chapters`}
+        action={<span className="num text-sm font-semibold text-primary">{pct}%</span>}
+      >
+        <div className="mb-4 h-1.5 overflow-hidden rounded-full bg-muted">
+          <div
+            className="h-full rounded-full bg-primary transition-all duration-500"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
 
-        <form
-          className="mt-4 flex gap-2"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (!title.trim()) return;
-            addLesson(active, title.trim());
-            setTitle("");
-          }}
-        >
+        <div className="mb-4 flex gap-2">
           <Input
-            placeholder="Add a lesson or unit…"
+            placeholder="Add a chapter (e.g. Mechanics)"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") void add();
+            }}
           />
-          <Button type="submit" size="icon" className="shrink-0">
+          <Button onClick={add} disabled={!title.trim()}>
             <Plus className="h-4 w-4" />
           </Button>
-        </form>
+        </div>
 
-        <div className="mt-4 space-y-2">
-          {lessons.length === 0 ? (
-            <EmptyState text="Add your first lesson for this subject." />
+        <div className="space-y-2">
+          {chapters.length === 0 ? (
+            <EmptyState text="No chapters yet. Add the first one above." />
           ) : (
-            lessons.map((l) => (
+            chapters.map((c) => (
               <div
-                key={l.id}
-                className="rounded-2xl border border-border bg-elevated p-3 transition-colors"
+                key={c.id}
+                className="flex items-center gap-3 rounded-xl border border-border bg-elevated p-3"
               >
-                <div className="flex items-center justify-between gap-3">
-                  <p className="truncate text-sm font-medium">{l.title}</p>
-                  <button
-                    onClick={() => removeLesson(l.id)}
-                    className="text-muted-foreground transition-colors hover:text-destructive"
+                <button
+                  onClick={() => setChapterStatus(c.id, NEXT[c.status])}
+                  className="flex flex-1 items-center gap-3 text-left"
+                >
+                  <span className={cn("h-2.5 w-2.5 shrink-0 rounded-full", DOT[c.status])} />
+                  <span
+                    className={cn(
+                      "truncate text-sm",
+                      c.status === "done" && "text-muted-foreground line-through",
+                    )}
                   >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-                <div className="mt-2.5 flex flex-wrap gap-1.5">
-                  {LESSON_STATUSES.map((st) => (
-                    <button
-                      key={st}
-                      onClick={() => setLessonStatus(l.id, st)}
-                      className={cn(
-                        "rounded-full px-2.5 py-1 text-[11px] transition-colors",
-                        l.status === st
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted text-muted-foreground hover:text-foreground",
-                      )}
-                    >
-                      {st}
-                    </button>
-                  ))}
-                </div>
+                    {c.title}
+                  </span>
+                </button>
+                <span className="hidden text-xs text-muted-foreground sm:inline">
+                  {CHAPTER_LABEL[c.status]}
+                </span>
+                <button
+                  onClick={() => removeChapter(c.id)}
+                  className="text-muted-foreground transition-colors hover:text-destructive"
+                  aria-label={`Delete ${c.title}`}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
               </div>
             ))
           )}
         </div>
+
+        <p className="mt-4 text-xs text-muted-foreground">
+          Tap a chapter to cycle it:{" "}
+          {CHAPTER_STATUSES.map((s) => CHAPTER_LABEL[s]).join(" → ")}.
+        </p>
       </Panel>
     </AppShell>
   );
