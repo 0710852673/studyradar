@@ -17,6 +17,7 @@ import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as MarksRouteImport } from './routes/marks'
 import { Route as RevisionRouteImport } from './routes/revision'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SubjectsRouteImport } from './routes/subjects'
 import { Route as TimerRouteImport } from './routes/timer'
 import { Route as SubjectsIndexRouteImport } from './routes/subjects.index'
 
@@ -60,15 +61,20 @@ const SettingsRoute = SettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SubjectsRoute = SubjectsRouteImport.update({
+  id: '/subjects',
+  path: '/subjects',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TimerRoute = TimerRouteImport.update({
   id: '/timer',
   path: '/timer',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SubjectsIndexRoute = SubjectsIndexRouteImport.update({
-  id: '/subjects/',
-  path: '/subjects/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => SubjectsRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -80,6 +86,7 @@ export interface FileRoutesByFullPath {
   '/marks': typeof MarksRoute
   '/revision': typeof RevisionRoute
   '/settings': typeof SettingsRoute
+  '/subjects': typeof SubjectsRouteWithChildren
   '/timer': typeof TimerRoute
   '/subjects/': typeof SubjectsIndexRoute
 }
@@ -105,6 +112,7 @@ export interface FileRoutesById {
   '/marks': typeof MarksRoute
   '/revision': typeof RevisionRoute
   '/settings': typeof SettingsRoute
+  '/subjects': typeof SubjectsRouteWithChildren
   '/timer': typeof TimerRoute
   '/subjects/': typeof SubjectsIndexRoute
 }
@@ -119,6 +127,7 @@ export interface FileRouteTypes {
     | '/marks'
     | '/revision'
     | '/settings'
+    | '/subjects'
     | '/timer'
     | '/subjects/'
   fileRoutesByTo: FileRoutesByTo
@@ -143,6 +152,7 @@ export interface FileRouteTypes {
     | '/marks'
     | '/revision'
     | '/settings'
+    | '/subjects'
     | '/timer'
     | '/subjects/'
   fileRoutesById: FileRoutesById
@@ -156,8 +166,8 @@ export interface RootRouteChildren {
   MarksRoute: typeof MarksRoute
   RevisionRoute: typeof RevisionRoute
   SettingsRoute: typeof SettingsRoute
+  SubjectsRoute: typeof SubjectsRouteWithChildren
   TimerRoute: typeof TimerRoute
-  SubjectsIndexRoute: typeof SubjectsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -218,6 +228,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/subjects': {
+      id: '/subjects'
+      path: '/subjects'
+      fullPath: '/subjects'
+      preLoaderRoute: typeof SubjectsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/timer': {
       id: '/timer'
       path: '/timer'
@@ -227,13 +244,25 @@ declare module '@tanstack/react-router' {
     }
     '/subjects/': {
       id: '/subjects/'
-      path: '/subjects'
+      path: '/'
       fullPath: '/subjects/'
       preLoaderRoute: typeof SubjectsIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof SubjectsRoute
     }
   }
 }
+
+interface SubjectsRouteChildren {
+  SubjectsIndexRoute: typeof SubjectsIndexRoute
+}
+
+const SubjectsRouteChildren: SubjectsRouteChildren = {
+  SubjectsIndexRoute: SubjectsIndexRoute,
+}
+
+const SubjectsRouteWithChildren = SubjectsRoute._addFileChildren(
+  SubjectsRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -244,8 +273,8 @@ const rootRouteChildren: RootRouteChildren = {
   MarksRoute: MarksRoute,
   RevisionRoute: RevisionRoute,
   SettingsRoute: SettingsRoute,
+  SubjectsRoute: SubjectsRouteWithChildren,
   TimerRoute: TimerRoute,
-  SubjectsIndexRoute: SubjectsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
