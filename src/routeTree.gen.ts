@@ -15,6 +15,7 @@ import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as MarksRouteImport } from './routes/marks'
+import { Route as ProgressRouteImport } from './routes/progress'
 import { Route as RevisionRouteImport } from './routes/revision'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SubjectsRouteImport } from './routes/subjects'
@@ -50,6 +51,11 @@ const CalendarRoute = CalendarRouteImport.update({
 const MarksRoute = MarksRouteImport.update({
   id: '/marks',
   path: '/marks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProgressRoute = ProgressRouteImport.update({
+  id: '/progress',
+  path: '/progress',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RevisionRoute = RevisionRouteImport.update({
@@ -90,6 +96,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/calendar': typeof CalendarRoute
   '/marks': typeof MarksRoute
+  '/progress': typeof ProgressRoute
   '/revision': typeof RevisionRoute
   '/settings': typeof SettingsRoute
   '/subjects': typeof SubjectsRouteWithChildren
@@ -104,6 +111,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/calendar': typeof CalendarRoute
   '/marks': typeof MarksRoute
+  '/progress': typeof ProgressRoute
   '/revision': typeof RevisionRoute
   '/settings': typeof SettingsRoute
   '/timer': typeof TimerRoute
@@ -118,6 +126,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/calendar': typeof CalendarRoute
   '/marks': typeof MarksRoute
+  '/progress': typeof ProgressRoute
   '/revision': typeof RevisionRoute
   '/settings': typeof SettingsRoute
   '/subjects': typeof SubjectsRouteWithChildren
@@ -134,6 +143,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/calendar'
     | '/marks'
+    | '/progress'
     | '/revision'
     | '/settings'
     | '/subjects'
@@ -148,6 +158,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/calendar'
     | '/marks'
+    | '/progress'
     | '/revision'
     | '/settings'
     | '/timer'
@@ -161,6 +172,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/calendar'
     | '/marks'
+    | '/progress'
     | '/revision'
     | '/settings'
     | '/subjects'
@@ -176,6 +188,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CalendarRoute: typeof CalendarRoute
   MarksRoute: typeof MarksRoute
+  ProgressRoute: typeof ProgressRoute
   RevisionRoute: typeof RevisionRoute
   SettingsRoute: typeof SettingsRoute
   SubjectsRoute: typeof SubjectsRouteWithChildren
@@ -224,6 +237,13 @@ declare module '@tanstack/react-router' {
       path: '/marks'
       fullPath: '/marks'
       preLoaderRoute: typeof MarksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/progress': {
+      id: '/progress'
+      path: '/progress'
+      fullPath: '/progress'
+      preLoaderRoute: typeof ProgressRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/revision': {
@@ -292,6 +312,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CalendarRoute: CalendarRoute,
   MarksRoute: MarksRoute,
+  ProgressRoute: ProgressRoute,
   RevisionRoute: RevisionRoute,
   SettingsRoute: SettingsRoute,
   SubjectsRoute: SubjectsRouteWithChildren,
