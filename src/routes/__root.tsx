@@ -4,6 +4,8 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
+  useNavigate,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -117,14 +119,23 @@ function RootShell({ children }: { children: ReactNode }) {
 }
 
 function Gate() {
-  const { ready, profile } = useStudyOS();
+  const { ready, session, profile } = useStudyOS();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const navigate = useNavigate();
+  const onAuth = pathname === "/auth";
+
+  useEffect(() => {
+    if (!ready) return;
+    if (!session && !onAuth) void navigate({ to: "/auth", replace: true });
+    if (session && onAuth) void navigate({ to: "/", replace: true });
+  }, [ready, session, onAuth, navigate]);
 
   // Always render <Outlet /> so the SSR tree matches the first client render;
-  // stored state only exists in the browser and arrives after hydration.
+  // the session only exists in the browser and arrives after hydration.
   return (
     <>
       <Outlet />
-      {ready && !profile ? <Onboarding /> : null}
+      {ready && session && (!profile || !profile.onboarded) ? <Onboarding /> : null}
     </>
   );
 }
