@@ -7,7 +7,7 @@ import { useStudyOS } from "@/lib/studyos/store";
 import { subjectColor } from "@/lib/studyos/subjects";
 import { fmtHours, sessionsBetween, totalMinutes } from "@/lib/studyos/analytics";
 
-export const Route = createFileRoute("/subjects")({
+export const Route = createFileRoute("/subjects/")({
   head: () => ({
     meta: [
       { title: "Subjects — Study Radar" },
