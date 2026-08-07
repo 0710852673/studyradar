@@ -51,7 +51,6 @@ function CalendarPage() {
     end: endOfWeek(endOfMonth(month), { weekStartsOn: 1 }),
   });
   const daySessions = data.sessions.filter((s) => s.date === selected);
-  const papers = daySessions.filter((s) => s.type === "Paper").length;
 
   return (
     <AppShell title="Calendar" subtitle="Your study history, day by day">
@@ -117,8 +116,8 @@ function CalendarPage() {
               <p className="num text-lg font-semibold">{fmtHours(byDay.get(selected) ?? 0)}</p>
             </div>
             <div className="rounded-xl bg-elevated p-3">
-              <p className="text-xs text-muted-foreground">Papers</p>
-              <p className="num text-lg font-semibold">{papers}</p>
+              <p className="text-xs text-muted-foreground">Sessions</p>
+              <p className="num text-lg font-semibold">{daySessions.length}</p>
             </div>
           </div>
 
@@ -141,8 +140,7 @@ function CalendarPage() {
                     </span>
                   </div>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {s.type}
-                    {s.note ? ` · ${s.note}` : ""}
+                    {s.note ?? ""}
                   </p>
                 </div>
               ))

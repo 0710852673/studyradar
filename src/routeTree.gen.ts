@@ -11,12 +11,18 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AchievementsRouteImport } from './routes/achievements'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as MarksRouteImport } from './routes/marks'
+import { Route as ProgressRouteImport } from './routes/progress'
 import { Route as RevisionRouteImport } from './routes/revision'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SubjectsRouteImport } from './routes/subjects'
 import { Route as TimerRouteImport } from './routes/timer'
+import { Route as SubjectsIndexRouteImport } from './routes/subjects.index'
+import { Route as SubjectsSubjectRouteImport } from './routes/subjects.$subject'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,9 +34,19 @@ const AchievementsRoute = AchievementsRouteImport.update({
   path: '/achievements',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AnalyticsRoute = AnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CalendarRoute = CalendarRouteImport.update({
@@ -43,6 +59,11 @@ const MarksRoute = MarksRouteImport.update({
   path: '/marks',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProgressRoute = ProgressRouteImport.update({
+  id: '/progress',
+  path: '/progress',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RevisionRoute = RevisionRouteImport.update({
   id: '/revision',
   path: '/revision',
@@ -53,84 +74,137 @@ const SettingsRoute = SettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SubjectsRoute = SubjectsRouteImport.update({
+  id: '/subjects',
+  path: '/subjects',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TimerRoute = TimerRouteImport.update({
   id: '/timer',
   path: '/timer',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SubjectsIndexRoute = SubjectsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SubjectsRoute,
+} as any)
+const SubjectsSubjectRoute = SubjectsSubjectRouteImport.update({
+  id: '/$subject',
+  path: '/$subject',
+  getParentRoute: () => SubjectsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/achievements': typeof AchievementsRoute
+  '/admin': typeof AdminRoute
   '/analytics': typeof AnalyticsRoute
+  '/auth': typeof AuthRoute
   '/calendar': typeof CalendarRoute
   '/marks': typeof MarksRoute
+  '/progress': typeof ProgressRoute
   '/revision': typeof RevisionRoute
   '/settings': typeof SettingsRoute
+  '/subjects': typeof SubjectsRouteWithChildren
   '/timer': typeof TimerRoute
+  '/subjects/$subject': typeof SubjectsSubjectRoute
+  '/subjects/': typeof SubjectsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/achievements': typeof AchievementsRoute
+  '/admin': typeof AdminRoute
   '/analytics': typeof AnalyticsRoute
+  '/auth': typeof AuthRoute
   '/calendar': typeof CalendarRoute
   '/marks': typeof MarksRoute
+  '/progress': typeof ProgressRoute
   '/revision': typeof RevisionRoute
   '/settings': typeof SettingsRoute
   '/timer': typeof TimerRoute
+  '/subjects/$subject': typeof SubjectsSubjectRoute
+  '/subjects': typeof SubjectsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/achievements': typeof AchievementsRoute
+  '/admin': typeof AdminRoute
   '/analytics': typeof AnalyticsRoute
+  '/auth': typeof AuthRoute
   '/calendar': typeof CalendarRoute
   '/marks': typeof MarksRoute
+  '/progress': typeof ProgressRoute
   '/revision': typeof RevisionRoute
   '/settings': typeof SettingsRoute
+  '/subjects': typeof SubjectsRouteWithChildren
   '/timer': typeof TimerRoute
+  '/subjects/$subject': typeof SubjectsSubjectRoute
+  '/subjects/': typeof SubjectsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/achievements'
+    | '/admin'
     | '/analytics'
+    | '/auth'
     | '/calendar'
     | '/marks'
+    | '/progress'
     | '/revision'
     | '/settings'
+    | '/subjects'
     | '/timer'
+    | '/subjects/$subject'
+    | '/subjects/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/achievements'
+    | '/admin'
     | '/analytics'
+    | '/auth'
     | '/calendar'
     | '/marks'
+    | '/progress'
     | '/revision'
     | '/settings'
     | '/timer'
+    | '/subjects/$subject'
+    | '/subjects'
   id:
     | '__root__'
     | '/'
     | '/achievements'
+    | '/admin'
     | '/analytics'
+    | '/auth'
     | '/calendar'
     | '/marks'
+    | '/progress'
     | '/revision'
     | '/settings'
+    | '/subjects'
     | '/timer'
+    | '/subjects/$subject'
+    | '/subjects/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AchievementsRoute: typeof AchievementsRoute
+  AdminRoute: typeof AdminRoute
   AnalyticsRoute: typeof AnalyticsRoute
+  AuthRoute: typeof AuthRoute
   CalendarRoute: typeof CalendarRoute
   MarksRoute: typeof MarksRoute
+  ProgressRoute: typeof ProgressRoute
   RevisionRoute: typeof RevisionRoute
   SettingsRoute: typeof SettingsRoute
+  SubjectsRoute: typeof SubjectsRouteWithChildren
   TimerRoute: typeof TimerRoute
 }
 
@@ -150,11 +224,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AchievementsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/analytics': {
       id: '/analytics'
       path: '/analytics'
       fullPath: '/analytics'
       preLoaderRoute: typeof AnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/calendar': {
@@ -171,6 +259,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarksRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/progress': {
+      id: '/progress'
+      path: '/progress'
+      fullPath: '/progress'
+      preLoaderRoute: typeof ProgressRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/revision': {
       id: '/revision'
       path: '/revision'
@@ -185,6 +280,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/subjects': {
+      id: '/subjects'
+      path: '/subjects'
+      fullPath: '/subjects'
+      preLoaderRoute: typeof SubjectsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/timer': {
       id: '/timer'
       path: '/timer'
@@ -192,17 +294,49 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TimerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/subjects/': {
+      id: '/subjects/'
+      path: '/'
+      fullPath: '/subjects/'
+      preLoaderRoute: typeof SubjectsIndexRouteImport
+      parentRoute: typeof SubjectsRoute
+    }
+    '/subjects/$subject': {
+      id: '/subjects/$subject'
+      path: '/$subject'
+      fullPath: '/subjects/$subject'
+      preLoaderRoute: typeof SubjectsSubjectRouteImport
+      parentRoute: typeof SubjectsRoute
+    }
   }
 }
+
+interface SubjectsRouteChildren {
+  SubjectsSubjectRoute: typeof SubjectsSubjectRoute
+  SubjectsIndexRoute: typeof SubjectsIndexRoute
+}
+
+const SubjectsRouteChildren: SubjectsRouteChildren = {
+  SubjectsSubjectRoute: SubjectsSubjectRoute,
+  SubjectsIndexRoute: SubjectsIndexRoute,
+}
+
+const SubjectsRouteWithChildren = SubjectsRoute._addFileChildren(
+  SubjectsRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AchievementsRoute: AchievementsRoute,
+  AdminRoute: AdminRoute,
   AnalyticsRoute: AnalyticsRoute,
+  AuthRoute: AuthRoute,
   CalendarRoute: CalendarRoute,
   MarksRoute: MarksRoute,
+  ProgressRoute: ProgressRoute,
   RevisionRoute: RevisionRoute,
   SettingsRoute: SettingsRoute,
+  SubjectsRoute: SubjectsRouteWithChildren,
   TimerRoute: TimerRoute,
 }
 export const routeTree = rootRouteImport

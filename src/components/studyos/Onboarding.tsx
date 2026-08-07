@@ -44,7 +44,7 @@ function Selectable({
 }
 
 export function Onboarding() {
-  const { setProfile } = useStudyOS();
+  const { profile, updateProfile } = useStudyOS();
   const thisYear = new Date().getFullYear();
 
   const [step, setStep] = useState(0);
@@ -53,8 +53,7 @@ export function Onboarding() {
   const [stream, setStream] = useState<string>("");
   const [picked, setPicked] = useState<string[]>([]);
   const [daily, setDaily] = useState(4);
-  const [weekly, setWeekly] = useState(28);
-  const [zscore, setZscore] = useState(1.8);
+  const [saving, setSaving] = useState(false);
 
   const optionalPool = track === "AL" ? (AL_STREAMS[stream] ?? []) : OL_OPTIONAL;
 
@@ -73,21 +72,20 @@ export function Onboarding() {
           : picked.length === 3
         : true;
 
-  const finish = () => {
-    if (!track) return;
+  const finish = async () => {
+    if (!track || saving) return;
+    setSaving(true);
     const subjects = track === "AL" ? picked : [...OL_COMPULSORY, ...picked];
-    setProfile({
+    await updateProfile({
       track,
       examYear,
       examDate: defaultExamDate(track, examYear),
       stream: track === "AL" ? stream : undefined,
       subjects,
       dailyGoalHours: daily,
-      weeklyGoalHours: weekly,
-      targetZScore: track === "AL" ? zscore : undefined,
-      theme: "dark",
-      notifications: true,
+      onboarded: true,
     });
+    setSaving(false);
   };
 
   return (
@@ -240,35 +238,9 @@ export function Onboarding() {
                 onValueChange={([v]) => setDaily(v ?? 1)}
               />
             </div>
-            <div>
-              <div className="mb-3 flex items-baseline justify-between">
-                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Weekly goal
-                </p>
-                <span className="num text-lg font-semibold">{weekly}h</span>
-              </div>
-              <Slider
-                value={[weekly]}
-                min={5}
-                max={90}
-                step={1}
-                onValueChange={([v]) => setWeekly(v ?? 5)}
-              />
-            </div>
-            {track === "AL" ? (
-              <div>
-                <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Target Z-Score
-                </p>
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={zscore}
-                  onChange={(e) => setZscore(Number(e.target.value))}
-                  className="w-36"
-                />
-              </div>
-            ) : null}
+            <p className="text-xs text-muted-foreground">
+              You can change this any time from your profile.
+            </p>
           </div>
         ) : null}
 

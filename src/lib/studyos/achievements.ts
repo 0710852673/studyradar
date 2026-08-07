@@ -12,7 +12,6 @@ export interface AchievementContext {
   totalHours: number;
   currentStreak: number;
   longestStreak: number;
-  papers: number;
   sessions: StudySession[];
 }
 
@@ -51,13 +50,6 @@ export const ACHIEVEMENTS: Achievement[] = [
     description: "A full month of consistency",
     goal: 30,
     progress: (c) => c.longestStreak,
-  },
-  {
-    id: "p100",
-    title: "100 Papers Completed",
-    description: "Log 100 paper sessions",
-    goal: 100,
-    progress: (c) => c.papers,
   },
   {
     id: "first",
