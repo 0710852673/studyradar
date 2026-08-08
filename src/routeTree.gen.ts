@@ -15,6 +15,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CalendarRouteImport } from './routes/calendar'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as MarksRouteImport } from './routes/marks'
 import { Route as ProgressRouteImport } from './routes/progress'
 import { Route as RevisionRouteImport } from './routes/revision'
@@ -52,6 +53,11 @@ const AuthRoute = AuthRouteImport.update({
 const CalendarRoute = CalendarRouteImport.update({
   id: '/calendar',
   path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MarksRoute = MarksRouteImport.update({
@@ -102,6 +108,7 @@ export interface FileRoutesByFullPath {
   '/analytics': typeof AnalyticsRoute
   '/auth': typeof AuthRoute
   '/calendar': typeof CalendarRoute
+  '/dashboard': typeof DashboardRoute
   '/marks': typeof MarksRoute
   '/progress': typeof ProgressRoute
   '/revision': typeof RevisionRoute
@@ -118,6 +125,7 @@ export interface FileRoutesByTo {
   '/analytics': typeof AnalyticsRoute
   '/auth': typeof AuthRoute
   '/calendar': typeof CalendarRoute
+  '/dashboard': typeof DashboardRoute
   '/marks': typeof MarksRoute
   '/progress': typeof ProgressRoute
   '/revision': typeof RevisionRoute
@@ -134,6 +142,7 @@ export interface FileRoutesById {
   '/analytics': typeof AnalyticsRoute
   '/auth': typeof AuthRoute
   '/calendar': typeof CalendarRoute
+  '/dashboard': typeof DashboardRoute
   '/marks': typeof MarksRoute
   '/progress': typeof ProgressRoute
   '/revision': typeof RevisionRoute
@@ -152,6 +161,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/auth'
     | '/calendar'
+    | '/dashboard'
     | '/marks'
     | '/progress'
     | '/revision'
@@ -168,6 +178,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/auth'
     | '/calendar'
+    | '/dashboard'
     | '/marks'
     | '/progress'
     | '/revision'
@@ -183,6 +194,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/auth'
     | '/calendar'
+    | '/dashboard'
     | '/marks'
     | '/progress'
     | '/revision'
@@ -200,6 +212,7 @@ export interface RootRouteChildren {
   AnalyticsRoute: typeof AnalyticsRoute
   AuthRoute: typeof AuthRoute
   CalendarRoute: typeof CalendarRoute
+  DashboardRoute: typeof DashboardRoute
   MarksRoute: typeof MarksRoute
   ProgressRoute: typeof ProgressRoute
   RevisionRoute: typeof RevisionRoute
@@ -250,6 +263,13 @@ declare module '@tanstack/react-router' {
       path: '/calendar'
       fullPath: '/calendar'
       preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/marks': {
@@ -332,6 +352,7 @@ const rootRouteChildren: RootRouteChildren = {
   AnalyticsRoute: AnalyticsRoute,
   AuthRoute: AuthRoute,
   CalendarRoute: CalendarRoute,
+  DashboardRoute: DashboardRoute,
   MarksRoute: MarksRoute,
   ProgressRoute: ProgressRoute,
   RevisionRoute: RevisionRoute,
