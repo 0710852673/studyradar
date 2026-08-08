@@ -1,5 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { LogOut } from "lucide-react";
+import { useRef, useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Camera, KeyRound, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/studyos/AppShell";
 import { Panel } from "@/components/studyos/Primitives";
@@ -9,6 +10,8 @@ import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 import { useStudyOS } from "@/lib/studyos/store";
 import { AL_STREAMS, OL_COMPULSORY, OL_OPTIONAL, defaultExamDate } from "@/lib/studyos/subjects";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({
@@ -38,8 +41,58 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 }
 
 function ProfilePage() {
-  const { profile, user, updateProfile, signOut } = useStudyOS();
+  const { profile, user, avatarSrc, updateProfile, uploadAvatar, signOut } = useStudyOS();
+  const navigate = useNavigate();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [pw, setPw] = useState("");
+  const [pw2, setPw2] = useState("");
+  const [pwBusy, setPwBusy] = useState(false);
+
   if (!profile) return null;
+
+  const pickAvatar = async (file: File | undefined) => {
+    if (!file) return;
+    if (file.size > 3 * 1024 * 1024) {
+      toast.error("Please pick an image under 3 MB.");
+      return;
+    }
+    setUploading(true);
+    await uploadAvatar(file);
+    setUploading(false);
+  };
+
+  const changePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (pw.length < 6) {
+      toast.error("Password must be at least 6 characters.");
+      return;
+    }
+    if (pw !== pw2) {
+      toast.error("The two passwords don't match.");
+      return;
+    }
+    setPwBusy(true);
+    const { error } = await supabase.auth.updateUser({ password: pw });
+    setPwBusy(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setPw("");
+    setPw2("");
+    toast.success("Password changed");
+  };
+
+  const sendResetEmail = async () => {
+    const email = user?.email;
+    if (!email) return;
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) toast.error(error.message);
+    else toast.success("Reset link sent to your email.");
+  };
 
   const thisYear = new Date().getFullYear();
   const optionalPool =
@@ -58,6 +111,38 @@ function ProfilePage() {
     <AppShell title="Profile" subtitle={user?.email ?? "Your account"}>
       <div className="mx-auto max-w-2xl space-y-4">
         <Panel title="Account">
+          <div className="flex items-center gap-4 border-b border-border pb-4">
+            <Avatar className="h-16 w-16">
+              {avatarSrc ? <AvatarImage src={avatarSrc} alt={profile.name} /> : null}
+              <AvatarFallback className="text-lg">
+                {profile.name.slice(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium">{profile.name}</p>
+              <p className="truncate text-xs text-muted-foreground">{user?.email}</p>
+              <Button
+                variant="secondary"
+                size="sm"
+                className="mt-2"
+                disabled={uploading}
+                onClick={() => fileRef.current?.click()}
+              >
+                <Camera className="h-4 w-4" />
+                {uploading ? "Uploading…" : "Change picture"}
+              </Button>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  void pickAvatar(e.target.files?.[0]);
+                  e.target.value = "";
+                }}
+              />
+            </div>
+          </div>
           <Row label="Name">
             <Input
               defaultValue={profile.name}
@@ -154,8 +239,43 @@ function ProfilePage() {
           </div>
         </Panel>
 
+        <Panel title="Password">
+          <form onSubmit={changePassword} className="space-y-3">
+            <Input
+              type="password"
+              placeholder="New password"
+              value={pw}
+              onChange={(e) => setPw(e.target.value)}
+              autoComplete="new-password"
+            />
+            <Input
+              type="password"
+              placeholder="Confirm new password"
+              value={pw2}
+              onChange={(e) => setPw2(e.target.value)}
+              autoComplete="new-password"
+            />
+            <div className="flex flex-wrap gap-2">
+              <Button type="submit" disabled={pwBusy}>
+                <KeyRound className="h-4 w-4" />
+                {pwBusy ? "Saving…" : "Change password"}
+              </Button>
+              <Button type="button" variant="ghost" onClick={() => void sendResetEmail()}>
+                Email me a reset link
+              </Button>
+            </div>
+          </form>
+        </Panel>
+
         <Panel>
-          <Button variant="secondary" className="w-full" onClick={() => void signOut()}>
+          <Button
+            variant="secondary"
+            className="w-full"
+            onClick={async () => {
+              await signOut();
+              void navigate({ to: "/", replace: true });
+            }}
+          >
             <LogOut className="h-4 w-4" /> Sign out
           </Button>
         </Panel>

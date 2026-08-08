@@ -19,7 +19,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useStudyOS } from "@/lib/studyos/store";
 
 const PRIMARY = [
-  { to: "/", label: "Home", icon: Home },
+  { to: "/dashboard", label: "Home", icon: Home },
   { to: "/subjects", label: "Subjects", icon: BookOpen },
   { to: "/progress", label: "Progress", icon: BarChart3 },
   { to: "/settings", label: "Profile", icon: User },
@@ -34,7 +34,7 @@ const SECONDARY = [
 ] as const;
 
 function isActive(pathname: string, to: string) {
-  return to === "/" ? pathname === "/" : pathname.startsWith(to);
+  return pathname === to || pathname.startsWith(to + "/");
 }
 
 export function AppShell({
@@ -59,7 +59,7 @@ export function AppShell({
   return (
     <div className="min-h-screen w-full bg-background">
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-border bg-sidebar px-3 py-5 lg:flex">
-        <Link to="/" className="mb-7 flex items-center gap-2.5 px-2">
+        <Link to="/dashboard" className="mb-7 flex items-center gap-2.5 px-2">
           <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-sm font-bold text-primary-foreground">
             S
           </span>
@@ -106,6 +106,14 @@ export function AppShell({
         </header>
 
         <main className="px-4 pb-28 pt-5 sm:px-6 lg:pb-10">{children}</main>
+
+        <footer className="border-t border-border px-4 py-6 text-center text-[11px] text-muted-foreground sm:px-6 lg:pb-8">
+          Study Radar · built by{" "}
+          <span className="text-foreground">Shehara Geeneth</span> ·{" "}
+          <a href="mailto:sheharageeneth@gmail.com" className="underline-offset-2 hover:underline">
+            sheharageeneth@gmail.com
+          </a>
+        </footer>
       </div>
 
       {/* Mobile: Home · Subjects · Log · Progress · Profile */}

@@ -23,6 +23,9 @@ export interface Profile {
   /** Derived: daily target x 7, used by weekly report. */
   weeklyGoalHours: number;
   onboarded: boolean;
+  /** Storage path in the private avatars bucket, or an external https URL. */
+  avatarUrl?: string | undefined;
+  email?: string | undefined;
 }
 
 export interface StudySession {
