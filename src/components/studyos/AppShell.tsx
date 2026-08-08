@@ -106,6 +106,14 @@ export function AppShell({
         </header>
 
         <main className="px-4 pb-28 pt-5 sm:px-6 lg:pb-10">{children}</main>
+
+        <footer className="border-t border-border px-4 py-6 text-center text-[11px] text-muted-foreground sm:px-6 lg:pb-8">
+          Study Radar · built by{" "}
+          <span className="text-foreground">Shehara Geeneth</span> ·{" "}
+          <a href="mailto:sheharageeneth@gmail.com" className="underline-offset-2 hover:underline">
+            sheharageeneth@gmail.com
+          </a>
+        </footer>
       </div>
 
       {/* Mobile: Home · Subjects · Log · Progress · Profile */}
