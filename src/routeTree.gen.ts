@@ -18,6 +18,7 @@ import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as MarksRouteImport } from './routes/marks'
 import { Route as ProgressRouteImport } from './routes/progress'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RevisionRouteImport } from './routes/revision'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SubjectsRouteImport } from './routes/subjects'
@@ -70,6 +71,11 @@ const ProgressRoute = ProgressRouteImport.update({
   path: '/progress',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RevisionRoute = RevisionRouteImport.update({
   id: '/revision',
   path: '/revision',
@@ -111,6 +117,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/marks': typeof MarksRoute
   '/progress': typeof ProgressRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/revision': typeof RevisionRoute
   '/settings': typeof SettingsRoute
   '/subjects': typeof SubjectsRouteWithChildren
@@ -128,6 +135,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/marks': typeof MarksRoute
   '/progress': typeof ProgressRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/revision': typeof RevisionRoute
   '/settings': typeof SettingsRoute
   '/timer': typeof TimerRoute
@@ -145,6 +153,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/marks': typeof MarksRoute
   '/progress': typeof ProgressRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/revision': typeof RevisionRoute
   '/settings': typeof SettingsRoute
   '/subjects': typeof SubjectsRouteWithChildren
@@ -164,6 +173,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/marks'
     | '/progress'
+    | '/reset-password'
     | '/revision'
     | '/settings'
     | '/subjects'
@@ -181,6 +191,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/marks'
     | '/progress'
+    | '/reset-password'
     | '/revision'
     | '/settings'
     | '/timer'
@@ -197,6 +208,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/marks'
     | '/progress'
+    | '/reset-password'
     | '/revision'
     | '/settings'
     | '/subjects'
@@ -215,6 +227,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   MarksRoute: typeof MarksRoute
   ProgressRoute: typeof ProgressRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   RevisionRoute: typeof RevisionRoute
   SettingsRoute: typeof SettingsRoute
   SubjectsRoute: typeof SubjectsRouteWithChildren
@@ -286,6 +299,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProgressRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/revision': {
       id: '/revision'
       path: '/revision'
@@ -355,6 +375,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   MarksRoute: MarksRoute,
   ProgressRoute: ProgressRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   RevisionRoute: RevisionRoute,
   SettingsRoute: SettingsRoute,
   SubjectsRoute: SubjectsRouteWithChildren,
