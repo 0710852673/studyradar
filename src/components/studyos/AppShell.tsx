@@ -19,7 +19,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useStudyOS } from "@/lib/studyos/store";
 
 const PRIMARY = [
-  { to: "/", label: "Home", icon: Home },
+  { to: "/dashboard", label: "Home", icon: Home },
   { to: "/subjects", label: "Subjects", icon: BookOpen },
   { to: "/progress", label: "Progress", icon: BarChart3 },
   { to: "/settings", label: "Profile", icon: User },
@@ -34,7 +34,7 @@ const SECONDARY = [
 ] as const;
 
 function isActive(pathname: string, to: string) {
-  return to === "/" ? pathname === "/" : pathname.startsWith(to);
+  return pathname === to || pathname.startsWith(to + "/");
 }
 
 export function AppShell({
@@ -59,7 +59,7 @@ export function AppShell({
   return (
     <div className="min-h-screen w-full bg-background">
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-border bg-sidebar px-3 py-5 lg:flex">
-        <Link to="/" className="mb-7 flex items-center gap-2.5 px-2">
+        <Link to="/dashboard" className="mb-7 flex items-center gap-2.5 px-2">
           <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-sm font-bold text-primary-foreground">
             S
           </span>
