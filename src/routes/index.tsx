@@ -1,280 +1,232 @@
-import { differenceInCalendarDays, parseISO, startOfMonth, startOfWeek } from "date-fns";
-import { Flame, Gauge, CalendarClock, Clock, Sparkles, TrendingUp } from "lucide-react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
-  Area,
-  AreaChart,
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
-import { AppShell } from "@/components/studyos/AppShell";
-import { EmptyState, Panel, StatCard } from "@/components/studyos/Primitives";
-import { Heatmap } from "@/components/studyos/Heatmap";
-import { Progress } from "@/components/ui/progress";
+  BarChart3,
+  CalendarDays,
+  CheckCircle2,
+  Flame,
+  GraduationCap,
+  ListChecks,
+  Radar,
+  Timer,
+  Trophy,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { SiteFooter } from "@/components/studyos/Footer";
 import { useStudyOS } from "@/lib/studyos/store";
-import {
-  bySubject,
-  dailySeries,
-  fmtHours,
-  forecast,
-  insights,
-  monthlySeries,
-  sessionsBetween,
-  streaks,
-  studyScore,
-  totalMinutes,
-} from "@/lib/studyos/analytics";
-import { subjectColor } from "@/lib/studyos/subjects";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "StudyOS — GCE O/L & A/L Study Dashboard" },
+      { title: "Study Radar — GCE O/L & A/L Study Tracker for Sri Lanka" },
       {
         name: "description",
         content:
-          "Track study hours, streaks, marks and exam readiness for Sri Lankan GCE O/L and A/L students.",
+          "Track study hours, streaks, marks and syllabus progress for GCE O/L and A/L. Free, fast and built for Sri Lankan students.",
       },
-      { property: "og:title", content: "StudyOS — Your study dashboard" },
+      { property: "og:title", content: "Study Radar — Know exactly where you stand" },
       {
         property: "og:description",
-        content: "A fitness tracker, but for studying. Hours, streaks, marks and forecasts.",
+        content:
+          "Log study in seconds, watch your streak grow and see your exam readiness in one dashboard.",
       },
     ],
   }),
-  component: Dashboard,
+  component: Landing,
 });
 
-const chartAxis = { stroke: "var(--muted-foreground)", fontSize: 11 };
+const FEATURES = [
+  {
+    icon: Flame,
+    title: "Fast study logging",
+    text: "Pick a subject, tap +30m, done. Logging a session takes under five seconds.",
+  },
+  {
+    icon: BarChart3,
+    title: "Real progress, not guesses",
+    text: "Daily, weekly and monthly trends with subject comparison and honest insights.",
+  },
+  {
+    icon: GraduationCap,
+    title: "Marks tracker",
+    text: "Add every term test and model paper, then watch your improvement curve.",
+  },
+  {
+    icon: ListChecks,
+    title: "Syllabus tracker",
+    text: "Chapter by chapter: not started, in progress, done. Nothing more complicated.",
+  },
+  {
+    icon: CalendarDays,
+    title: "GitHub-style heatmap",
+    text: "One glance shows your consistency across the whole year.",
+  },
+  {
+    icon: Trophy,
+    title: "Streaks & achievements",
+    text: "100 study hours. 30 day streak. Small wins that keep you going.",
+  },
+];
 
-function ChartTip({ active, payload, label }: any) {
-  if (!active || !payload?.length) return null;
+const STEPS = [
+  { n: "01", t: "Create your account", d: "Email or Google — takes ten seconds." },
+  { n: "02", t: "Pick exam & subjects", d: "A/L stream subjects or O/L compulsory + optional." },
+  { n: "03", t: "Log study daily", d: "Your dashboard, streak and forecast update instantly." },
+];
+
+function Landing() {
+  const { session } = useStudyOS();
+
   return (
-    <div className="rounded-xl border border-border bg-popover px-3 py-2 text-xs shadow-lg">
-      <p className="font-medium">{label}</p>
-      <p className="text-muted-foreground">{payload[0].value}h</p>
-    </div>
-  );
-}
-
-function Dashboard() {
-  const { data, profile } = useStudyOS();
-  if (!profile) return null;
-  const sessions = data.sessions;
-
-  const today = totalMinutes(sessionsBetween(sessions, new Date(), new Date()));
-  const week = totalMinutes(
-    sessionsBetween(sessions, startOfWeek(new Date(), { weekStartsOn: 1 }), new Date()),
-  );
-  const month = totalMinutes(sessionsBetween(sessions, startOfMonth(new Date()), new Date()));
-  const s = streaks(sessions);
-  const score = studyScore(sessions, profile);
-  const daysLeft = Math.max(
-    0,
-    differenceInCalendarDays(parseISO(profile.examDate), new Date()),
-  );
-  const goalPct = Math.min(100, Math.round((today / (profile.dailyGoalHours * 60)) * 100));
-  const weekSeries = dailySeries(sessions, 7);
-  const monthSeries = monthlySeries(sessions, 6);
-  const subjectStats = bySubject(sessions, profile.subjects);
-  const maxSubject = Math.max(1, ...subjectStats.map((x) => x.total));
-  const f = forecast(sessions, profile);
-  const notes = insights(sessions, profile);
-
-  return (
-    <AppShell
-      title={`${profile.track === "AL" ? "A/L" : "O/L"} ${profile.examYear}`}
-      subtitle={profile.stream ? `${profile.stream} stream` : "Your study dashboard"}
-    >
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        <StatCard
-          label="Today"
-          value={fmtHours(today)}
-          icon={Clock}
-          accent
-          hint={`${goalPct}% of your ${profile.dailyGoalHours}h goal`}
-        >
-          <Progress value={goalPct} className="mt-3 h-1.5" />
-        </StatCard>
-        <StatCard
-          label="This week"
-          value={fmtHours(week)}
-          icon={TrendingUp}
-          hint={`Goal ${profile.weeklyGoalHours}h`}
-        >
-          <Progress
-            value={Math.min(100, (week / 60 / profile.weeklyGoalHours) * 100)}
-            className="mt-3 h-1.5"
-          />
-        </StatCard>
-        <StatCard label="This month" value={fmtHours(month)} icon={Gauge} hint="Total logged" />
-        <StatCard
-          label="Streak"
-          value={`${s.current} days`}
-          icon={Flame}
-          hint={`Longest ${s.longest} days`}
-        />
-        <StatCard
-          label="Study score"
-          value={score}
-          icon={Sparkles}
-          hint="Consistency + goals + volume"
-        />
-        <StatCard
-          label="Exam countdown"
-          value={`${daysLeft} days`}
-          icon={CalendarClock}
-          hint={profile.examDate}
-        />
-      </div>
-
-      <div className="mt-4 grid gap-4 lg:grid-cols-3">
-        <Panel title="Weekly study trend" className="lg:col-span-2">
-          <ResponsiveContainer width="100%" height={220}>
-            <AreaChart data={weekSeries}>
-              <defs>
-                <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--brand)" stopOpacity={0.5} />
-                  <stop offset="100%" stopColor="var(--brand)" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-              <XAxis dataKey="label" tickLine={false} axisLine={false} {...chartAxis} />
-              <YAxis tickLine={false} axisLine={false} width={28} {...chartAxis} />
-              <Tooltip content={<ChartTip />} />
-              <Area
-                type="monotone"
-                dataKey="hours"
-                stroke="var(--brand)"
-                strokeWidth={2.5}
-                fill="url(#g1)"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </Panel>
-
-        <Panel title="Monthly trend">
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={monthSeries}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-              <XAxis dataKey="label" tickLine={false} axisLine={false} {...chartAxis} />
-              <Tooltip content={<ChartTip />} cursor={{ fill: "var(--muted)" }} />
-              <Bar dataKey="hours" fill="var(--brand)" radius={[6, 6, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </Panel>
-      </div>
-
-      <div className="mt-4 grid gap-4 lg:grid-cols-3">
-        <Panel title="Subject comparison" className="lg:col-span-2">
-          {totalMinutes(sessions) === 0 ? (
-            <EmptyState text="Log your first session to see subject comparison." />
-          ) : (
-            <ResponsiveContainer width="100%" height={Math.max(180, subjectStats.length * 38)}>
-              <BarChart data={subjectStats} layout="vertical" margin={{ left: 8 }}>
-                <XAxis type="number" hide />
-                <YAxis
-                  type="category"
-                  dataKey="subject"
-                  width={130}
-                  tickLine={false}
-                  axisLine={false}
-                  {...chartAxis}
-                />
-                <Tooltip
-                  cursor={{ fill: "var(--muted)" }}
-                  content={({ active, payload }: any) =>
-                    active && payload?.length ? (
-                      <div className="rounded-xl border border-border bg-popover px-3 py-2 text-xs">
-                        {fmtHours(payload[0].value)}
-                      </div>
-                    ) : null
-                  }
-                />
-                <Bar dataKey="total" radius={[0, 6, 6, 0]}>
-                  {subjectStats.map((x) => (
-                    <Cell key={x.subject} fill={subjectColor(x.subject)} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          )}
-        </Panel>
-
-        <Panel title="Insights">
-          {notes.length === 0 ? (
-            <EmptyState text="No alerts. You're on top of things." />
-          ) : (
-            <ul className="space-y-2.5">
-              {notes.map((n, i) => (
-                <li
-                  key={i}
-                  className="rounded-xl border border-border bg-elevated px-3 py-2.5 text-sm text-muted-foreground"
-                >
-                  {n}
-                </li>
-              ))}
-            </ul>
-          )}
-        </Panel>
-      </div>
-
-      <Panel title="Subjects" className="mt-4">
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {subjectStats.map((x) => (
-            <div key={x.subject} className="rounded-2xl border border-border bg-elevated p-4">
-              <div className="flex items-center gap-2">
-                <span
-                  className="h-2.5 w-2.5 rounded-full"
-                  style={{ background: subjectColor(x.subject) }}
-                />
-                <span className="truncate text-sm font-medium">{x.subject}</span>
-              </div>
-              <div className="num mt-3 text-xl font-semibold">{fmtHours(x.total)}</div>
-              <div className="mt-1 text-xs text-muted-foreground">
-                {fmtHours(x.week)} this week · avg {fmtHours(x.avg)}/day
-              </div>
-              <Progress value={(x.total / maxSubject) * 100} className="mt-3 h-1.5" />
-            </div>
-          ))}
+    <div className="min-h-screen bg-background">
+      <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3.5 sm:px-8">
+          <Link to="/" className="flex items-center gap-2.5">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+              <Radar className="h-4 w-4" />
+            </span>
+            <span className="font-display text-base font-semibold tracking-tight sm:text-lg">
+              Study Radar
+            </span>
+          </Link>
+          <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
+            <a href="#features" className="transition-colors hover:text-foreground">
+              Features
+            </a>
+            <a href="#how" className="transition-colors hover:text-foreground">
+              How it works
+            </a>
+            <a href="#contact" className="transition-colors hover:text-foreground">
+              Contact
+            </a>
+          </nav>
+          <div className="flex items-center gap-2">
+            {session ? (
+              <Button asChild size="sm">
+                <Link to="/dashboard">Open dashboard</Link>
+              </Button>
+            ) : (
+              <>
+                <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+                  <Link to="/auth">Sign in</Link>
+                </Button>
+                <Button asChild size="sm">
+                  <Link to="/auth">Get started</Link>
+                </Button>
+              </>
+            )}
+          </div>
         </div>
-      </Panel>
+      </header>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-3">
-        <Panel title="Study heatmap" className="lg:col-span-2">
-          <Heatmap sessions={sessions} goalMinutes={profile.dailyGoalHours * 60} />
-        </Panel>
-        <Panel title="Forecast">
-          <p className="text-sm text-muted-foreground">
-            At your current pace of <span className="text-foreground">{f.avgPerDay}h/day</span>,
-            you will complete approximately{" "}
-            <span className="text-foreground">{f.projected} study hours</span> before your exam.
-          </p>
-          <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-            <div className="rounded-xl bg-elevated p-3">
-              <p className="text-xs text-muted-foreground">Hours done</p>
-              <p className="num text-lg font-semibold">{f.done}h</p>
+      <main>
+        <section className="relative overflow-hidden px-5 pb-16 pt-16 sm:px-8 sm:pb-24 sm:pt-24">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute left-1/2 top-0 h-72 w-[42rem] -translate-x-1/2 rounded-full bg-primary/15 blur-[110px]"
+          />
+          <div className="relative mx-auto max-w-3xl text-center">
+            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-elevated px-3.5 py-1.5 text-xs text-muted-foreground">
+              <Timer className="h-3.5 w-3.5 text-primary" />
+              Built for GCE O/L &amp; A/L students in Sri Lanka
+            </span>
+            <h1 className="mt-6 font-display text-4xl font-semibold leading-[1.08] tracking-tight sm:text-6xl">
+              Know exactly where you stand
+              <span className="block text-primary">before the exam does.</span>
+            </h1>
+            <p className="mx-auto mt-5 max-w-xl text-base text-muted-foreground sm:text-lg">
+              Study Radar turns your daily study into hours, streaks, marks and a clear readiness
+              score — so you stop guessing and start improving.
+            </p>
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Button asChild size="lg" className="w-full sm:w-auto">
+                <Link to={session ? "/dashboard" : "/auth"}>
+                  {session ? "Open your dashboard" : "Start tracking — free"}
+                </Link>
+              </Button>
+              <Button asChild variant="secondary" size="lg" className="w-full sm:w-auto">
+                <a href="#features">See what's inside</a>
+              </Button>
             </div>
-            <div className="rounded-xl bg-elevated p-3">
-              <p className="text-xs text-muted-foreground">Days left</p>
-              <p className="num text-lg font-semibold">{f.daysLeft}</p>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
+              {["No cost", "Google sign-in", "Works on mobile", "Your data is private"].map((x) => (
+                <span key={x} className="inline-flex items-center gap-1.5">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+                  {x}
+                </span>
+              ))}
             </div>
           </div>
-          <p
-            className={`mt-4 rounded-xl px-3 py-2.5 text-sm ${f.onTrack ? "bg-brand-soft text-primary" : "bg-muted text-muted-foreground"}`}
-          >
-            {f.onTrack
-              ? "You are on track for your target."
-              : `Behind target — aim for ${f.requiredPerDay}h/day to catch up.`}
-          </p>
-        </Panel>
-      </div>
-    </AppShell>
+
+          <div className="relative mx-auto mt-14 grid max-w-4xl gap-3 sm:grid-cols-3">
+            {[
+              { k: "Today", v: "3h 20m", s: "of your 5h target" },
+              { k: "Streak", v: "12 days", s: "keep it alive" },
+              { k: "Exam in", v: "245 days", s: "A/L 2027" },
+            ].map((c) => (
+              <div key={c.k} className="panel p-5 text-left">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">{c.k}</p>
+                <p className="num mt-2 text-2xl font-semibold">{c.v}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{c.s}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section id="features" className="border-t border-border px-5 py-16 sm:px-8 sm:py-20">
+          <div className="mx-auto max-w-6xl">
+            <h2 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
+              Everything you need. Nothing you don't.
+            </h2>
+            <p className="mt-2 max-w-xl text-sm text-muted-foreground">
+              Designed to be opened between lessons — quick, calm and honest about your progress.
+            </p>
+            <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {FEATURES.map((f) => (
+                <div key={f.title} className="panel p-5">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-soft text-primary">
+                    <f.icon className="h-4.5 w-4.5" />
+                  </span>
+                  <h3 className="mt-4 text-sm font-medium">{f.title}</h3>
+                  <p className="mt-1.5 text-sm text-muted-foreground">{f.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="how" className="border-t border-border px-5 py-16 sm:px-8 sm:py-20">
+          <div className="mx-auto max-w-6xl">
+            <h2 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
+              Up and running in a minute
+            </h2>
+            <div className="mt-8 grid gap-3 md:grid-cols-3">
+              {STEPS.map((s) => (
+                <div key={s.n} className="panel p-6">
+                  <span className="num text-sm text-primary">{s.n}</span>
+                  <h3 className="mt-3 text-base font-medium">{s.t}</h3>
+                  <p className="mt-1.5 text-sm text-muted-foreground">{s.d}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="panel mt-10 flex flex-col items-center gap-4 p-8 text-center sm:p-12">
+              <h3 className="font-display text-xl font-semibold sm:text-2xl">
+                Your next exam starts today.
+              </h3>
+              <p className="max-w-md text-sm text-muted-foreground">
+                Join Study Radar and log your first session in under a minute.
+              </p>
+              <Button asChild size="lg">
+                <Link to={session ? "/dashboard" : "/auth"}>
+                  {session ? "Open dashboard" : "Create your free account"}
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <SiteFooter />
+    </div>
   );
 }
