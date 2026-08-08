@@ -23,7 +23,6 @@ import { Route as SubjectsRouteImport } from './routes/subjects'
 import { Route as TimerRouteImport } from './routes/timer'
 import { Route as SubjectsIndexRouteImport } from './routes/subjects.index'
 import { Route as SubjectsSubjectRouteImport } from './routes/subjects.$subject'
-import { Route as ApiPublicSeedDemoRouteImport } from './routes/api/public/seed-demo'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -95,11 +94,6 @@ const SubjectsSubjectRoute = SubjectsSubjectRouteImport.update({
   path: '/$subject',
   getParentRoute: () => SubjectsRoute,
 } as any)
-const ApiPublicSeedDemoRoute = ApiPublicSeedDemoRouteImport.update({
-  id: '/api/public/seed-demo',
-  path: '/api/public/seed-demo',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -116,7 +110,6 @@ export interface FileRoutesByFullPath {
   '/timer': typeof TimerRoute
   '/subjects/$subject': typeof SubjectsSubjectRoute
   '/subjects/': typeof SubjectsIndexRoute
-  '/api/public/seed-demo': typeof ApiPublicSeedDemoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -132,7 +125,6 @@ export interface FileRoutesByTo {
   '/timer': typeof TimerRoute
   '/subjects/$subject': typeof SubjectsSubjectRoute
   '/subjects': typeof SubjectsIndexRoute
-  '/api/public/seed-demo': typeof ApiPublicSeedDemoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -150,7 +142,6 @@ export interface FileRoutesById {
   '/timer': typeof TimerRoute
   '/subjects/$subject': typeof SubjectsSubjectRoute
   '/subjects/': typeof SubjectsIndexRoute
-  '/api/public/seed-demo': typeof ApiPublicSeedDemoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -169,7 +160,6 @@ export interface FileRouteTypes {
     | '/timer'
     | '/subjects/$subject'
     | '/subjects/'
-    | '/api/public/seed-demo'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -185,7 +175,6 @@ export interface FileRouteTypes {
     | '/timer'
     | '/subjects/$subject'
     | '/subjects'
-    | '/api/public/seed-demo'
   id:
     | '__root__'
     | '/'
@@ -202,7 +191,6 @@ export interface FileRouteTypes {
     | '/timer'
     | '/subjects/$subject'
     | '/subjects/'
-    | '/api/public/seed-demo'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -218,7 +206,6 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   SubjectsRoute: typeof SubjectsRouteWithChildren
   TimerRoute: typeof TimerRoute
-  ApiPublicSeedDemoRoute: typeof ApiPublicSeedDemoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -321,13 +308,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SubjectsSubjectRouteImport
       parentRoute: typeof SubjectsRoute
     }
-    '/api/public/seed-demo': {
-      id: '/api/public/seed-demo'
-      path: '/api/public/seed-demo'
-      fullPath: '/api/public/seed-demo'
-      preLoaderRoute: typeof ApiPublicSeedDemoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -358,7 +338,6 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   SubjectsRoute: SubjectsRouteWithChildren,
   TimerRoute: TimerRoute,
-  ApiPublicSeedDemoRoute: ApiPublicSeedDemoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
