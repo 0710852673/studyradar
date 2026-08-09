@@ -22,6 +22,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RevisionRouteImport } from './routes/revision'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SubjectsRouteImport } from './routes/subjects'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TimerRouteImport } from './routes/timer'
 import { Route as SubjectsIndexRouteImport } from './routes/subjects.index'
 import { Route as SubjectsSubjectRouteImport } from './routes/subjects.$subject'
@@ -91,6 +92,11 @@ const SubjectsRoute = SubjectsRouteImport.update({
   path: '/subjects',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TimerRoute = TimerRouteImport.update({
   id: '/timer',
   path: '/timer',
@@ -121,6 +127,7 @@ export interface FileRoutesByFullPath {
   '/revision': typeof RevisionRoute
   '/settings': typeof SettingsRoute
   '/subjects': typeof SubjectsRouteWithChildren
+  '/terms': typeof TermsRoute
   '/timer': typeof TimerRoute
   '/subjects/$subject': typeof SubjectsSubjectRoute
   '/subjects/': typeof SubjectsIndexRoute
@@ -138,6 +145,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/revision': typeof RevisionRoute
   '/settings': typeof SettingsRoute
+  '/terms': typeof TermsRoute
   '/timer': typeof TimerRoute
   '/subjects/$subject': typeof SubjectsSubjectRoute
   '/subjects': typeof SubjectsIndexRoute
@@ -157,6 +165,7 @@ export interface FileRoutesById {
   '/revision': typeof RevisionRoute
   '/settings': typeof SettingsRoute
   '/subjects': typeof SubjectsRouteWithChildren
+  '/terms': typeof TermsRoute
   '/timer': typeof TimerRoute
   '/subjects/$subject': typeof SubjectsSubjectRoute
   '/subjects/': typeof SubjectsIndexRoute
@@ -177,6 +186,7 @@ export interface FileRouteTypes {
     | '/revision'
     | '/settings'
     | '/subjects'
+    | '/terms'
     | '/timer'
     | '/subjects/$subject'
     | '/subjects/'
@@ -194,6 +204,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/revision'
     | '/settings'
+    | '/terms'
     | '/timer'
     | '/subjects/$subject'
     | '/subjects'
@@ -212,6 +223,7 @@ export interface FileRouteTypes {
     | '/revision'
     | '/settings'
     | '/subjects'
+    | '/terms'
     | '/timer'
     | '/subjects/$subject'
     | '/subjects/'
@@ -231,6 +243,7 @@ export interface RootRouteChildren {
   RevisionRoute: typeof RevisionRoute
   SettingsRoute: typeof SettingsRoute
   SubjectsRoute: typeof SubjectsRouteWithChildren
+  TermsRoute: typeof TermsRoute
   TimerRoute: typeof TimerRoute
 }
 
@@ -327,6 +340,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SubjectsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/timer': {
       id: '/timer'
       path: '/timer'
@@ -379,18 +399,9 @@ const rootRouteChildren: RootRouteChildren = {
   RevisionRoute: RevisionRoute,
   SettingsRoute: SettingsRoute,
   SubjectsRoute: SubjectsRouteWithChildren,
+  TermsRoute: TermsRoute,
   TimerRoute: TimerRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
