@@ -12,12 +12,12 @@ import { useStudyOS } from "@/lib/studyos/store";
 export const Route = createFileRoute("/timer")({
   head: () => ({
     meta: [
-      { title: "Study Timer — StudyOS" },
+      { title: "Study Timer — Study Radar" },
       {
         name: "description",
         content: "Stopwatch, Pomodoro and countdown timers that log your study automatically.",
       },
-      { property: "og:title", content: "Study Timer — StudyOS" },
+      { property: "og:title", content: "Study Timer — Study Radar" },
       {
         property: "og:description",
         content: "Focus with Pomodoro or a stopwatch and auto-log every finished session.",
