@@ -31,12 +31,12 @@ import { subjectColor } from "@/lib/studyos/subjects";
 export const Route = createFileRoute("/analytics")({
   head: () => ({
     meta: [
-      { title: "Study Analytics — StudyOS" },
+      { title: "Study Analytics — Study Radar" },
       {
         name: "description",
         content: "Weekly, monthly and yearly study analytics with subject breakdowns.",
       },
-      { property: "og:title", content: "Study Analytics — StudyOS" },
+      { property: "og:title", content: "Study Analytics — Study Radar" },
       {
         property: "og:description",
         content: "See your best study day, consistency and subject-wise hours at a glance.",

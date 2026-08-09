@@ -22,12 +22,12 @@ import { markStats, toKey } from "@/lib/studyos/analytics";
 export const Route = createFileRoute("/marks")({
   head: () => ({
     meta: [
-      { title: "Marks Tracker — StudyOS" },
+      { title: "Marks Tracker — Study Radar" },
       {
         name: "description",
         content: "Record exam marks per subject and watch your improvement trend over time.",
       },
-      { property: "og:title", content: "Marks Tracker — StudyOS" },
+      { property: "og:title", content: "Marks Tracker — Study Radar" },
       {
         property: "og:description",
         content: "Averages, highs, lows and improvement trends for every subject.",

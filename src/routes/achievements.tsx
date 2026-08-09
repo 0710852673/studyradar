@@ -11,12 +11,12 @@ import { streaks, totalMinutes } from "@/lib/studyos/analytics";
 export const Route = createFileRoute("/achievements")({
   head: () => ({
     meta: [
-      { title: "Achievements & Streaks — StudyOS" },
+      { title: "Achievements & Streaks — Study Radar" },
       {
         name: "description",
         content: "Unlock study milestones, keep your streak alive and stay motivated.",
       },
-      { property: "og:title", content: "Achievements & Streaks — StudyOS" },
+      { property: "og:title", content: "Achievements & Streaks — Study Radar" },
       {
         property: "og:description",
         content: "Milestones for hours studied, streaks kept and papers completed.",

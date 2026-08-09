@@ -23,12 +23,12 @@ import { subjectColor } from "@/lib/studyos/subjects";
 export const Route = createFileRoute("/calendar")({
   head: () => ({
     meta: [
-      { title: "Study Calendar — StudyOS" },
+      { title: "Study Calendar — Study Radar" },
       {
         name: "description",
         content: "Browse your study history day by day: hours, subjects, papers and notes.",
       },
-      { property: "og:title", content: "Study Calendar — StudyOS" },
+      { property: "og:title", content: "Study Calendar — Study Radar" },
       {
         property: "og:description",
         content: "A month view of everything you studied, one tap per day.",
