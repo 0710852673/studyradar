@@ -41,7 +41,7 @@ export function SiteFooter() {
         </div>
 
         <div>
-          <h3 className="text-sm font-medium">Contact</h3>
+          <h3 className="text-sm font-medium">Contact &amp; legal</h3>
           <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
             <li className="flex items-center gap-2">
               <Mail className="h-4 w-4" />
@@ -56,8 +56,19 @@ export function SiteFooter() {
               <Github className="h-4 w-4" />
               <span>Built in Sri Lanka 🇱🇰</span>
             </li>
+            <li>
+              <Link to="/privacy" className="transition-colors hover:text-foreground">
+                Privacy Policy
+              </Link>
+            </li>
+            <li>
+              <Link to="/terms" className="transition-colors hover:text-foreground">
+                Terms &amp; Conditions
+              </Link>
+            </li>
           </ul>
         </div>
+
       </div>
 
       <div className="border-t border-border px-5 py-5 text-center text-xs text-muted-foreground sm:px-8">
