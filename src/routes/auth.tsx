@@ -296,6 +296,18 @@ function AuthPage() {
           <p className="mt-5 text-center text-xs text-muted-foreground">
             You stay signed in on this device until you sign out.
           </p>
+          <p className="mt-3 text-center text-xs text-muted-foreground">
+            By continuing you agree to our{" "}
+            <Link to="/terms" className="text-primary underline-offset-4 hover:underline">
+              Terms
+            </Link>{" "}
+            and{" "}
+            <Link to="/privacy" className="text-primary underline-offset-4 hover:underline">
+              Privacy Policy
+            </Link>
+            . Google sign-in shares only your name, email and profile picture.
+          </p>
+
         </div>
       </div>
     </main>
