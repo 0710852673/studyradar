@@ -17,6 +17,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as MarksRouteImport } from './routes/marks'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProgressRouteImport } from './routes/progress'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RevisionRouteImport } from './routes/revision'
@@ -65,6 +66,11 @@ const DashboardRoute = DashboardRouteImport.update({
 const MarksRoute = MarksRouteImport.update({
   id: '/marks',
   path: '/marks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProgressRoute = ProgressRouteImport.update({
@@ -122,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/calendar': typeof CalendarRoute
   '/dashboard': typeof DashboardRoute
   '/marks': typeof MarksRoute
+  '/privacy': typeof PrivacyRoute
   '/progress': typeof ProgressRoute
   '/reset-password': typeof ResetPasswordRoute
   '/revision': typeof RevisionRoute
@@ -141,6 +148,7 @@ export interface FileRoutesByTo {
   '/calendar': typeof CalendarRoute
   '/dashboard': typeof DashboardRoute
   '/marks': typeof MarksRoute
+  '/privacy': typeof PrivacyRoute
   '/progress': typeof ProgressRoute
   '/reset-password': typeof ResetPasswordRoute
   '/revision': typeof RevisionRoute
@@ -160,6 +168,7 @@ export interface FileRoutesById {
   '/calendar': typeof CalendarRoute
   '/dashboard': typeof DashboardRoute
   '/marks': typeof MarksRoute
+  '/privacy': typeof PrivacyRoute
   '/progress': typeof ProgressRoute
   '/reset-password': typeof ResetPasswordRoute
   '/revision': typeof RevisionRoute
@@ -181,6 +190,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/dashboard'
     | '/marks'
+    | '/privacy'
     | '/progress'
     | '/reset-password'
     | '/revision'
@@ -200,6 +210,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/dashboard'
     | '/marks'
+    | '/privacy'
     | '/progress'
     | '/reset-password'
     | '/revision'
@@ -218,6 +229,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/dashboard'
     | '/marks'
+    | '/privacy'
     | '/progress'
     | '/reset-password'
     | '/revision'
@@ -238,6 +250,7 @@ export interface RootRouteChildren {
   CalendarRoute: typeof CalendarRoute
   DashboardRoute: typeof DashboardRoute
   MarksRoute: typeof MarksRoute
+  PrivacyRoute: typeof PrivacyRoute
   ProgressRoute: typeof ProgressRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   RevisionRoute: typeof RevisionRoute
@@ -303,6 +316,13 @@ declare module '@tanstack/react-router' {
       path: '/marks'
       fullPath: '/marks'
       preLoaderRoute: typeof MarksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/progress': {
@@ -394,6 +414,7 @@ const rootRouteChildren: RootRouteChildren = {
   CalendarRoute: CalendarRoute,
   DashboardRoute: DashboardRoute,
   MarksRoute: MarksRoute,
+  PrivacyRoute: PrivacyRoute,
   ProgressRoute: ProgressRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   RevisionRoute: RevisionRoute,
