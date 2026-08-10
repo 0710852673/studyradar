@@ -86,10 +86,12 @@ export type Database = {
           exam_date: string | null
           exam_year: number
           id: string
+          is_demo: boolean
           name: string
           onboarded: boolean
           stream: string | null
           subjects: string[]
+          terms_accepted_at: string | null
           track: string
           updated_at: string
         }
@@ -101,10 +103,12 @@ export type Database = {
           exam_date?: string | null
           exam_year?: number
           id: string
+          is_demo?: boolean
           name?: string
           onboarded?: boolean
           stream?: string | null
           subjects?: string[]
+          terms_accepted_at?: string | null
           track?: string
           updated_at?: string
         }
@@ -116,12 +120,50 @@ export type Database = {
           exam_date?: string | null
           exam_year?: number
           id?: string
+          is_demo?: boolean
           name?: string
           onboarded?: boolean
           stream?: string | null
           subjects?: string[]
+          terms_accepted_at?: string | null
           track?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      security_events: {
+        Row: {
+          created_at: string
+          detail: string | null
+          email: string | null
+          id: string
+          kind: string
+          path: string | null
+          severity: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          detail?: string | null
+          email?: string | null
+          id?: string
+          kind: string
+          path?: string | null
+          severity?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          detail?: string | null
+          email?: string | null
+          id?: string
+          kind?: string
+          path?: string | null
+          severity?: string
+          user_agent?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }

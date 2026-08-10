@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
+import { logSecurityEvent, rememberConsent } from "@/lib/studyos/security";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -71,6 +72,7 @@ function AuthPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
+  const [agree, setAgree] = useState(false);
 
   const fail = (message: string) => {
     const text = friendly(message);
@@ -94,6 +96,12 @@ function AuthPage() {
         toast.success("Reset link sent — check your email.");
       }
     } else if (mode === "up") {
+      if (!agree) {
+        setBusy(false);
+        fail("Please accept the Terms and Privacy Policy to create an account.");
+        return;
+      }
+      rememberConsent();
       const { data, error: err } = await supabase.auth.signUp({
         email: email.trim(),
         password,
@@ -114,8 +122,14 @@ function AuthPage() {
         email: email.trim(),
         password,
       });
-      if (err) fail(err.message);
-      else void navigate({ to: "/dashboard", replace: true });
+      if (err) {
+        fail(err.message);
+        void logSecurityEvent("sign_in_failed", {
+          severity: "warning",
+          email: email.trim(),
+          detail: err.message,
+        });
+      } else void navigate({ to: "/dashboard", replace: true });
     }
     setBusy(false);
   };
@@ -123,12 +137,17 @@ function AuthPage() {
   const google = async () => {
     setBusy(true);
     setError(null);
+    rememberConsent();
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
     });
     const err = (result as { error?: unknown }).error;
     if (err) {
       fail(err instanceof Error ? err.message : "Google sign-in failed.");
+      void logSecurityEvent("google_sign_in_failed", {
+        severity: "warning",
+        detail: err instanceof Error ? err.message : "unknown",
+      });
       setBusy(false);
       return;
     }
@@ -266,6 +285,28 @@ function AuthPage() {
                 >
                   {error}
                 </p>
+              ) : null}
+
+              {mode === "up" ? (
+                <label className="flex cursor-pointer items-start gap-2 text-xs text-muted-foreground">
+                  <input
+                    type="checkbox"
+                    checked={agree}
+                    onChange={(e) => setAgree(e.target.checked)}
+                    className="mt-0.5 h-3.5 w-3.5 rounded border-border accent-primary"
+                  />
+                  <span>
+                    I accept the{" "}
+                    <Link to="/terms" className="underline underline-offset-4">
+                      Terms
+                    </Link>{" "}
+                    and{" "}
+                    <Link to="/privacy" className="underline underline-offset-4">
+                      Privacy Policy
+                    </Link>
+                    .
+                  </span>
+                </label>
               ) : null}
 
               <Button type="submit" size="lg" className="w-full" disabled={busy}>
