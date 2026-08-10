@@ -15,6 +15,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { StudyOSProvider, useStudyOS } from "../lib/studyos/store";
 import { Onboarding } from "../components/studyos/Onboarding";
+import { ProfileNudge } from "../components/studyos/ProfileNudge";
 import { Toaster } from "../components/ui/sonner";
 
 function NotFoundComponent() {
