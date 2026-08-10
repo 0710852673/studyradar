@@ -10,6 +10,7 @@ import {
 import type { Session, User } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { syncConsent } from "./security";
 import {
   EMPTY_DATA,
   type ChapterStatus,
@@ -120,6 +121,9 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
 
     const prof = p.data ? rowToProfile(p.data as ProfileRow) : null;
     setProfile(prof);
+
+    // Consent captured before an OAuth redirect lands on the profile row here.
+    void syncConsent(uid, Boolean((p.data as { terms_accepted_at?: string } | null)?.terms_accepted_at));
 
     // Avatars live in a private bucket, so stored paths need a signed URL.
     const raw = prof?.avatarUrl;
