@@ -119,7 +119,7 @@ function RootShell({ children }: { children: ReactNode }) {
 }
 
 /** Public pages anyone can open without a session. */
-const PUBLIC_PATHS = ["/", "/auth", "/reset-password"];
+const PUBLIC_PATHS = ["/", "/auth", "/reset-password", "/terms", "/privacy"];
 
 function Gate() {
   const { ready, session, profile } = useStudyOS();
@@ -136,13 +136,14 @@ function Gate() {
 
   // Always render <Outlet /> so the SSR tree matches the first client render;
   // the session only exists in the browser and arrives after hydration.
-  const showOnboarding =
-    ready && session && !isPublic && (!profile || !profile.onboarded);
+  const authedArea = ready && session && !isPublic;
+  const showOnboarding = authedArea && (!profile || !profile.onboarded);
 
   return (
     <>
       <Outlet />
       {showOnboarding ? <Onboarding /> : null}
+      {authedArea && !showOnboarding ? <ProfileNudge /> : null}
     </>
   );
 }
