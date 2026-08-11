@@ -6,6 +6,7 @@ import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 import { useStudyOS } from "@/lib/studyos/store";
 import { AL_STREAMS, OL_COMPULSORY, OL_OPTIONAL, defaultExamDate } from "@/lib/studyos/subjects";
+import { SubjectPicker } from "./SubjectPicker";
 import type { ExamTrack } from "@/lib/studyos/types";
 
 function Selectable({
@@ -57,20 +58,16 @@ export function Onboarding() {
 
   const optionalPool = track === "AL" ? (AL_STREAMS[stream] ?? []) : OL_OPTIONAL;
 
-  const toggle = (s: string) => {
-    setPicked((prev) =>
-      prev.includes(s) ? prev.filter((x) => x !== s) : prev.length >= 3 ? prev : [...prev, s],
-    );
-  };
-
+  // At least one subject; students may add their own beyond the presets.
   const canNext =
     step === 0
       ? !!track
       : step === 1
         ? track === "AL"
-          ? !!stream && picked.length === 3
-          : picked.length === 3
+          ? !!stream && picked.length > 0
+          : picked.length > 0
         : true;
+
 
   const finish = async () => {
     if (!track || saving) return;
@@ -200,24 +197,18 @@ export function Onboarding() {
               </div>
             )}
 
-            {optionalPool.length > 0 ? (
-              <div>
-                <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Choose exactly 3 {track === "OL" ? "optional " : ""}subjects · {picked.length}/3
-                </p>
-                <div className="grid gap-2 sm:grid-cols-3">
-                  {optionalPool.map((s) => (
-                    <Selectable
-                      key={s}
-                      active={picked.includes(s)}
-                      disabled={!picked.includes(s) && picked.length >= 3}
-                      onClick={() => toggle(s)}
-                      title={s}
-                    />
-                  ))}
-                </div>
-              </div>
-            ) : null}
+            <div>
+              <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Your {track === "OL" ? "optional " : ""}subjects
+              </p>
+              <SubjectPicker
+                pool={optionalPool}
+                selected={picked}
+                onChange={setPicked}
+                recommended={3}
+              />
+            </div>
+
           </div>
         ) : null}
 

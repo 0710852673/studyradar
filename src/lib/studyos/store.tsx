@@ -11,11 +11,14 @@ import type { Session, User } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { syncConsent } from "./security";
+import { recordActivity } from "./telemetry";
 import {
+  DEFAULT_SETTINGS,
   EMPTY_DATA,
   type ChapterStatus,
   type MarkEntry,
   type Profile,
+  type SiteSettings,
   type StudyOSData,
   type StudySession,
 } from "./types";
@@ -37,7 +40,19 @@ type ProfileRow = {
   onboarded: boolean;
   avatar_url?: string | null;
   email?: string | null;
+  city?: string | null;
+  district?: string | null;
+  mobile?: string | null;
+  school?: string | null;
+  grade?: string | null;
+  guardian_name?: string | null;
+  guardian_phone?: string | null;
+  bio?: string | null;
+  suspended?: boolean | null;
+  suspended_reason?: string | null;
 };
+
+const opt = (v: string | null | undefined) => (v == null || v === "" ? undefined : v);
 
 export function rowToProfile(r: ProfileRow): Profile {
   const track = (r.track === "OL" ? "OL" : "AL") as Profile["track"];
@@ -54,6 +69,16 @@ export function rowToProfile(r: ProfileRow): Profile {
     onboarded: r.onboarded,
     avatarUrl: r.avatar_url ?? undefined,
     email: r.email ?? undefined,
+    city: opt(r.city),
+    district: opt(r.district),
+    mobile: opt(r.mobile),
+    school: opt(r.school),
+    grade: opt(r.grade),
+    guardianName: opt(r.guardian_name),
+    guardianPhone: opt(r.guardian_phone),
+    bio: opt(r.bio),
+    suspended: Boolean(r.suspended),
+    suspendedReason: opt(r.suspended_reason),
   };
 }
 
@@ -75,7 +100,9 @@ interface Store {
   profile: Profile | null;
   avatarSrc: string | null;
   data: StudyOSData;
+  settings: SiteSettings;
   refresh: () => Promise<void>;
+  refreshSettings: () => Promise<void>;
   updateProfile: (p: Partial<Profile>) => Promise<void>;
   uploadAvatar: (file: File) => Promise<void>;
   addSession: (s: Omit<StudySession, "id" | "createdAt">) => Promise<void>;
@@ -97,8 +124,29 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
   const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [data, setData] = useState<StudyOSData>(EMPTY_DATA);
+  const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
 
   const userId = session?.user?.id ?? null;
+
+  const refreshSettings = useCallback(async () => {
+    const { data: s } = await supabase.from("site_settings").select("*").maybeSingle();
+    if (!s) return;
+    const r = s as Record<string, unknown>;
+    setSettings({
+      maintenanceMode: Boolean(r["maintenance_mode"]),
+      maintenanceMessage: String(r["maintenance_message"] ?? DEFAULT_SETTINGS.maintenanceMessage),
+      signupsEnabled: Boolean(r["signups_enabled"]),
+      googleLoginEnabled: Boolean(r["google_login_enabled"]),
+      announcement: (r["announcement"] as string | null) ?? null,
+      announcementActive: Boolean(r["announcement_active"]),
+      maxWritesPerMinute: Number(r["max_writes_per_minute"] ?? 60),
+    });
+  }, []);
+
+  useEffect(() => {
+    void refreshSettings();
+  }, [refreshSettings]);
+
 
   const load = useCallback(async (uid: string) => {
     const [p, roles, sessions, marks, chapters] = await Promise.all([
@@ -166,8 +214,15 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((e, s) => {
       setSession(s);
+      if (e === "SIGNED_IN" && s?.user) {
+        void recordActivity("login", { userId: s.user.id, email: s.user.email ?? null });
+        void supabase
+          .from("profiles")
+          .update({ last_seen_at: new Date().toISOString() } as never)
+          .eq("id", s.user.id);
+      }
       if (!s) {
         setProfile(null);
         setAvatarSrc(null);
@@ -207,7 +262,9 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
       profile,
       avatarSrc,
       data,
+      settings,
       refresh,
+      refreshSettings,
       updateProfile: async (p) => {
         if (!userId) return;
         const patch: Record<string, unknown> = {};
@@ -220,6 +277,14 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
         if (p.dailyGoalHours !== undefined) patch["daily_target_hours"] = p.dailyGoalHours;
         if (p.onboarded !== undefined) patch["onboarded"] = p.onboarded;
         if (p.avatarUrl !== undefined) patch["avatar_url"] = p.avatarUrl ?? null;
+        if (p.city !== undefined) patch["city"] = p.city ?? null;
+        if (p.district !== undefined) patch["district"] = p.district ?? null;
+        if (p.mobile !== undefined) patch["mobile"] = p.mobile ?? null;
+        if (p.school !== undefined) patch["school"] = p.school ?? null;
+        if (p.grade !== undefined) patch["grade"] = p.grade ?? null;
+        if (p.guardianName !== undefined) patch["guardian_name"] = p.guardianName ?? null;
+        if (p.guardianPhone !== undefined) patch["guardian_phone"] = p.guardianPhone ?? null;
+        if (p.bio !== undefined) patch["bio"] = p.bio ?? null;
 
         // The signup trigger creates the row, but upsert keeps older accounts
         // and edge cases (missing row) working instead of silently no-op-ing.
@@ -306,7 +371,19 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
         await supabase.auth.signOut();
       },
     }),
-    [ready, session, isAdmin, profile, avatarSrc, data, refresh, userId, load],
+    [
+      ready,
+      session,
+      isAdmin,
+      profile,
+      avatarSrc,
+      data,
+      settings,
+      refresh,
+      refreshSettings,
+      userId,
+      load,
+    ],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

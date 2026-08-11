@@ -10,6 +10,7 @@ import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 import { useStudyOS } from "@/lib/studyos/store";
 import { AL_STREAMS, OL_COMPULSORY, OL_OPTIONAL, defaultExamDate } from "@/lib/studyos/subjects";
+import { SubjectPicker } from "@/components/studyos/SubjectPicker";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -39,6 +40,38 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
     </div>
   );
 }
+
+/** Saves on blur so students never hunt for a save button. */
+function Field({
+  label,
+  value,
+  placeholder,
+  onSave,
+}: {
+  label: string;
+  value: string | undefined;
+  placeholder?: string;
+  onSave: (v: string) => void;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-1.5 block text-xs text-muted-foreground">{label}</span>
+      <Input
+        defaultValue={value ?? ""}
+        placeholder={placeholder ?? ""}
+        maxLength={120}
+        onBlur={(e) => {
+          const v = e.target.value.trim();
+          if (v !== (value ?? "")) {
+            onSave(v);
+            toast.success(`${label} saved`);
+          }
+        }}
+      />
+    </label>
+  );
+}
+
 
 function ProfilePage() {
   const { profile, user, avatarSrc, updateProfile, uploadAvatar, signOut } = useStudyOS();
@@ -95,17 +128,14 @@ function ProfilePage() {
   };
 
   const thisYear = new Date().getFullYear();
-  const optionalPool =
-    profile.track === "AL" ? (AL_STREAMS[profile.stream ?? ""] ?? []) : OL_OPTIONAL;
+  const pool = profile.track === "AL" ? (AL_STREAMS[profile.stream ?? ""] ?? []) : OL_OPTIONAL;
   const chosenOptional = profile.subjects.filter((s) => !OL_COMPULSORY.includes(s));
 
-  const toggleSubject = (s: string) => {
-    const has = chosenOptional.includes(s);
-    if (!has && chosenOptional.length >= 3) return;
-    const next = has ? chosenOptional.filter((x) => x !== s) : [...chosenOptional, s];
+  const setSubjects = (next: string[]) => {
     const subjects = profile.track === "AL" ? next : [...OL_COMPULSORY, ...next];
     void updateProfile({ subjects });
   };
+
 
   return (
     <AppShell title="Profile" subtitle={user?.email ?? "Your account"}>
@@ -205,39 +235,71 @@ function ProfilePage() {
         </Panel>
 
         <Panel title={profile.track === "AL" ? "Subjects" : "Optional subjects"}>
-          {profile.track === "OL" ? (
-            <div className="mb-4 flex flex-wrap gap-2">
-              {OL_COMPULSORY.map((s) => (
-                <span
-                  key={s}
-                  className="rounded-full border border-border bg-elevated px-3 py-1.5 text-xs text-muted-foreground"
-                >
-                  {s}
-                </span>
-              ))}
-            </div>
-          ) : null}
-          <div className="grid gap-2 sm:grid-cols-3">
-            {optionalPool.map((s) => {
-              const active = chosenOptional.includes(s);
-              return (
-                <button
-                  key={s}
-                  onClick={() => toggleSubject(s)}
-                  disabled={!active && chosenOptional.length >= 3}
-                  className={cn(
-                    "rounded-xl border p-3 text-left text-sm transition-colors",
-                    active
-                      ? "border-primary bg-brand-soft text-primary"
-                      : "border-border bg-elevated text-muted-foreground disabled:opacity-40",
-                  )}
-                >
-                  {s}
-                </button>
-              );
-            })}
+          <SubjectPicker
+            pool={pool}
+            selected={chosenOptional}
+            onChange={setSubjects}
+            recommended={3}
+            locked={profile.track === "OL" ? OL_COMPULSORY : []}
+          />
+        </Panel>
+
+        <Panel title="Your details">
+          <p className="mb-4 text-xs text-muted-foreground">
+            Optional, but it makes your reports and any support we give you far more useful.
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field
+              label="School"
+              value={profile.school}
+              placeholder="e.g. Royal College"
+              onSave={(v) => void updateProfile({ school: v })}
+            />
+            <Field
+              label="Class / Grade"
+              value={profile.grade}
+              placeholder="e.g. 13-C"
+              onSave={(v) => void updateProfile({ grade: v })}
+            />
+            <Field
+              label="Town / City"
+              value={profile.city}
+              placeholder="e.g. Nugegoda"
+              onSave={(v) => void updateProfile({ city: v })}
+            />
+            <Field
+              label="District"
+              value={profile.district}
+              placeholder="e.g. Colombo"
+              onSave={(v) => void updateProfile({ district: v })}
+            />
+            <Field
+              label="Mobile number"
+              value={profile.mobile}
+              placeholder="07X XXX XXXX"
+              onSave={(v) => void updateProfile({ mobile: v })}
+            />
+            <Field
+              label="Guardian name"
+              value={profile.guardianName}
+              placeholder="Parent or guardian"
+              onSave={(v) => void updateProfile({ guardianName: v })}
+            />
+            <Field
+              label="Guardian phone"
+              value={profile.guardianPhone}
+              placeholder="07X XXX XXXX"
+              onSave={(v) => void updateProfile({ guardianPhone: v })}
+            />
+            <Field
+              label="About you"
+              value={profile.bio}
+              placeholder="Goals, target university…"
+              onSave={(v) => void updateProfile({ bio: v })}
+            />
           </div>
         </Panel>
+
 
         <Panel title="Password">
           <form onSubmit={changePassword} className="space-y-3">
