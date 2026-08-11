@@ -44,6 +44,63 @@ export type Database = {
         }
         Relationships: []
       }
+      device_events: {
+        Row: {
+          city: string | null
+          country: string | null
+          created_at: string
+          email: string | null
+          id: string
+          ip: string | null
+          kind: string
+          language: string | null
+          path: string | null
+          platform: string | null
+          referrer: string | null
+          region: string | null
+          screen: string | null
+          timezone: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          ip?: string | null
+          kind?: string
+          language?: string | null
+          path?: string | null
+          platform?: string | null
+          referrer?: string | null
+          region?: string | null
+          screen?: string | null
+          timezone?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          ip?: string | null
+          kind?: string
+          language?: string | null
+          path?: string | null
+          platform?: string | null
+          referrer?: string | null
+          region?: string | null
+          screen?: string | null
+          timezone?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       marks: {
         Row: {
           created_at: string
@@ -80,51 +137,87 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          bio: string | null
+          city: string | null
           created_at: string
           daily_target_hours: number
+          district: string | null
           email: string | null
           exam_date: string | null
           exam_year: number
+          grade: string | null
+          guardian_name: string | null
+          guardian_phone: string | null
           id: string
           is_demo: boolean
+          last_seen_at: string | null
+          mobile: string | null
           name: string
           onboarded: boolean
+          school: string | null
           stream: string | null
           subjects: string[]
+          suspended: boolean
+          suspended_at: string | null
+          suspended_reason: string | null
           terms_accepted_at: string | null
           track: string
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
+          bio?: string | null
+          city?: string | null
           created_at?: string
           daily_target_hours?: number
+          district?: string | null
           email?: string | null
           exam_date?: string | null
           exam_year?: number
+          grade?: string | null
+          guardian_name?: string | null
+          guardian_phone?: string | null
           id: string
           is_demo?: boolean
+          last_seen_at?: string | null
+          mobile?: string | null
           name?: string
           onboarded?: boolean
+          school?: string | null
           stream?: string | null
           subjects?: string[]
+          suspended?: boolean
+          suspended_at?: string | null
+          suspended_reason?: string | null
           terms_accepted_at?: string | null
           track?: string
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
+          bio?: string | null
+          city?: string | null
           created_at?: string
           daily_target_hours?: number
+          district?: string | null
           email?: string | null
           exam_date?: string | null
           exam_year?: number
+          grade?: string | null
+          guardian_name?: string | null
+          guardian_phone?: string | null
           id?: string
           is_demo?: boolean
+          last_seen_at?: string | null
+          mobile?: string | null
           name?: string
           onboarded?: boolean
+          school?: string | null
           stream?: string | null
           subjects?: string[]
+          suspended?: boolean
+          suspended_at?: string | null
+          suspended_reason?: string | null
           terms_accepted_at?: string | null
           track?: string
           updated_at?: string
@@ -164,6 +257,42 @@ export type Database = {
           severity?: string
           user_agent?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      site_settings: {
+        Row: {
+          announcement: string | null
+          announcement_active: boolean
+          google_login_enabled: boolean
+          id: boolean
+          maintenance_message: string
+          maintenance_mode: boolean
+          max_writes_per_minute: number
+          signups_enabled: boolean
+          updated_at: string
+        }
+        Insert: {
+          announcement?: string | null
+          announcement_active?: boolean
+          google_login_enabled?: boolean
+          id?: boolean
+          maintenance_message?: string
+          maintenance_mode?: boolean
+          max_writes_per_minute?: number
+          signups_enabled?: boolean
+          updated_at?: string
+        }
+        Update: {
+          announcement?: string | null
+          announcement_active?: boolean
+          google_login_enabled?: boolean
+          id?: boolean
+          maintenance_message?: string
+          maintenance_mode?: boolean
+          max_writes_per_minute?: number
+          signups_enabled?: boolean
+          updated_at?: string
         }
         Relationships: []
       }
