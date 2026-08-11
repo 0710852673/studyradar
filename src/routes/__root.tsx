@@ -122,8 +122,29 @@ function RootShell({ children }: { children: ReactNode }) {
 /** Public pages anyone can open without a session. */
 const PUBLIC_PATHS = ["/", "/auth", "/reset-password", "/terms", "/privacy"];
 
+/** Full-screen message used for suspensions and maintenance. */
+function Interstitial({
+  title,
+  body,
+  children,
+}: {
+  title: string;
+  body: string;
+  children?: ReactNode;
+}) {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background px-5">
+      <div className="panel max-w-md p-7 text-center">
+        <h1 className="font-display text-xl font-semibold">{title}</h1>
+        <p className="mt-3 whitespace-pre-line text-sm text-muted-foreground">{body}</p>
+        {children}
+      </div>
+    </div>
+  );
+}
+
 function Gate() {
-  const { ready, session, profile } = useStudyOS();
+  const { ready, session, profile, isAdmin, settings, signOut } = useStudyOS();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const isPublic = PUBLIC_PATHS.includes(pathname);
@@ -135,13 +156,48 @@ function Gate() {
     if (session && onAuth) void navigate({ to: "/dashboard", replace: true });
   }, [ready, session, isPublic, onAuth, navigate]);
 
+  // Disclosed activity logging — see the Privacy Policy.
+  useEffect(() => {
+    if (!ready) return;
+    recordVisitOnce(pathname, session?.user?.id ?? null, session?.user?.email ?? null);
+  }, [ready, pathname, session]);
+
   // Always render <Outlet /> so the SSR tree matches the first client render;
   // the session only exists in the browser and arrives after hydration.
   const authedArea = ready && session && !isPublic;
+
+  if (authedArea && profile?.suspended) {
+    return (
+      <Interstitial
+        title="Your account is suspended"
+        body={
+          profile.suspendedReason ||
+          "An administrator has suspended this account. Email sheharageeneth@gmail.com if you think this is a mistake."
+        }
+      >
+        <button
+          onClick={() => void signOut()}
+          className="mt-5 rounded-md border border-border px-4 py-2 text-sm hover:bg-accent"
+        >
+          Sign out
+        </button>
+      </Interstitial>
+    );
+  }
+
+  if (ready && settings.maintenanceMode && !isAdmin && !isPublic) {
+    return <Interstitial title="Back in a moment" body={settings.maintenanceMessage} />;
+  }
+
   const showOnboarding = authedArea && (!profile || !profile.onboarded);
 
   return (
     <>
+      {ready && settings.announcementActive && settings.announcement ? (
+        <div className="bg-primary px-4 py-2 text-center text-xs font-medium text-primary-foreground">
+          {settings.announcement}
+        </div>
+      ) : null}
       <Outlet />
       {showOnboarding ? <Onboarding /> : null}
       {authedArea && !showOnboarding ? <ProfileNudge /> : null}
