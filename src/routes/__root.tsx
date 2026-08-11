@@ -14,6 +14,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { StudyOSProvider, useStudyOS } from "../lib/studyos/store";
+import { recordVisitOnce } from "../lib/studyos/telemetry";
 import { Onboarding } from "../components/studyos/Onboarding";
 import { ProfileNudge } from "../components/studyos/ProfileNudge";
 import { Toaster } from "../components/ui/sonner";
