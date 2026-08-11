@@ -902,7 +902,7 @@ function SiteSettingsPanel({
         announcement_active: draft.announcementActive,
         max_writes_per_minute: draft.maxWritesPerMinute,
       } as never)
-      .eq("id", 1);
+      .eq("id", true);
     setBusy(false);
     if (error) toast.error(error.message);
     else {
