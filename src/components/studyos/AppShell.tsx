@@ -17,6 +17,8 @@ import { cn } from "@/lib/utils";
 import { LogForm, QuickLogButton } from "./QuickLog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useStudyOS } from "@/lib/studyos/store";
+import { NotificationBell } from "./Notifications";
+
 
 const PRIMARY = [
   { to: "/dashboard", label: "Home", icon: Home },
