@@ -17,6 +17,8 @@ import { cn } from "@/lib/utils";
 import { LogForm, QuickLogButton } from "./QuickLog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useStudyOS } from "@/lib/studyos/store";
+import { NotificationBell } from "./Notifications";
+
 
 const PRIMARY = [
   { to: "/dashboard", label: "Home", icon: Home },
@@ -100,9 +102,13 @@ export function AppShell({
               <p className="truncate text-xs text-muted-foreground sm:text-sm">{subtitle}</p>
             ) : null}
           </div>
-          <div className="hidden sm:block">
-            <QuickLogButton />
+          <div className="flex shrink-0 items-center gap-2">
+            <NotificationBell />
+            <div className="hidden sm:block">
+              <QuickLogButton />
+            </div>
           </div>
+
         </header>
 
         <main className="px-4 pb-28 pt-5 sm:px-6 lg:pb-10">{children}</main>
