@@ -100,9 +100,13 @@ export function AppShell({
               <p className="truncate text-xs text-muted-foreground sm:text-sm">{subtitle}</p>
             ) : null}
           </div>
-          <div className="hidden sm:block">
-            <QuickLogButton />
+          <div className="flex shrink-0 items-center gap-2">
+            <NotificationBell />
+            <div className="hidden sm:block">
+              <QuickLogButton />
+            </div>
           </div>
+
         </header>
 
         <main className="px-4 pb-28 pt-5 sm:px-6 lg:pb-10">{children}</main>
