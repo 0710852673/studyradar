@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { allowWrite } from "./ratelimit";
 
 /**
  * Activity & device logging.
@@ -69,6 +70,8 @@ export async function recordActivity(
   opts: { userId?: string | null; email?: string | null; path?: string } = {},
 ) {
   if (typeof window === "undefined") return;
+  // Background analytics never get priority over the student's own writes.
+  if (!allowWrite()) return;
   try {
     const net = await getNetwork();
     await supabase.from("device_events").insert({

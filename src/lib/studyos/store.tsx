@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { syncConsent } from "./security";
 import { recordActivity } from "./telemetry";
+import { allowWrite, retryInSeconds, setWriteLimit } from "./ratelimit";
 import {
   DEFAULT_SETTINGS,
   EMPTY_DATA,
@@ -92,6 +93,15 @@ function check(error: { message: string } | null, what: string) {
   return true;
 }
 
+/** Applies the admin write-rate limit to student data writes. */
+function throttled(): boolean {
+  if (allowWrite()) return false;
+  toast.error("Slow down a moment", {
+    description: `Too many changes at once. Try again in about ${retryInSeconds()}s.`,
+  });
+  return true;
+}
+
 interface Store {
   ready: boolean;
   user: User | null;
@@ -141,6 +151,7 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
       announcementActive: Boolean(r["announcement_active"]),
       maxWritesPerMinute: Number(r["max_writes_per_minute"] ?? 60),
     });
+    setWriteLimit(Number(r["max_writes_per_minute"] ?? 60));
   }, []);
 
   useEffect(() => {
@@ -266,6 +277,7 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
       refresh,
       refreshSettings,
       updateProfile: async (p) => {
+        if (throttled()) return;
         if (!userId) return;
         const patch: Record<string, unknown> = {};
         if (p.name !== undefined) patch["name"] = p.name;
@@ -295,6 +307,7 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
         await load(userId);
       },
       uploadAvatar: async (file) => {
+        if (throttled()) return;
         if (!userId) return;
         const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
         const path = `${userId}/avatar-${Date.now()}.${ext}`;
@@ -311,6 +324,7 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
         toast.success("Profile picture updated");
       },
       addSession: async (s) => {
+        if (throttled()) return;
         if (!userId) return;
         const { error } = await supabase.from("study_sessions").insert({
           user_id: userId,
@@ -323,12 +337,14 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
         await load(userId);
       },
       removeSession: async (id) => {
+        if (throttled()) return;
         if (!userId) return;
         const { error } = await supabase.from("study_sessions").delete().eq("id", id);
         if (!check(error, "delete that session")) return;
         await load(userId);
       },
       addMark: async (m) => {
+        if (throttled()) return;
         if (!userId) return;
         const { error } = await supabase.from("marks").insert({
           user_id: userId,
@@ -342,12 +358,14 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
         await load(userId);
       },
       removeMark: async (id) => {
+        if (throttled()) return;
         if (!userId) return;
         const { error } = await supabase.from("marks").delete().eq("id", id);
         if (!check(error, "delete that result")) return;
         await load(userId);
       },
       addChapter: async (subject, title) => {
+        if (throttled()) return;
         if (!userId) return;
         const { error } = await supabase
           .from("chapters")
@@ -356,12 +374,14 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
         await load(userId);
       },
       setChapterStatus: async (id, status) => {
+        if (throttled()) return;
         if (!userId) return;
         const { error } = await supabase.from("chapters").update({ status }).eq("id", id);
         if (!check(error, "update that chapter")) return;
         await load(userId);
       },
       removeChapter: async (id) => {
+        if (throttled()) return;
         if (!userId) return;
         const { error } = await supabase.from("chapters").delete().eq("id", id);
         if (!check(error, "delete that chapter")) return;
