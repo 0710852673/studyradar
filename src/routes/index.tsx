@@ -513,7 +513,84 @@ function Landing() {
           </div>
         </section>
 
+        {/* ABOUT US */}
+        <section id="about" className="border-t border-border px-5 py-16 sm:px-8 sm:py-24">
+          <div className="mx-auto max-w-6xl">
+            <div className="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+              <Reveal>
+                <span className="inline-flex items-center gap-2 rounded-full border border-border bg-elevated px-3 py-1.5 text-xs text-muted-foreground">
+                  <Sparkles className="h-3.5 w-3.5 text-primary" />
+                  About us
+                </span>
+                <h2 className="mt-5 font-display text-2xl font-semibold tracking-tight sm:text-4xl">
+                  Built by a student, for students sitting the same exams.
+                </h2>
+                <p className="mt-4 text-sm text-muted-foreground sm:text-base">
+                  Study Radar started with a simple frustration: hours of work with nothing to show
+                  for it but a vague feeling of being behind. Notebooks, timetables and phone timers
+                  all told part of the story — never the whole one.
+                </p>
+                <p className="mt-3 text-sm text-muted-foreground sm:text-base">
+                  So this became one place where every hour, mark, chapter and streak lives
+                  together. No noise, no adverts, no paywall. Just an honest picture of your
+                  preparation, updated the moment you log a session.
+                </p>
+
+                <div className="panel mt-7 flex flex-col gap-4 p-5 sm:flex-row sm:items-center">
+                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-lg font-semibold text-primary-foreground">
+                    SG
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold">Shehara Geeneth</p>
+                    <p className="text-xs text-muted-foreground">Founder &amp; developer</p>
+                    <a
+                      href="mailto:sheharageeneth@gmail.com"
+                      className="mt-1 block break-all text-xs text-primary underline-offset-4 hover:underline"
+                    >
+                      sheharageeneth@gmail.com
+                    </a>
+                  </div>
+                </div>
+              </Reveal>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                {[
+                  {
+                    i: Target,
+                    t: "Our mission",
+                    d: "Give every Sri Lankan O/L and A/L student a clear, honest view of their own preparation.",
+                  },
+                  {
+                    i: Flame,
+                    t: "What we believe",
+                    d: "Consistency beats cramming. Small daily wins, tracked, become results.",
+                  },
+                  {
+                    i: Lock,
+                    t: "How we treat you",
+                    d: "Your records are private to your account. No selling data, ever.",
+                  },
+                  {
+                    i: Trophy,
+                    t: "Where we're going",
+                    d: "Smarter insights, better reports — shaped by what students actually ask for.",
+                  },
+                ].map((c, i) => (
+                  <Reveal key={c.t} delay={i * 80}>
+                    <div className="panel h-full p-5 transition-transform duration-300 hover:-translate-y-1">
+                      <c.i className="h-4.5 w-4.5 text-primary" />
+                      <h3 className="mt-3 text-sm font-medium">{c.t}</h3>
+                      <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{c.d}</p>
+                    </div>
+                  </Reveal>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* SECURITY */}
+
         <section className="border-t border-border px-5 py-16 sm:px-8 sm:py-24">
           <div className="mx-auto max-w-6xl">
             <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
