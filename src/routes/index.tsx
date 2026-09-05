@@ -290,6 +290,9 @@ function Landing() {
             <a href="#exams" className="transition-colors hover:text-foreground">
               O/L &amp; A/L
             </a>
+            <a href="#about" className="transition-colors hover:text-foreground">
+              About
+            </a>
             <a href="#contact" className="transition-colors hover:text-foreground">
               Contact
             </a>
