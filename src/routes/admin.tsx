@@ -39,7 +39,7 @@ import {
 } from "@/lib/studyos/admin-data";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/console")({
+export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
       { title: "Control Room — Study Radar" },

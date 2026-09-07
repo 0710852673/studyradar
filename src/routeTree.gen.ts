@@ -11,10 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AchievementsRouteImport } from './routes/achievements'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CalendarRouteImport } from './routes/calendar'
-import { Route as ConsoleRouteImport } from './routes/console'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as MarksRouteImport } from './routes/marks'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -38,6 +38,11 @@ const AchievementsRoute = AchievementsRouteImport.update({
   path: '/achievements',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AnalyticsRoute = AnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
@@ -51,11 +56,6 @@ const AuthRoute = AuthRouteImport.update({
 const CalendarRoute = CalendarRouteImport.update({
   id: '/calendar',
   path: '/calendar',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ConsoleRoute = ConsoleRouteImport.update({
-  id: '/console',
-  path: '/console',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -122,10 +122,10 @@ const SubjectsSubjectRoute = SubjectsSubjectRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/achievements': typeof AchievementsRoute
+  '/admin': typeof AdminRoute
   '/analytics': typeof AnalyticsRoute
   '/auth': typeof AuthRoute
   '/calendar': typeof CalendarRoute
-  '/console': typeof ConsoleRoute
   '/dashboard': typeof DashboardRoute
   '/marks': typeof MarksRoute
   '/privacy': typeof PrivacyRoute
@@ -142,10 +142,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/achievements': typeof AchievementsRoute
+  '/admin': typeof AdminRoute
   '/analytics': typeof AnalyticsRoute
   '/auth': typeof AuthRoute
   '/calendar': typeof CalendarRoute
-  '/console': typeof ConsoleRoute
   '/dashboard': typeof DashboardRoute
   '/marks': typeof MarksRoute
   '/privacy': typeof PrivacyRoute
@@ -162,10 +162,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/achievements': typeof AchievementsRoute
+  '/admin': typeof AdminRoute
   '/analytics': typeof AnalyticsRoute
   '/auth': typeof AuthRoute
   '/calendar': typeof CalendarRoute
-  '/console': typeof ConsoleRoute
   '/dashboard': typeof DashboardRoute
   '/marks': typeof MarksRoute
   '/privacy': typeof PrivacyRoute
@@ -184,10 +184,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/achievements'
+    | '/admin'
     | '/analytics'
     | '/auth'
     | '/calendar'
-    | '/console'
     | '/dashboard'
     | '/marks'
     | '/privacy'
@@ -204,10 +204,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/achievements'
+    | '/admin'
     | '/analytics'
     | '/auth'
     | '/calendar'
-    | '/console'
     | '/dashboard'
     | '/marks'
     | '/privacy'
@@ -223,10 +223,10 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/achievements'
+    | '/admin'
     | '/analytics'
     | '/auth'
     | '/calendar'
-    | '/console'
     | '/dashboard'
     | '/marks'
     | '/privacy'
@@ -244,10 +244,10 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AchievementsRoute: typeof AchievementsRoute
+  AdminRoute: typeof AdminRoute
   AnalyticsRoute: typeof AnalyticsRoute
   AuthRoute: typeof AuthRoute
   CalendarRoute: typeof CalendarRoute
-  ConsoleRoute: typeof ConsoleRoute
   DashboardRoute: typeof DashboardRoute
   MarksRoute: typeof MarksRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -276,6 +276,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AchievementsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/analytics': {
       id: '/analytics'
       path: '/analytics'
@@ -295,13 +302,6 @@ declare module '@tanstack/react-router' {
       path: '/calendar'
       fullPath: '/calendar'
       preLoaderRoute: typeof CalendarRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/console': {
-      id: '/console'
-      path: '/console'
-      fullPath: '/console'
-      preLoaderRoute: typeof ConsoleRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -408,10 +408,10 @@ const SubjectsRouteWithChildren = SubjectsRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AchievementsRoute: AchievementsRoute,
+  AdminRoute: AdminRoute,
   AnalyticsRoute: AnalyticsRoute,
   AuthRoute: AuthRoute,
   CalendarRoute: CalendarRoute,
-  ConsoleRoute: ConsoleRoute,
   DashboardRoute: DashboardRoute,
   MarksRoute: MarksRoute,
   PrivacyRoute: PrivacyRoute,
