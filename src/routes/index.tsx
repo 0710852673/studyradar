@@ -270,51 +270,7 @@ function Landing() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-40 border-b border-border bg-background/70 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3.5 sm:px-8">
-          <Link to="/" className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-primary-foreground transition-transform duration-200 hover:scale-105">
-              <Radar className="h-4 w-4" />
-            </span>
-            <span className="font-display text-base font-semibold tracking-tight sm:text-lg">
-              Study Radar
-            </span>
-          </Link>
-          <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
-            <a href="#features" className="transition-colors hover:text-foreground">
-              Features
-            </a>
-            <a href="#how" className="transition-colors hover:text-foreground">
-              How it works
-            </a>
-            <a href="#exams" className="transition-colors hover:text-foreground">
-              O/L &amp; A/L
-            </a>
-            <a href="#about" className="transition-colors hover:text-foreground">
-              About
-            </a>
-            <a href="#contact" className="transition-colors hover:text-foreground">
-              Contact
-            </a>
-          </nav>
-          <div className="flex items-center gap-2">
-            {session ? (
-              <Button asChild size="sm">
-                <Link to="/dashboard">Open dashboard</Link>
-              </Button>
-            ) : (
-              <>
-                <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
-                  <Link to="/auth">Sign in</Link>
-                </Button>
-                <Button asChild size="sm" className="transition-transform hover:scale-[1.03]">
-                  <Link to="/auth">Get Started</Link>
-                </Button>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
+      <PublicHeader />
 
       <main>
         {/* HERO */}

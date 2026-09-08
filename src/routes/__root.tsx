@@ -121,7 +121,18 @@ function RootShell({ children }: { children: ReactNode }) {
 }
 
 /** Public pages anyone can open without a session. */
-const PUBLIC_PATHS = ["/", "/auth", "/reset-password", "/terms", "/privacy"];
+const PUBLIC_PATHS = [
+  "/",
+  "/auth",
+  "/reset-password",
+  "/terms",
+  "/privacy",
+  "/features",
+  "/how-it-works",
+  "/ol-al",
+  "/about",
+  "/contact",
+];
 
 /** Full-screen message used for suspensions and maintenance. */
 function Interstitial({
