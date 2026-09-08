@@ -13,13 +13,17 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AchievementsRouteImport } from './routes/achievements'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AiRouteImport } from './routes/ai'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
+import { Route as AskASeniorRouteImport } from './routes/ask-a-senior'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CalendarRouteImport } from './routes/calendar'
+import { Route as CommunityRouteImport } from './routes/community'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as FeaturesRouteImport } from './routes/features'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as LearnRouteImport } from './routes/learn'
 import { Route as MarksRouteImport } from './routes/marks'
 import { Route as OlAlRouteImport } from './routes/ol-al'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -53,9 +57,19 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AiRoute = AiRouteImport.update({
+  id: '/ai',
+  path: '/ai',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AnalyticsRoute = AnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AskASeniorRoute = AskASeniorRouteImport.update({
+  id: '/ask-a-senior',
+  path: '/ask-a-senior',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -66,6 +80,11 @@ const AuthRoute = AuthRouteImport.update({
 const CalendarRoute = CalendarRouteImport.update({
   id: '/calendar',
   path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunityRoute = CommunityRouteImport.update({
+  id: '/community',
+  path: '/community',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -86,6 +105,11 @@ const FeaturesRoute = FeaturesRouteImport.update({
 const HowItWorksRoute = HowItWorksRouteImport.update({
   id: '/how-it-works',
   path: '/how-it-works',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LearnRoute = LearnRouteImport.update({
+  id: '/learn',
+  path: '/learn',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MarksRoute = MarksRouteImport.update({
@@ -154,13 +178,17 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/achievements': typeof AchievementsRoute
   '/admin': typeof AdminRoute
+  '/ai': typeof AiRoute
   '/analytics': typeof AnalyticsRoute
+  '/ask-a-senior': typeof AskASeniorRoute
   '/auth': typeof AuthRoute
   '/calendar': typeof CalendarRoute
+  '/community': typeof CommunityRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
   '/features': typeof FeaturesRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/learn': typeof LearnRoute
   '/marks': typeof MarksRoute
   '/ol-al': typeof OlAlRoute
   '/privacy': typeof PrivacyRoute
@@ -179,13 +207,17 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/achievements': typeof AchievementsRoute
   '/admin': typeof AdminRoute
+  '/ai': typeof AiRoute
   '/analytics': typeof AnalyticsRoute
+  '/ask-a-senior': typeof AskASeniorRoute
   '/auth': typeof AuthRoute
   '/calendar': typeof CalendarRoute
+  '/community': typeof CommunityRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
   '/features': typeof FeaturesRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/learn': typeof LearnRoute
   '/marks': typeof MarksRoute
   '/ol-al': typeof OlAlRoute
   '/privacy': typeof PrivacyRoute
@@ -204,13 +236,17 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/achievements': typeof AchievementsRoute
   '/admin': typeof AdminRoute
+  '/ai': typeof AiRoute
   '/analytics': typeof AnalyticsRoute
+  '/ask-a-senior': typeof AskASeniorRoute
   '/auth': typeof AuthRoute
   '/calendar': typeof CalendarRoute
+  '/community': typeof CommunityRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
   '/features': typeof FeaturesRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/learn': typeof LearnRoute
   '/marks': typeof MarksRoute
   '/ol-al': typeof OlAlRoute
   '/privacy': typeof PrivacyRoute
@@ -231,13 +267,17 @@ export interface FileRouteTypes {
     | '/about'
     | '/achievements'
     | '/admin'
+    | '/ai'
     | '/analytics'
+    | '/ask-a-senior'
     | '/auth'
     | '/calendar'
+    | '/community'
     | '/contact'
     | '/dashboard'
     | '/features'
     | '/how-it-works'
+    | '/learn'
     | '/marks'
     | '/ol-al'
     | '/privacy'
@@ -256,13 +296,17 @@ export interface FileRouteTypes {
     | '/about'
     | '/achievements'
     | '/admin'
+    | '/ai'
     | '/analytics'
+    | '/ask-a-senior'
     | '/auth'
     | '/calendar'
+    | '/community'
     | '/contact'
     | '/dashboard'
     | '/features'
     | '/how-it-works'
+    | '/learn'
     | '/marks'
     | '/ol-al'
     | '/privacy'
@@ -280,13 +324,17 @@ export interface FileRouteTypes {
     | '/about'
     | '/achievements'
     | '/admin'
+    | '/ai'
     | '/analytics'
+    | '/ask-a-senior'
     | '/auth'
     | '/calendar'
+    | '/community'
     | '/contact'
     | '/dashboard'
     | '/features'
     | '/how-it-works'
+    | '/learn'
     | '/marks'
     | '/ol-al'
     | '/privacy'
@@ -306,13 +354,17 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AchievementsRoute: typeof AchievementsRoute
   AdminRoute: typeof AdminRoute
+  AiRoute: typeof AiRoute
   AnalyticsRoute: typeof AnalyticsRoute
+  AskASeniorRoute: typeof AskASeniorRoute
   AuthRoute: typeof AuthRoute
   CalendarRoute: typeof CalendarRoute
+  CommunityRoute: typeof CommunityRoute
   ContactRoute: typeof ContactRoute
   DashboardRoute: typeof DashboardRoute
   FeaturesRoute: typeof FeaturesRoute
   HowItWorksRoute: typeof HowItWorksRoute
+  LearnRoute: typeof LearnRoute
   MarksRoute: typeof MarksRoute
   OlAlRoute: typeof OlAlRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -355,11 +407,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ai': {
+      id: '/ai'
+      path: '/ai'
+      fullPath: '/ai'
+      preLoaderRoute: typeof AiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/analytics': {
       id: '/analytics'
       path: '/analytics'
       fullPath: '/analytics'
       preLoaderRoute: typeof AnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ask-a-senior': {
+      id: '/ask-a-senior'
+      path: '/ask-a-senior'
+      fullPath: '/ask-a-senior'
+      preLoaderRoute: typeof AskASeniorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -374,6 +440,13 @@ declare module '@tanstack/react-router' {
       path: '/calendar'
       fullPath: '/calendar'
       preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/community': {
+      id: '/community'
+      path: '/community'
+      fullPath: '/community'
+      preLoaderRoute: typeof CommunityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -402,6 +475,13 @@ declare module '@tanstack/react-router' {
       path: '/how-it-works'
       fullPath: '/how-it-works'
       preLoaderRoute: typeof HowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/learn': {
+      id: '/learn'
+      path: '/learn'
+      fullPath: '/learn'
+      preLoaderRoute: typeof LearnRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/marks': {
@@ -510,13 +590,17 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AchievementsRoute: AchievementsRoute,
   AdminRoute: AdminRoute,
+  AiRoute: AiRoute,
   AnalyticsRoute: AnalyticsRoute,
+  AskASeniorRoute: AskASeniorRoute,
   AuthRoute: AuthRoute,
   CalendarRoute: CalendarRoute,
+  CommunityRoute: CommunityRoute,
   ContactRoute: ContactRoute,
   DashboardRoute: DashboardRoute,
   FeaturesRoute: FeaturesRoute,
   HowItWorksRoute: HowItWorksRoute,
+  LearnRoute: LearnRoute,
   MarksRoute: MarksRoute,
   OlAlRoute: OlAlRoute,
   PrivacyRoute: PrivacyRoute,
