@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SiteFooter } from "@/components/studyos/Footer";
+import { PublicHeader } from "@/components/studyos/PublicHeader";
 import { useStudyOS } from "@/lib/studyos/store";
 import { cn } from "@/lib/utils";
 
