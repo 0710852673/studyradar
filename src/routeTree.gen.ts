@@ -21,16 +21,22 @@ import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as FeaturesRouteImport } from './routes/features'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as LearnRouteImport } from './routes/learn'
 import { Route as MarksRouteImport } from './routes/marks'
 import { Route as OlAlRouteImport } from './routes/ol-al'
+import { Route as OpportunitiesRouteImport } from './routes/opportunities'
+import { Route as PathwayRouteImport } from './routes/pathway'
+import { Route as PortfolioRouteImport } from './routes/portfolio'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProgressRouteImport } from './routes/progress'
+import { Route as ReelsRouteImport } from './routes/reels'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RevisionRouteImport } from './routes/revision'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SkillLabRouteImport } from './routes/skill-lab'
 import { Route as SubjectsRouteImport } from './routes/subjects'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TimerRouteImport } from './routes/timer'
@@ -97,6 +103,11 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ExploreRoute = ExploreRouteImport.update({
+  id: '/explore',
+  path: '/explore',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FeaturesRoute = FeaturesRouteImport.update({
   id: '/features',
   path: '/features',
@@ -122,6 +133,21 @@ const OlAlRoute = OlAlRouteImport.update({
   path: '/ol-al',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OpportunitiesRoute = OpportunitiesRouteImport.update({
+  id: '/opportunities',
+  path: '/opportunities',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PathwayRoute = PathwayRouteImport.update({
+  id: '/pathway',
+  path: '/pathway',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PortfolioRoute = PortfolioRouteImport.update({
+  id: '/portfolio',
+  path: '/portfolio',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
@@ -130,6 +156,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const ProgressRoute = ProgressRouteImport.update({
   id: '/progress',
   path: '/progress',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReelsRoute = ReelsRouteImport.update({
+  id: '/reels',
+  path: '/reels',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -145,6 +176,11 @@ const RevisionRoute = RevisionRouteImport.update({
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SkillLabRoute = SkillLabRouteImport.update({
+  id: '/skill-lab',
+  path: '/skill-lab',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SubjectsRoute = SubjectsRouteImport.update({
@@ -186,16 +222,22 @@ export interface FileRoutesByFullPath {
   '/community': typeof CommunityRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
+  '/explore': typeof ExploreRoute
   '/features': typeof FeaturesRoute
   '/how-it-works': typeof HowItWorksRoute
   '/learn': typeof LearnRoute
   '/marks': typeof MarksRoute
   '/ol-al': typeof OlAlRoute
+  '/opportunities': typeof OpportunitiesRoute
+  '/pathway': typeof PathwayRoute
+  '/portfolio': typeof PortfolioRoute
   '/privacy': typeof PrivacyRoute
   '/progress': typeof ProgressRoute
+  '/reels': typeof ReelsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/revision': typeof RevisionRoute
   '/settings': typeof SettingsRoute
+  '/skill-lab': typeof SkillLabRoute
   '/subjects': typeof SubjectsRouteWithChildren
   '/terms': typeof TermsRoute
   '/timer': typeof TimerRoute
@@ -215,16 +257,22 @@ export interface FileRoutesByTo {
   '/community': typeof CommunityRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
+  '/explore': typeof ExploreRoute
   '/features': typeof FeaturesRoute
   '/how-it-works': typeof HowItWorksRoute
   '/learn': typeof LearnRoute
   '/marks': typeof MarksRoute
   '/ol-al': typeof OlAlRoute
+  '/opportunities': typeof OpportunitiesRoute
+  '/pathway': typeof PathwayRoute
+  '/portfolio': typeof PortfolioRoute
   '/privacy': typeof PrivacyRoute
   '/progress': typeof ProgressRoute
+  '/reels': typeof ReelsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/revision': typeof RevisionRoute
   '/settings': typeof SettingsRoute
+  '/skill-lab': typeof SkillLabRoute
   '/terms': typeof TermsRoute
   '/timer': typeof TimerRoute
   '/subjects/$subject': typeof SubjectsSubjectRoute
@@ -244,16 +292,22 @@ export interface FileRoutesById {
   '/community': typeof CommunityRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
+  '/explore': typeof ExploreRoute
   '/features': typeof FeaturesRoute
   '/how-it-works': typeof HowItWorksRoute
   '/learn': typeof LearnRoute
   '/marks': typeof MarksRoute
   '/ol-al': typeof OlAlRoute
+  '/opportunities': typeof OpportunitiesRoute
+  '/pathway': typeof PathwayRoute
+  '/portfolio': typeof PortfolioRoute
   '/privacy': typeof PrivacyRoute
   '/progress': typeof ProgressRoute
+  '/reels': typeof ReelsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/revision': typeof RevisionRoute
   '/settings': typeof SettingsRoute
+  '/skill-lab': typeof SkillLabRoute
   '/subjects': typeof SubjectsRouteWithChildren
   '/terms': typeof TermsRoute
   '/timer': typeof TimerRoute
@@ -275,16 +329,22 @@ export interface FileRouteTypes {
     | '/community'
     | '/contact'
     | '/dashboard'
+    | '/explore'
     | '/features'
     | '/how-it-works'
     | '/learn'
     | '/marks'
     | '/ol-al'
+    | '/opportunities'
+    | '/pathway'
+    | '/portfolio'
     | '/privacy'
     | '/progress'
+    | '/reels'
     | '/reset-password'
     | '/revision'
     | '/settings'
+    | '/skill-lab'
     | '/subjects'
     | '/terms'
     | '/timer'
@@ -304,16 +364,22 @@ export interface FileRouteTypes {
     | '/community'
     | '/contact'
     | '/dashboard'
+    | '/explore'
     | '/features'
     | '/how-it-works'
     | '/learn'
     | '/marks'
     | '/ol-al'
+    | '/opportunities'
+    | '/pathway'
+    | '/portfolio'
     | '/privacy'
     | '/progress'
+    | '/reels'
     | '/reset-password'
     | '/revision'
     | '/settings'
+    | '/skill-lab'
     | '/terms'
     | '/timer'
     | '/subjects/$subject'
@@ -332,16 +398,22 @@ export interface FileRouteTypes {
     | '/community'
     | '/contact'
     | '/dashboard'
+    | '/explore'
     | '/features'
     | '/how-it-works'
     | '/learn'
     | '/marks'
     | '/ol-al'
+    | '/opportunities'
+    | '/pathway'
+    | '/portfolio'
     | '/privacy'
     | '/progress'
+    | '/reels'
     | '/reset-password'
     | '/revision'
     | '/settings'
+    | '/skill-lab'
     | '/subjects'
     | '/terms'
     | '/timer'
@@ -362,16 +434,22 @@ export interface RootRouteChildren {
   CommunityRoute: typeof CommunityRoute
   ContactRoute: typeof ContactRoute
   DashboardRoute: typeof DashboardRoute
+  ExploreRoute: typeof ExploreRoute
   FeaturesRoute: typeof FeaturesRoute
   HowItWorksRoute: typeof HowItWorksRoute
   LearnRoute: typeof LearnRoute
   MarksRoute: typeof MarksRoute
   OlAlRoute: typeof OlAlRoute
+  OpportunitiesRoute: typeof OpportunitiesRoute
+  PathwayRoute: typeof PathwayRoute
+  PortfolioRoute: typeof PortfolioRoute
   PrivacyRoute: typeof PrivacyRoute
   ProgressRoute: typeof ProgressRoute
+  ReelsRoute: typeof ReelsRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   RevisionRoute: typeof RevisionRoute
   SettingsRoute: typeof SettingsRoute
+  SkillLabRoute: typeof SkillLabRoute
   SubjectsRoute: typeof SubjectsRouteWithChildren
   TermsRoute: typeof TermsRoute
   TimerRoute: typeof TimerRoute
@@ -463,6 +541,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/explore': {
+      id: '/explore'
+      path: '/explore'
+      fullPath: '/explore'
+      preLoaderRoute: typeof ExploreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/features': {
       id: '/features'
       path: '/features'
@@ -498,6 +583,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OlAlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/opportunities': {
+      id: '/opportunities'
+      path: '/opportunities'
+      fullPath: '/opportunities'
+      preLoaderRoute: typeof OpportunitiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pathway': {
+      id: '/pathway'
+      path: '/pathway'
+      fullPath: '/pathway'
+      preLoaderRoute: typeof PathwayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portfolio': {
+      id: '/portfolio'
+      path: '/portfolio'
+      fullPath: '/portfolio'
+      preLoaderRoute: typeof PortfolioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/privacy': {
       id: '/privacy'
       path: '/privacy'
@@ -510,6 +616,13 @@ declare module '@tanstack/react-router' {
       path: '/progress'
       fullPath: '/progress'
       preLoaderRoute: typeof ProgressRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reels': {
+      id: '/reels'
+      path: '/reels'
+      fullPath: '/reels'
+      preLoaderRoute: typeof ReelsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -531,6 +644,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/skill-lab': {
+      id: '/skill-lab'
+      path: '/skill-lab'
+      fullPath: '/skill-lab'
+      preLoaderRoute: typeof SkillLabRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/subjects': {
@@ -598,16 +718,22 @@ const rootRouteChildren: RootRouteChildren = {
   CommunityRoute: CommunityRoute,
   ContactRoute: ContactRoute,
   DashboardRoute: DashboardRoute,
+  ExploreRoute: ExploreRoute,
   FeaturesRoute: FeaturesRoute,
   HowItWorksRoute: HowItWorksRoute,
   LearnRoute: LearnRoute,
   MarksRoute: MarksRoute,
   OlAlRoute: OlAlRoute,
+  OpportunitiesRoute: OpportunitiesRoute,
+  PathwayRoute: PathwayRoute,
+  PortfolioRoute: PortfolioRoute,
   PrivacyRoute: PrivacyRoute,
   ProgressRoute: ProgressRoute,
+  ReelsRoute: ReelsRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   RevisionRoute: RevisionRoute,
   SettingsRoute: SettingsRoute,
+  SkillLabRoute: SkillLabRoute,
   SubjectsRoute: SubjectsRouteWithChildren,
   TermsRoute: TermsRoute,
   TimerRoute: TimerRoute,
