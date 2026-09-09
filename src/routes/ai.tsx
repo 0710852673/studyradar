@@ -61,7 +61,7 @@ function AiPage() {
       const marks = data?.marks ?? [];
       if (!marks.length) return "No marks recorded yet — add a paper under Marks and I'll track the trend.";
       const avg =
-        marks.reduce((a, m) => a + (m.score / Math.max(1, m.total)) * 100, 0) / marks.length;
+        marks.reduce((a, m) => a + (m.marks / Math.max(1, m.total)) * 100, 0) / marks.length;
       return `Across ${marks.length} recorded papers your average is ${avg.toFixed(1)}%. Look at the two lowest papers first — they usually share one weak chapter.`;
     }
     if (q.includes("time") || q.includes("plan") || q.includes("schedule")) {
