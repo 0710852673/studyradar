@@ -67,6 +67,18 @@ export const Route = createFileRoute("/dashboard")({
 
 const chartAxis = { stroke: "var(--muted-foreground)", fontSize: 11 };
 
+const ECOSYSTEM = [
+  { to: "/ai", label: "Study assistant", icon: Sparkles, desc: "Advice from your own record" },
+  { to: "/learn", label: "Guides & videos", icon: FileText, desc: "Topic-by-topic library" },
+  { to: "/reels", label: "Study reels", icon: PlayCircle, desc: "One concept per clip" },
+  { to: "/community", label: "Community", icon: MessagesSquare, desc: "Subject rooms" },
+  { to: "/ask-a-senior", label: "Ask a senior", icon: UserRoundCheck, desc: "Students who sat it" },
+  { to: "/pathway", label: "Career pathways", icon: Compass, desc: "Where your stream leads" },
+  { to: "/opportunities", label: "Opportunities", icon: Briefcase, desc: "Scholarships & olympiads" },
+  { to: "/skill-lab", label: "Skill lab", icon: Wrench, desc: "Skills beside the syllabus" },
+  { to: "/portfolio", label: "Portfolio", icon: FileText, desc: "Your record, summarised" },
+] as const;
+
 function ChartTip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   return (
