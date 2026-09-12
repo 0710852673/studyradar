@@ -134,6 +134,19 @@ const PUBLIC_PATHS = [
   "/contact",
 ];
 
+/** Modules that are built but not released yet — redirected away from. */
+const HIDDEN_PATHS = [
+  "/explore",
+  "/learn",
+  "/reels",
+  "/skill-lab",
+  "/community",
+  "/ask-a-senior",
+  "/pathway",
+  "/opportunities",
+  "/portfolio",
+];
+
 /** Full-screen message used for suspensions and maintenance. */
 function Interstitial({
   title,
@@ -166,7 +179,8 @@ function Gate() {
     if (!ready) return;
     if (!session && !isPublic) void navigate({ to: "/auth", replace: true });
     if (session && onAuth) void navigate({ to: "/dashboard", replace: true });
-  }, [ready, session, isPublic, onAuth, navigate]);
+    if (HIDDEN_PATHS.includes(pathname)) void navigate({ to: "/dashboard", replace: true });
+  }, [ready, session, isPublic, onAuth, pathname, navigate]);
 
   // Disclosed activity logging — see the Privacy Policy.
   useEffect(() => {
@@ -184,7 +198,7 @@ function Gate() {
         title="Your account is suspended"
         body={
           profile.suspendedReason ||
-          "An administrator has suspended this account. Email sheharageeneth@gmail.com if you think this is a mistake."
+          "An administrator has suspended this account. Use the contact page if you think this is a mistake."
         }
       >
         <button
