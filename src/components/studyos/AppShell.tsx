@@ -3,12 +3,12 @@ import {
   BarChart3,
   BookOpen,
   CalendarDays,
-  Compass,
   GraduationCap,
   Home,
   ListChecks,
   Plus,
   Shield,
+  Sparkles,
   Timer,
   Trophy,
   User,
@@ -19,6 +19,7 @@ import { LogForm, QuickLogButton } from "./QuickLog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useStudyOS } from "@/lib/studyos/store";
 import { NotificationBell } from "./Notifications";
+import { AssistantWidget } from "./AssistantWidget";
 
 
 const PRIMARY = [
@@ -116,11 +117,7 @@ export function AppShell({
         <main className="px-4 pb-28 pt-5 sm:px-6 lg:pb-10">{children}</main>
 
         <footer className="border-t border-border px-4 py-6 text-center text-[11px] text-muted-foreground sm:px-6 lg:pb-8">
-          Study Radar · built by{" "}
-          <span className="text-foreground">Shehara Geeneth</span> ·{" "}
-          <a href="mailto:sheharageeneth@gmail.com" className="underline-offset-2 hover:underline">
-            sheharageeneth@gmail.com
-          </a>
+          Study Radar · built for Sri Lankan O/L &amp; A/L students
         </footer>
       </div>
 
@@ -152,6 +149,8 @@ export function AppShell({
           <LogForm onDone={() => setLogOpen(false)} />
         </DialogContent>
       </Dialog>
+
+      <AssistantWidget />
     </div>
   );
 }
