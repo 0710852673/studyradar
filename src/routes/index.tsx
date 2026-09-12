@@ -483,7 +483,7 @@ function Landing() {
                   About us
                 </span>
                 <h2 className="mt-5 font-display text-2xl font-semibold tracking-tight sm:text-4xl">
-                  Built by a student, for students sitting the same exams.
+                  Built by students, for students sitting the same exams.
                 </h2>
                 <p className="mt-4 text-sm text-muted-foreground sm:text-base">
                   Study Radar started with a simple frustration: hours of work with nothing to show
@@ -496,20 +496,12 @@ function Landing() {
                   preparation, updated the moment you log a session.
                 </p>
 
-                <div className="panel mt-7 flex flex-col gap-4 p-5 sm:flex-row sm:items-center">
-                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-lg font-semibold text-primary-foreground">
-                    SG
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold">Shehara Geeneth</p>
-                    <p className="text-xs text-muted-foreground">Founder &amp; developer</p>
-                    <a
-                      href="mailto:sheharageeneth@gmail.com"
-                      className="mt-1 block break-all text-xs text-primary underline-offset-4 hover:underline"
-                    >
-                      sheharageeneth@gmail.com
-                    </a>
-                  </div>
+                <div className="panel mt-7 p-5">
+                  <p className="text-sm font-semibold">A small independent team in Sri Lanka</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    We build alongside the students who use Study Radar — tell us what to fix next
+                    on the contact page.
+                  </p>
                 </div>
               </Reveal>
 

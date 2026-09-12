@@ -115,14 +115,11 @@ function ContactPage() {
           </div>
 
           <div className="space-y-4">
-            <div className="panel p-5">
-              <h2 className="text-sm font-semibold">Email us directly</h2>
-              <a
-                href="mailto:sheharageeneth@gmail.com"
-                className="mt-2 inline-flex items-center gap-2 text-sm text-primary hover:underline"
-              >
-                <Mail className="h-4 w-4" /> sheharageeneth@gmail.com
-              </a>
+            <div className="panel p-5 text-sm text-muted-foreground">
+              <h2 className="text-sm font-semibold text-foreground">Where messages go</h2>
+              <p className="mt-2">
+                The form above reaches the Study Radar team directly — no other contact is needed.
+              </p>
             </div>
             <div className="panel p-5 text-sm text-muted-foreground">
               <h2 className="text-sm font-semibold text-foreground">Response time</h2>
