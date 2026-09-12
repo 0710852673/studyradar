@@ -6,6 +6,7 @@ import { Panel, StatCard } from "@/components/studyos/Primitives";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useStudyOS } from "@/lib/studyos/store";
+import { assistantReply } from "@/lib/studyos/assistant";
 
 export const Route = createFileRoute("/ai")({
   head: () => ({
@@ -51,23 +52,11 @@ function AiPage() {
   const [draft, setDraft] = useState("");
 
   function reply(question: string): string {
-    const q = question.toLowerCase();
-    if (q.includes("weak") || q.includes("focus") || q.includes("next")) {
-      return weakest
-        ? `Your lowest logged time is ${weakest.subject} (${Math.round(weakest.minutes / 60)}h total). Try two 45-minute blocks on it this week before touching ${strongest?.subject ?? "your strongest subject"} again.`
-        : "Log a few sessions first and I'll be able to compare your subjects.";
-    }
-    if (q.includes("mark") || q.includes("score")) {
-      const marks = data?.marks ?? [];
-      if (!marks.length) return "No marks recorded yet — add a paper under Marks and I'll track the trend.";
-      const avg =
-        marks.reduce((a, m) => a + (m.marks / Math.max(1, m.total)) * 100, 0) / marks.length;
-      return `Across ${marks.length} recorded papers your average is ${avg.toFixed(1)}%. Look at the two lowest papers first — they usually share one weak chapter.`;
-    }
-    if (q.includes("time") || q.includes("plan") || q.includes("schedule")) {
-      return `A simple week that fits school and tuition: 5 study days, 2 blocks a day, one block per subject, rotating so your weakest subject (${weakest?.subject ?? "—"}) appears twice.`;
-    }
-    return "I can help with what to focus on, how your marks are trending, and how to plan your week. Try asking \"what should I focus on?\"";
+    return assistantReply(question, {
+      subjects,
+      sessions: data?.sessions ?? [],
+      marks: data?.marks ?? [],
+    });
   }
 
   function send() {
