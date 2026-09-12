@@ -29,7 +29,7 @@ const PRIMARY = [
 ] as const;
 
 const SECONDARY = [
-  { to: "/explore", label: "Explore", icon: Compass },
+  { to: "/ai", label: "Study assistant", icon: Sparkles },
   { to: "/timer", label: "Timer", icon: Timer },
   { to: "/marks", label: "Marks", icon: GraduationCap },
   { to: "/revision", label: "Syllabus", icon: ListChecks },
