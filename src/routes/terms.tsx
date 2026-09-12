@@ -24,7 +24,7 @@ const SECTIONS: { h: string; p: string[] }[] = [
   {
     h: "1. Introduction",
     p: [
-      "These Terms & Conditions govern your access to and use of Study Radar (the \"Service\"), operated by Shehara Geeneth from Sri Lanka. By creating an account or using the Service you agree to these terms.",
+      "These Terms & Conditions govern your access to and use of Study Radar (the \"Service\"), operated from Sri Lanka. By creating an account or using the Service you agree to these terms.",
     ],
   },
   {
@@ -143,7 +143,7 @@ const SECTIONS: { h: string; p: string[] }[] = [
   },
   {
     h: "21. Contact",
-    p: ["Questions about these terms: sheharageeneth@gmail.com."],
+    p: ["Questions about these terms can be sent through the contact page."],
   },
 ];
 

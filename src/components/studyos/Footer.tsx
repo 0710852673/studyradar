@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Github, Mail, Radar } from "lucide-react";
 
-/** Public marketing footer — founder + contact details. */
+/** Public marketing footer. */
 export function SiteFooter() {
   return (
     <footer id="contact" className="border-t border-border bg-sidebar">
@@ -60,12 +60,9 @@ export function SiteFooter() {
           <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
             <li className="flex items-center gap-2">
               <Mail className="h-4 w-4" />
-              <a
-                href="mailto:sheharageeneth@gmail.com"
-                className="transition-colors hover:text-foreground"
-              >
-                sheharageeneth@gmail.com
-              </a>
+              <Link to="/contact" className="transition-colors hover:text-foreground">
+                Contact us
+              </Link>
             </li>
             <li className="flex items-center gap-2">
               <Github className="h-4 w-4" />
@@ -87,8 +84,7 @@ export function SiteFooter() {
       </div>
 
       <div className="border-t border-border px-5 py-5 text-center text-xs text-muted-foreground sm:px-8">
-        © {new Date().getFullYear()} Study Radar · Founded &amp; built by{" "}
-        <span className="text-foreground">Shehara Geeneth</span>
+        © {new Date().getFullYear()} Study Radar · Built in Sri Lanka
       </div>
     </footer>
   );

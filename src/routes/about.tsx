@@ -16,7 +16,7 @@ export const Route = createFileRoute("/about")({
       { property: "og:title", content: "About Study Radar" },
       {
         property: "og:description",
-        content: "Founded by Shehara Geeneth to help Sri Lankan students study with clarity.",
+        content: "Why Study Radar exists and who it is built for.",
       },
     ],
   }),
@@ -74,18 +74,17 @@ function AboutPage() {
           </div>
 
           <div className="panel p-6">
-            <h2 className="font-display text-lg font-semibold">Founder</h2>
+            <h2 className="font-display text-lg font-semibold">Who builds it</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Study Radar is founded and built by{" "}
-              <span className="text-foreground">Shehara Geeneth</span> in Sri Lanka, working
-              directly with the students who use it.
+              Study Radar is built in Sri Lanka by a small independent team working directly with
+              the students who use it. Feedback shapes what gets built next.
             </p>
-            <a
-              href="mailto:sheharageeneth@gmail.com"
+            <Link
+              to="/contact"
               className="mt-3 inline-flex items-center gap-2 text-sm text-primary hover:underline"
             >
-              <Mail className="h-4 w-4" /> sheharageeneth@gmail.com
-            </a>
+              <Mail className="h-4 w-4" /> Get in touch
+            </Link>
           </div>
 
           <div className="pt-4 text-center">

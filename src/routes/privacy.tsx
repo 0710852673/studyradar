@@ -27,7 +27,7 @@ const SECTIONS: { h: string; p: string[]; list?: string[] }[] = [
   {
     h: "1. Who we are",
     p: [
-      "Study Radar is a study-tracking service for Sri Lankan GCE O/L and A/L students, operated by Shehara Geeneth. This policy explains what information we handle and why.",
+      "Study Radar is a study-tracking service for Sri Lankan GCE O/L and A/L students. This policy explains what information we handle and why.",
     ],
   },
   {
@@ -138,7 +138,7 @@ const SECTIONS: { h: string; p: string[]; list?: string[] }[] = [
   },
   {
     h: "17. Contact",
-    p: ["Privacy questions and requests: sheharageeneth@gmail.com."],
+    p: ["Privacy questions and requests can be sent through the contact page."],
   },
 ];
 
