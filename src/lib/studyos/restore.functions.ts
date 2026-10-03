@@ -2,7 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-const row = z.record(z.string(), z.unknown());
+const row = z.record(z.string(), z.unknown()) as unknown as z.ZodType<Row>;
+type Row = { id?: unknown; user_id?: unknown; [k: string]: unknown };
 const Input = z.object({
   dryRun: z.boolean(),
   sessions: z.array(row).max(50000).default([]),
@@ -51,7 +52,7 @@ export const restoreBackup = createServerFn({ method: "POST" })
     const { data: profiles } = await db.from("profiles").select("id");
     const users = new Set<string>((profiles ?? []).map((p: { id: string }) => p.id));
 
-    const plan: [TableName, Record<string, unknown>[]][] = [
+    const plan: [TableName, Row[]][] = [
       ["study_sessions", data.sessions],
       ["wasted_time", data.wasted],
       ["marks", data.marks],
@@ -62,7 +63,7 @@ export const restoreBackup = createServerFn({ method: "POST" })
     for (const [table, rows] of plan) {
       const clean = rows
         .filter((r) => typeof r.id === "string" && uuid.test(r.id) && typeof r.user_id === "string")
-        .map((r) => Object.fromEntries(COLS[table].filter((c) => c in r).map((c) => [c, r[c]])));
+        .map((r): Row => Object.fromEntries(COLS[table].filter((c) => c in r).map((c) => [c, r[c]])));
       const owned = clean.filter((r) => users.has(r.user_id as string));
       const ids = owned.map((r) => r.id as string);
 
