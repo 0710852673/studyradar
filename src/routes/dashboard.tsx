@@ -4,6 +4,7 @@ import {
   Clock,
   Flame,
   Gauge,
+  Hourglass,
   Sparkles,
   TrendingUp,
 } from "lucide-react";
@@ -36,6 +37,7 @@ import {
   streaks,
   studyScore,
   totalMinutes,
+  toKey,
 } from "@/lib/studyos/analytics";
 import { subjectColor } from "@/lib/studyos/subjects";
 
@@ -81,6 +83,10 @@ function Dashboard() {
   );
   const month = totalMinutes(sessionsBetween(sessions, startOfMonth(new Date()), new Date()));
   const s = streaks(sessions);
+  const todayKey = toKey(new Date());
+  const weekStart = toKey(startOfWeek(new Date(), { weekStartsOn: 1 }));
+  const wasteToday = data.wasted.filter((w) => w.date === todayKey).reduce((a, w) => a + w.minutes, 0);
+  const wasteWeek = data.wasted.filter((w) => w.date >= weekStart).reduce((a, w) => a + w.minutes, 0);
   const score = studyScore(sessions, profile);
   const daysLeft = Math.max(
     0,
@@ -132,6 +138,16 @@ function Dashboard() {
           value={score}
           icon={Sparkles}
           hint="Consistency + goals + volume"
+        />
+        <StatCard
+          label="Wasted time"
+          value={fmtHours(wasteToday)}
+          icon={Hourglass}
+          hint={
+            wasteWeek === 0
+              ? "None logged this week — great focus"
+              : `${fmtHours(wasteWeek)} this week · ${Math.round((wasteWeek / Math.max(1, wasteWeek + week)) * 100)}% of tracked time`
+          }
         />
         <StatCard
           label="Exam countdown"

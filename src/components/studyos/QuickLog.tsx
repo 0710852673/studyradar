@@ -57,7 +57,8 @@ export function LogForm({
   initialMinutes?: number;
   initialSubject?: string;
 }) {
-  const { profile, addSession } = useStudyOS();
+  const { profile, addSession, addWaste } = useStudyOS();
+  const [kind, setKind] = useState<"study" | "waste">("study");
   const subjects = profile?.subjects ?? [];
   const [subject, setSubject] = useState(initialSubject ?? subjects[0] ?? "");
   const [minutes, setMinutes] = useState(initialMinutes ?? 0);
@@ -70,7 +71,16 @@ export function LogForm({
   }, [subject, subjects]);
 
   const save = async () => {
-    if (!subject || minutes <= 0 || saving) return;
+    if (minutes <= 0 || saving) return;
+    if (kind === "waste") {
+      setSaving(true);
+      await addWaste({ date: toKey(new Date()), minutes, reason: note.trim() || undefined });
+      toast.success(`${fmtHours(minutes)} of wasted time logged — honesty helps you improve`);
+      setSaving(false);
+      onDone();
+      return;
+    }
+    if (!subject) return;
     setSaving(true);
     await addSession({
       date: toKey(new Date()),
@@ -85,6 +95,27 @@ export function LogForm({
 
   return (
     <div className="space-y-6">
+      <div className="grid grid-cols-2 gap-1 rounded-2xl border border-border bg-elevated p-1">
+        {(["study", "waste"] as const).map((k) => (
+          <button
+            key={k}
+            type="button"
+            onClick={() => setKind(k)}
+            className={cn(
+              "rounded-xl py-2 text-sm transition-colors",
+              kind === k ? "bg-brand-soft font-medium text-primary" : "text-muted-foreground",
+            )}
+          >
+            {k === "study" ? "Study time" : "Wasted time"}
+          </button>
+        ))}
+      </div>
+
+      {kind === "waste" ? (
+        <p className="text-xs text-muted-foreground">
+          Phone, social media, distractions — log it honestly. No waste today? That's fine, skip it.
+        </p>
+      ) : (
       <div>
         <p className="mb-2.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Subject
@@ -97,6 +128,7 @@ export function LogForm({
           ))}
         </div>
       </div>
+      )}
 
       <div>
         <p className="mb-2.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -127,7 +159,7 @@ export function LogForm({
 
       {noteOpen ? (
         <Textarea
-          placeholder="Note (optional)"
+          placeholder={kind === "waste" ? "What distracted you? (optional)" : "Note (optional)"}
           value={note}
           onChange={(e) => setNote(e.target.value)}
           rows={2}
@@ -139,7 +171,7 @@ export function LogForm({
           onClick={() => setNoteOpen(true)}
           className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
         >
-          Add note
+          {kind === "waste" ? "Add reason" : "Add note"}
         </button>
       )}
 
@@ -147,7 +179,7 @@ export function LogForm({
         className="w-full"
         size="lg"
         onClick={save}
-        disabled={!subject || minutes <= 0 || saving}
+        disabled={(kind === "study" && !subject) || minutes <= 0 || saving}
       >
         {saving ? "Saving…" : "Save"}
       </Button>
