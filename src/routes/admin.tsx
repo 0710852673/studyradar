@@ -1066,7 +1066,7 @@ function DataPanel({ snap }: { snap: AdminSnapshot }) {
 
 function RestoreBlock() {
   const restore = useServerFn(restoreBackup);
-  const [file, setFile] = useState<Record<string, unknown[]> | null>(null);
+  const [file, setFile] = useState<{ sessions?: unknown[]; wasted?: unknown[]; marks?: unknown[]; chapters?: unknown[] } | null>(null);
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<{ dryRun: boolean; reports: RestoreReport[] } | null>(null);
