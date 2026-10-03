@@ -107,11 +107,14 @@ export const EMPTY_SNAPSHOT: AdminSnapshot = {
   events: [],
   devices: [],
   roles: [],
+  wasted: [],
 };
 
 /** One round trip for the entire platform — admin RLS policies allow the reads. */
+export type AdminWaste = { id: string; user_id: string; date: string; minutes: number; reason: string | null; created_at: string };
+
 export async function loadSnapshot(): Promise<AdminSnapshot> {
-  const [p, s, m, c, e, d, r] = await Promise.all([
+  const [p, s, m, c, e, d, r, w] = await Promise.all([
     supabase.from("profiles").select("*").order("created_at", { ascending: false }),
     supabase.from("study_sessions").select("*"),
     supabase.from("marks").select("*"),
@@ -127,6 +130,7 @@ export async function loadSnapshot(): Promise<AdminSnapshot> {
       .order("created_at", { ascending: false })
       .limit(1000),
     supabase.from("user_roles").select("user_id, role"),
+    (supabase as any).from("wasted_time").select("*"),
   ]);
   return {
     profiles: (p.data ?? []) as AdminProfile[],
@@ -136,6 +140,7 @@ export async function loadSnapshot(): Promise<AdminSnapshot> {
     events: (e.data ?? []) as AdminEvent[],
     devices: (d.data ?? []) as AdminDevice[],
     roles: (r.data ?? []) as AdminRole[],
+    wasted: ((w as any).data ?? []) as AdminWaste[],
   };
 }
 
