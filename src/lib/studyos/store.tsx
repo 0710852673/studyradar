@@ -22,6 +22,7 @@ import {
   type SiteSettings,
   type StudyOSData,
   type StudySession,
+  type WasteEntry,
 } from "./types";
 
 /**
@@ -117,6 +118,8 @@ interface Store {
   uploadAvatar: (file: File) => Promise<void>;
   addSession: (s: Omit<StudySession, "id" | "createdAt">) => Promise<void>;
   removeSession: (id: string) => Promise<void>;
+  addWaste: (w: Omit<WasteEntry, "id">) => Promise<void>;
+  removeWaste: (id: string) => Promise<void>;
   addMark: (m: Omit<MarkEntry, "id">) => Promise<void>;
   removeMark: (id: string) => Promise<void>;
   addChapter: (subject: string, title: string) => Promise<void>;
@@ -160,7 +163,7 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
 
 
   const load = useCallback(async (uid: string) => {
-    const [p, roles, sessions, marks, chapters] = await Promise.all([
+    const [p, roles, sessions, marks, chapters, wasted] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", uid).maybeSingle(),
       supabase.from("user_roles").select("role").eq("user_id", uid),
       supabase
@@ -174,6 +177,11 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
         .select("*")
         .eq("user_id", uid)
         .order("position", { ascending: true }),
+      (supabase as any)
+        .from("wasted_time")
+        .select("*")
+        .eq("user_id", uid)
+        .order("date", { ascending: false }),
     ]);
 
     check(p.error, "load your profile");
@@ -199,6 +207,12 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
 
     setIsAdmin((roles.data ?? []).some((r: { role: string }) => r.role === "admin"));
     setData({
+      wasted: ((wasted as any).data ?? []).map((w: any) => ({
+        id: w.id,
+        date: w.date,
+        minutes: w.minutes,
+        reason: w.reason ?? undefined,
+      })),
       sessions: (sessions.data ?? []).map((s: any) => ({
         id: s.id,
         date: s.date,
@@ -341,6 +355,25 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
         if (!userId) return;
         const { error } = await supabase.from("study_sessions").delete().eq("id", id);
         if (!check(error, "delete that session")) return;
+        await load(userId);
+      },
+      addWaste: async (w) => {
+        if (throttled()) return;
+        if (!userId) return;
+        const { error } = await (supabase as any).from("wasted_time").insert({
+          user_id: userId,
+          date: w.date,
+          minutes: w.minutes,
+          reason: w.reason ?? null,
+        });
+        if (!check(error, "save that wasted time")) return;
+        await load(userId);
+      },
+      removeWaste: async (id) => {
+        if (throttled()) return;
+        if (!userId) return;
+        const { error } = await (supabase as any).from("wasted_time").delete().eq("id", id);
+        if (!check(error, "delete that entry")) return;
         await load(userId);
       },
       addMark: async (m) => {

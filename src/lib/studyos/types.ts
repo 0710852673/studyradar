@@ -88,10 +88,18 @@ export interface Chapter {
   status: ChapterStatus;
 }
 
+export interface WasteEntry {
+  id: string;
+  date: string; // yyyy-MM-dd
+  minutes: number;
+  reason?: string | undefined;
+}
+
 export interface StudyOSData {
+  wasted: WasteEntry[];
   sessions: StudySession[];
   marks: MarkEntry[];
   chapters: Chapter[];
 }
 
-export const EMPTY_DATA: StudyOSData = { sessions: [], marks: [], chapters: [] };
+export const EMPTY_DATA: StudyOSData = { wasted: [], sessions: [], marks: [], chapters: [] };
