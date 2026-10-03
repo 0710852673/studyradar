@@ -37,6 +37,7 @@ import {
   streaks,
   studyScore,
   totalMinutes,
+  toKey,
 } from "@/lib/studyos/analytics";
 import { subjectColor } from "@/lib/studyos/subjects";
 
@@ -82,8 +83,8 @@ function Dashboard() {
   );
   const month = totalMinutes(sessionsBetween(sessions, startOfMonth(new Date()), new Date()));
   const s = streaks(sessions);
-  const todayKey = new Date().toISOString().slice(0, 10);
-  const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 }).toISOString().slice(0, 10);
+  const todayKey = toKey(new Date());
+  const weekStart = toKey(startOfWeek(new Date(), { weekStartsOn: 1 }));
   const wasteToday = data.wasted.filter((w) => w.date === todayKey).reduce((a, w) => a + w.minutes, 0);
   const wasteWeek = data.wasted.filter((w) => w.date >= weekStart).reduce((a, w) => a + w.minutes, 0);
   const score = studyScore(sessions, profile);
