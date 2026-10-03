@@ -97,6 +97,7 @@ export interface AdminSnapshot {
   events: AdminEvent[];
   devices: AdminDevice[];
   roles: AdminRole[];
+  wasted: { id: string; user_id: string; date: string; minutes: number; reason: string | null; created_at: string }[];
 }
 
 export const EMPTY_SNAPSHOT: AdminSnapshot = {
