@@ -38,6 +38,8 @@ import {
   type AdminSnapshot,
 } from "@/lib/studyos/admin-data";
 import { cn } from "@/lib/utils";
+import { useServerFn } from "@tanstack/react-start";
+import { restoreBackup, type RestoreReport } from "@/lib/studyos/restore.functions";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -1050,6 +1052,8 @@ function DataPanel({ snap }: { snap: AdminSnapshot }) {
         </div>
       </Block>
 
+      <RestoreBlock />
+
       <Block title="Managed backups">
         <p className="text-xs text-muted-foreground">
           The database is backed up automatically by the hosting platform on a rolling schedule.
@@ -1057,5 +1061,116 @@ function DataPanel({ snap }: { snap: AdminSnapshot }) {
         </p>
       </Block>
     </div>
+  );
+}
+
+function RestoreBlock() {
+  const restore = useServerFn(restoreBackup);
+  const [file, setFile] = useState<Record<string, unknown[]> | null>(null);
+  const [name, setName] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState<{ dryRun: boolean; reports: RestoreReport[] } | null>(null);
+
+  const payload = (dryRun: boolean) => ({
+    dryRun,
+    sessions: (file?.sessions ?? []) as Record<string, unknown>[],
+    wasted: (file?.wasted ?? []) as Record<string, unknown>[],
+    marks: (file?.marks ?? []) as Record<string, unknown>[],
+    chapters: (file?.chapters ?? []) as Record<string, unknown>[],
+  });
+
+  const run = async (dryRun: boolean) => {
+    if (!file) return;
+    if (!dryRun && !confirm("Restore missing rows from this backup? Existing data is never overwritten.")) return;
+    setBusy(true);
+    try {
+      setResult(await restore({ data: payload(dryRun) }));
+      toast.success(dryRun ? "Check finished — nothing was changed" : "Restore finished and verified");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Restore failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Block title="Restore from backup">
+      <p className="mb-3 text-xs text-muted-foreground">
+        Upload a JSON backup downloaded above. Run the check first: it shows what would come back.
+        Restoring only adds missing rows — nothing existing is changed, and rows for deleted
+        accounts are skipped. Every restored row is read back to confirm it saved.
+      </p>
+      <input
+        type="file"
+        accept="application/json,.json"
+        className="mb-3 block w-full text-xs"
+        onChange={async (e) => {
+          const f = e.target.files?.[0];
+          setResult(null);
+          if (!f) return setFile(null);
+          try {
+            const parsed = JSON.parse(await f.text());
+            if (!parsed || typeof parsed !== "object" || !Array.isArray(parsed.sessions)) {
+              throw new Error();
+            }
+            setFile(parsed);
+            setName(f.name);
+          } catch {
+            setFile(null);
+            toast.error("That file isn't a Study Radar backup");
+          }
+        }}
+      />
+      {file ? (
+        <p className="mb-3 text-xs text-muted-foreground">
+          {name}: {(file.sessions ?? []).length} sessions, {(file.wasted ?? []).length} wasted-time,{" "}
+          {(file.marks ?? []).length} marks, {(file.chapters ?? []).length} chapters
+        </p>
+      ) : null}
+      <div className="flex flex-wrap gap-2">
+        <Button size="sm" variant="outline" disabled={!file || busy} onClick={() => run(true)}>
+          Check backup
+        </Button>
+        <Button size="sm" disabled={!file || busy || !result?.dryRun} onClick={() => run(false)}>
+          {busy ? "Working…" : "Restore missing data"}
+        </Button>
+      </div>
+      {result ? (
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead className="text-muted-foreground">
+              <tr className="text-left">
+                <th className="py-1 pr-3">Data</th>
+                <th className="pr-3">In file</th>
+                <th className="pr-3">Already here</th>
+                <th className="pr-3">Skipped</th>
+                <th className="pr-3">{result.dryRun ? "Would add" : "Added"}</th>
+                {!result.dryRun ? <th>Verified</th> : null}
+              </tr>
+            </thead>
+            <tbody>
+              {result.reports.map((r) => {
+                const toAdd = r.valid - r.skippedUnknownUser - r.alreadyPresent;
+                const ok = r.verified === r.valid - r.skippedUnknownUser;
+                return (
+                  <tr key={r.table} className="border-t border-border">
+                    <td className="py-1 pr-3">{r.table.replace("_", " ")}</td>
+                    <td className="pr-3">{r.inBackup}</td>
+                    <td className="pr-3">{r.alreadyPresent}</td>
+                    <td className="pr-3">{r.inBackup - r.valid + r.skippedUnknownUser}</td>
+                    <td className="pr-3">{result.dryRun ? toAdd : r.inserted}</td>
+                    {!result.dryRun ? (
+                      <td className={ok ? "text-primary" : "text-destructive"}>
+                        {ok ? "All present" : `${r.verified} found`}
+                      </td>
+                    ) : null}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      ) : null}
+    </Block>
   );
 }
