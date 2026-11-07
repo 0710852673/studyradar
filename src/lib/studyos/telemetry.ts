@@ -4,7 +4,7 @@ import { analyticsAllowed } from "./privacy-preferences";
 /** Optional product metrics only. Essential security uses security.ts instead. */
 const CATEGORIES = new Set(["dashboard", "subjects", "analytics", "marks", "revision", "calendar", "achievements", "settings", "ai"]);
 export function pageCategory(path: string) {
-  const first = path.split("/")[1];
+  const first = path.split("/")[1] ?? "other";
   return CATEGORIES.has(first) ? first : "other";
 }
 
