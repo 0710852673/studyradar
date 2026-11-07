@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
 import { analyticsAllowed, setAnalyticsAllowed, googleConsentAction } from "../src/lib/studyos/privacy-preferences";
 
-const values = new Map<string, string>();
+const values = new Map();
 const insert = mock(async () => ({ error: null }));
 mock.module("@/integrations/supabase/client", () => ({ supabase: { from: () => ({ insert }) } }));
 const { recordActivity } = await import("../src/lib/studyos/telemetry");
