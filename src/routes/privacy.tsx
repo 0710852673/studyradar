@@ -39,6 +39,8 @@ const SECTIONS: { h: string; p: string[]; list?: string[] }[] = [
       "Examination type (O/L or A/L), examination year and stream",
       "Selected subjects and daily/weekly study goals",
       "Study sessions: subject, duration, date and optional notes",
+      "Wasted-time logs: duration, date and optional reason",
+      "Optional school, grade, town, district, mobile, guardian contact details and biography that you choose to enter; these are not required for study tracking",
       "Marks: exam name, subject, score, total and date",
       "Syllabus/chapter progress and achievement history",
       "Problem reports you submit, including any screenshot you attach",
@@ -71,15 +73,15 @@ const SECTIONS: { h: string; p: string[]; list?: string[] }[] = [
     ],
   },
   {
-    h: "6. Legal basis",
+    h: "6. Essential processing and optional choices",
     p: [
-      "We process this information to perform the service you asked for, on the basis of your consent where consent is required, and for our legitimate interest in operating a secure and reliable platform — consistent with the Personal Data Protection Act No. 9 of 2022 of Sri Lanka.",
+      "Account authentication, saving your study records, and essential security processing are needed to deliver the service and are not optional analytics. Accepting the Terms and Privacy acknowledgement does not opt you into product analytics. Qualified Sri Lankan privacy review is still needed, including the applicable legal grounds and protections for minors; we do not claim legal compliance.",
     ],
   },
   {
     h: "7. Service providers",
     p: [
-      "We rely on third-party providers for authentication, database hosting, file storage and application delivery. They process data on our instructions and may store it on servers outside Sri Lanka. We do not sell identifiable personal data.",
+      "Lovable Cloud provides authentication, database hosting and file storage; Lovable delivers the application. Google handles Google sign-in and serves the fonts loaded by this site. These providers receive the network information needed to deliver their services and may process information outside Sri Lanka. Provider-side operational logging and retention require review before launch. We do not sell personal data. The app no longer calls ipapi.co for IP or location lookup.",
     ],
   },
   {
@@ -89,9 +91,10 @@ const SECTIONS: { h: string; p: string[]; list?: string[] }[] = [
     ],
   },
   {
-    h: "9. Aggregated analytics",
+    h: "9. Optional product analytics",
     p: [
-      "We produce aggregated and de-identified statistics — such as total platform study hours, subject popularity, retention and O/L versus A/L distribution — which cannot identify an individual student. Demo accounts are excluded from these figures.",
+      "Optional app activity analytics is off by default. In Profile → Privacy you can choose to share visit/login events, coarse page categories, event timestamps, and broad browser family and mobile/desktop class for product improvement. New activity events do not include your account identifier, email, raw IP, city, region, country, exact screen size, timezone, language or referrer. We do not add fingerprinting, hidden pixels, keystroke tracking or session replay.",
+      "The choice is stored separately for each account in this browser. Other browsers start with analytics off. Turn it off anytime to stop future optional app activity events; core study functionality remains available. Withdrawal does not delete historical records. Existing administrator reports also summarize stored study and account data for operating the service; this switch does not change those reports or essential authentication/security logs.",
     ],
   },
   {
@@ -103,13 +106,13 @@ const SECTIONS: { h: string; p: string[]; list?: string[] }[] = [
   {
     h: "11. Retention",
     p: [
-      "We keep your account data while your account exists. Security and audit records may be retained for a limited period after deletion where necessary for operational or legal reasons. Encrypted backups roll off over time.",
+      "Account and study data are retained while your account exists. Historical activity, security and audit records currently have no app-enforced automatic expiry. This pass does not delete or change historical records, which may include IP/location and email collected under the earlier implementation. Fixed retention periods, backup expiry, and a safe deletion process still need to be established and reviewed; no automatic deletion schedule is promised.",
     ],
   },
   {
     h: "12. Deleting your account and exporting your data",
     p: [
-      "You can delete your account from Settings. Deletion removes your profile and study records from the live system; copies may persist briefly in backups and retained security records. Where available, you can also download a copy of your Study Radar data from Settings.",
+      "Request account deletion or a copy of your data through the contact page. Settings currently does not provide self-service deletion or a student data export. Requests require identity verification and review of retained security records and backups; we do not promise immediate removal from every backup.",
     ],
   },
   {
@@ -121,7 +124,7 @@ const SECTIONS: { h: string; p: string[]; list?: string[] }[] = [
   {
     h: "14. Students and minors",
     p: [
-      "The Service is designed for school students and may be used by minors. We deliberately avoid collecting sensitive categories of personal information. Where applicable law requires parental consent or additional safeguards, we will support the required mechanism.",
+      "Study Radar is used by school students, including minors. Optional activity analytics is off by default and declining it does not affect studying. Do not put sensitive information in study notes, wasted-time reasons, or your biography. School, mobile and guardian details are optional. No verified parental-consent mechanism is currently implemented. Age-appropriate notices, the necessity of optional profile fields, administrator access, and any required guardian consent need qualified Sri Lankan review before launch.",
     ],
   },
   {
@@ -156,7 +159,7 @@ function PrivacyPage() {
           Privacy Policy
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Effective from 9 August 2026 · Study Radar, Sri Lanka
+          Updated 7 November 2026 · Study Radar, Sri Lanka
         </p>
 
         <div className="mt-10 space-y-8">
