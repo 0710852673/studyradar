@@ -450,11 +450,7 @@ function KV({ label, value }: { label: string; value: string }) {
 // -------------------------------------------------------------- sections --
 
 function Overview({
-  people,
-  sessions,
-  marks,
-  chapters,
-  devices,
+  people, sessions, marks, chapters, devices,
 }: {
   people: AdminProfile[];
   sessions: AdminSnapshot["sessions"];
@@ -467,179 +463,203 @@ function Overview({
   const wau = activeWithin(sessions, 7);
   const mau = activeWithin(sessions, 30);
   const onboarded = people.filter((p) => p.onboarded).length;
-  const withDetails = people.filter((p) => p.school || p.city || p.mobile).length;
+  const suspended = people.filter((p) => p.suspended).length;
+  const neverStudied = people.filter((p) => !sessions.some((s) => s.user_id === p.id)).length;
+  const now = Date.now();
+  const inactive14 = people.filter((p) => {
+    const last = p.last_seen_at ? new Date(p.last_seen_at).getTime() : 0;
+    return !last || now - last > 14 * 864e5;
+  }).length;
+  const signup7 = people.filter((p) => now - new Date(p.created_at).getTime() <= 7 * 864e5).length;
+  const signupPrev7 = people.filter((p) => {
+    const age = now - new Date(p.created_at).getTime();
+    return age > 7 * 864e5 && age <= 14 * 864e5;
+  }).length;
+  const signupDelta = signup7 - signupPrev7;
+  const done = chapters.filter((c) => c.status === "done").length;
+  const subjectStudy = countBy(sessions, (s) => s.subject).slice(0, 8);
+  const subjectMax = Math.max(1, ...subjectStudy.map((x) => x[1]));
+  const trackCounts = countBy(people, (p) => p.track);
+  const districtCounts = countBy(people, (p) => p.district).slice(0, 8);
+  const hoursByDay = dailyMinutes(sessions, 14);
+  const averagePerActive = wau ? Math.round(totalMins / Math.max(1, new Set(sessions.filter(s => s.date >= new Date(now - 7 * 864e5).toISOString().slice(0,10)).map(s => s.user_id)).size)) : 0;
 
   return (
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <Card label="Students" value={String(people.length)} icon={Users} />
-        <Card label="Active today" value={String(dau)} icon={Activity} />
-        <Card label="Active this week" value={String(wau)} icon={Activity} />
-        <Card label="Total study" value={fmtHours(totalMins)} icon={Clock} />
+        <Card label="Registered students" value={String(people.length)} icon={Users} />
+        <Card label="Active today · study logs" value={String(dau)} icon={Activity} />
+        <Card label="Active 7 days · study logs" value={String(wau)} icon={Activity} />
+        <Card label="Active 30 days · study logs" value={String(mau)} icon={Radar} />
+        <Card label="Total study time" value={fmtHours(totalMins)} icon={Clock} />
+        <Card label="Study sessions" value={String(sessions.length)} icon={BarChart3} />
+        <Card label="Onboarding complete" value={people.length ? `${Math.round(onboarded / people.length * 100)}%` : "—"} icon={Users} />
+        <Card label="Suspended accounts" value={String(suspended)} icon={Ban} />
       </div>
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Block title="Study minutes · last 30 days">
-          <Bars
-            data={dailyMinutes(sessions, 30).map((d) => ({ label: d.date, value: d.minutes }))}
-            format={(n) => fmtHours(n)}
-          />
+
+      <div className="grid gap-4 xl:grid-cols-2">
+        <Block title="Study time · last 14 days">
+          <Bars data={hoursByDay.map(d => ({label:d.date.slice(5), value:d.minutes}))} format={fmtHours} />
+          <div className="mt-2 flex justify-between text-[10px] text-muted-foreground"><span>14 days ago</span><span>Today</span></div>
         </Block>
-        <Block title="Signups · last 30 days">
-          <Bars
-            data={dailySignups(people, 30).map((d) => ({ label: d.date, value: d.count }))}
-            format={(n) => `${n}`}
-          />
+        <Block title="Student registrations · last 30 days">
+          <Bars data={dailySignups(people, 30).map(d => ({label:d.date.slice(5), value:d.count}))} format={n => String(n)} />
+          <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+            <span>Last 7 days: <strong className="text-foreground">{signup7}</strong></span>
+            <span>{signupDelta >= 0 ? "+" : ""}{signupDelta} vs previous 7 days</span>
+          </div>
         </Block>
       </div>
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Block title="Health">
+
+      <div className="grid gap-4 xl:grid-cols-3">
+        <Block title="Platform health">
           <div className="space-y-2">
-            <KV label="Monthly active" value={String(mau)} />
-            <KV
-              label="Onboarding completion"
-              value={`${onboarded}/${people.length}`}
-            />
-            <KV label="Profiles with contact details" value={`${withDetails}/${people.length}`} />
-            <KV label="Sessions logged" value={String(sessions.length)} />
+            <KV label="Onboarded students" value={`${onboarded} / ${people.length}`} />
+            <KV label="Never logged a study session" value={String(neverStudied)} />
+            <KV label="No activity / last seen >14 days" value={String(inactive14)} />
+            <KV label="Average study per active student · 7d" value={fmtHours(averagePerActive)} />
+            <KV label="Syllabus marked done" value={chapters.length ? `${done} / ${chapters.length} · ${Math.round(done / chapters.length * 100)}%` : "No chapter data"} />
             <KV label="Marks recorded" value={String(marks.length)} />
-            <KV label="Chapters tracked" value={String(chapters.length)} />
-            <KV label="Device events" value={String(devices.length)} />
+            <KV label="Security events" value={String(devices.length)} />
           </div>
         </Block>
-        <Block title="Where students are">
-          <div className="flex flex-wrap gap-2">
-            {countBy(devices, (d) => d.city).slice(0, 12).map(([city, n]) => (
-              <span
-                key={city}
-                className="rounded-full border border-border bg-background px-3 py-1.5 text-xs"
-              >
-                {city} · {n}
-              </span>
-            ))}
-            {devices.length === 0 ? (
-              <p className="text-xs text-muted-foreground">No location data yet.</p>
-            ) : null}
+        <Block title="Study by subject">
+          <div className="space-y-3">
+            {subjectStudy.map(([subject, mins]) => <div key={subject}>
+              <div className="mb-1 flex justify-between gap-2 text-xs"><span className="truncate">{subject}</span><span className="num text-muted-foreground">{fmtHours(mins)}</span></div>
+              <div className="h-2 overflow-hidden rounded-full bg-background"><div className="h-full rounded-full bg-primary" style={{width:`${mins / subjectMax * 100}%`}} /></div>
+            </div>)}
+            {!subjectStudy.length ? <Empty text="No study sessions recorded." /> : null}
           </div>
+        </Block>
+        <Block title="Student distribution">
+          <p className="mb-2 text-[11px] text-muted-foreground">By examination track</p>
+          <div className="space-y-2">{trackCounts.map(([track,n]) => <KV key={track} label={track} value={String(n)} />)}</div>
+          <p className="mb-2 mt-4 text-[11px] text-muted-foreground">Top districts</p>
+          <div className="flex flex-wrap gap-1.5">{districtCounts.map(([district,n]) => <Tag key={district}>{district} · {n}</Tag>)}</div>
         </Block>
       </div>
+
+      <Block title="Admin attention · data-driven signals">
+        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="rounded-lg border border-border bg-background p-3">
+            <p className="text-xs font-medium">Onboarding gap</p>
+            <p className="num mt-1 text-xl">{people.length - onboarded}</p>
+            <p className="text-[11px] text-muted-foreground">Registered accounts not marked onboarded.</p>
+          </div>
+          <div className="rounded-lg border border-border bg-background p-3">
+            <p className="text-xs font-medium">First-session gap</p>
+            <p className="num mt-1 text-xl">{neverStudied}</p>
+            <p className="text-[11px] text-muted-foreground">Students with no recorded study session.</p>
+          </div>
+          <div className="rounded-lg border border-border bg-background p-3">
+            <p className="text-xs font-medium">Registration momentum</p>
+            <p className="num mt-1 text-xl">{signup7}</p>
+            <p className="text-[11px] text-muted-foreground">New registrations in the last 7 days; {signupDelta >= 0 ? "+" : ""}{signupDelta} compared with the prior 7 days.</p>
+          </div>
+        </div>
+        <p className="mt-3 text-[10px] text-muted-foreground">Activity metrics are based on recorded study sessions, not all page visits. Inactive status uses profile last_seen_at where available.</p>
+      </Block>
     </div>
   );
 }
 
 function Analytics({
-  people,
-  sessions,
-  marks,
-  chapters,
+  people, sessions, marks, chapters,
 }: {
   people: AdminProfile[];
   sessions: AdminSnapshot["sessions"];
   marks: AdminSnapshot["marks"];
   chapters: AdminSnapshot["chapters"];
 }) {
-  const subjectMinutes = new Map<string, number>();
-  for (const s of sessions)
-    subjectMinutes.set(s.subject, (subjectMinutes.get(s.subject) ?? 0) + s.minutes);
-  const topSubjects = [...subjectMinutes.entries()].sort((a, b) => b[1] - a[1]).slice(0, 12);
-
-  const subjectAvg = new Map<string, { sum: number; n: number }>();
+  const totalMins = sessions.reduce((a,s) => a + s.minutes, 0);
+  const subjectMinutes = countBy(sessions, s => s.subject);
+  const maxSubject = Math.max(1, ...subjectMinutes.map(x => x[1]));
+  const subjectMarks = new Map<string,{sum:number;count:number}>();
   for (const m of marks) {
-    const pct = (m.marks / (m.total || 100)) * 100;
-    const cur = subjectAvg.get(m.subject) ?? { sum: 0, n: 0 };
-    subjectAvg.set(m.subject, { sum: cur.sum + pct, n: cur.n + 1 });
+    if (!m.total) continue;
+    const v = subjectMarks.get(m.subject) ?? {sum:0,count:0};
+    subjectMarks.set(m.subject,{sum:v.sum + (m.marks / m.total) * 100,count:v.count + 1});
   }
-
-  const done = chapters.filter((c) => c.status === "done").length;
-  const ol = people.filter((p) => p.track === "OL").length;
-  const totalMins = sessions.reduce((a, s) => a + s.minutes, 0);
+  const done = chapters.filter(c => c.status === "done").length;
+  const inProgress = chapters.filter(c => c.status === "in_progress" || c.status === "in-progress").length;
+  const uniqueStudy = new Set(sessions.map(s => s.user_id)).size;
+  const sessionAvg = sessions.length ? Math.round(totalMins / sessions.length) : 0;
+  const byTrack = countBy(people,p => p.track);
+  const byYear = countBy(people,p => String(p.exam_year));
+  const byStream = countBy(people,p => p.stream);
+  const byDistrict = countBy(people,p => p.district);
+  const bySubjectInterest = countBy(people.flatMap(p => (p.subjects ?? []).map(subject => ({subject}))),r => r.subject);
+  const signupCohorts = new Map<string,number>();
+  for (const p of people) {
+    const d = new Date(p.created_at);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+    signupCohorts.set(key,(signupCohorts.get(key) ?? 0) + 1);
+  }
+  const cohorts = [...signupCohorts.entries()].sort((a,b) => a[0].localeCompare(b[0])).slice(-8);
+  const daily = dailyMinutes(sessions,30);
+  const maxDaily = Math.max(1,...daily.map(d => d.minutes));
+  const completion = chapters.length ? Math.round(done / chapters.length * 100) : null;
 
   return (
     <div className="space-y-4">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <Card label="Total study hours" value={fmtHours(totalMins)} icon={Clock} />
+        <Card label="Students who studied" value={String(uniqueStudy)} icon={Users} />
+        <Card label="Average session length" value={fmtHours(sessionAvg)} icon={Activity} />
+        <Card label="Syllabus completion" value={completion === null ? "—" : `${completion}%`} icon={LayoutGrid} />
+      </div>
+      <Block title="Study activity · last 30 days">
+        <Bars data={daily.map(d => ({label:d.date.slice(5),value:d.minutes}))} format={fmtHours} />
+        <div className="mt-2 flex justify-between text-[10px] text-muted-foreground"><span>30 days ago</span><span>Today</span></div>
+      </Block>
       <div className="grid gap-4 lg:grid-cols-2">
-        <Block title="Cohort">
-          <div className="space-y-2">
-            <KV label="GCE A/L" value={`${people.length - ol}`} />
-            <KV label="GCE O/L" value={`${ol}`} />
-            <KV
-              label="Average study per student"
-              value={fmtHours(people.length ? Math.round(totalMins / people.length) : 0)}
-            />
-            <KV
-              label="Average daily target"
-              value={`${
-                people.length
-                  ? (
-                      people.reduce((a, p) => a + Number(p.daily_target_hours), 0) / people.length
-                    ).toFixed(1)
-                  : "0"
-              } h`}
-            />
-            <KV
-              label="Syllabus completion"
-              value={chapters.length ? `${Math.round((done / chapters.length) * 100)}%` : "—"}
-            />
-          </div>
+        <Block title="Study time by subject">
+          <div className="space-y-3">{subjectMinutes.slice(0,12).map(([subject,mins]) => <div key={subject}>
+            <div className="mb-1 flex justify-between gap-2 text-xs"><span>{subject}</span><span className="num text-muted-foreground">{fmtHours(mins)}</span></div>
+            <div className="h-2 overflow-hidden rounded-full bg-background"><div className="h-full rounded-full bg-primary" style={{width:`${mins/maxSubject*100}%`}} /></div>
+          </div>)}
+          {!subjectMinutes.length ? <Empty text="No study data available." /> : null}</div>
         </Block>
-        <Block title="Popular streams & subjects">
-          <div className="flex flex-wrap gap-2">
-            {countBy(people, (p) => p.stream).map(([s, n]) => (
-              <span
-                key={s}
-                className="rounded-full border border-primary/40 bg-brand-soft px-3 py-1.5 text-xs text-primary"
-              >
-                {s} · {n}
-              </span>
-            ))}
-            {countBy(
-              people.flatMap((p) => (p.subjects ?? []).map((s) => ({ s }))),
-              (r) => r.s,
-            )
-              .slice(0, 14)
-              .map(([s, n]) => (
-                <span
-                  key={s}
-                  className="rounded-full border border-border bg-background px-3 py-1.5 text-xs"
-                >
-                  {s} · {n}
-                </span>
-              ))}
+        <Block title="Average marks by subject">
+          <div className="space-y-2">{[...subjectMarks.entries()].sort((a,b) => b[1].sum/b[1].count - a[1].sum/a[1].count).map(([subject,v]) => <KV key={subject} label={subject} value={`${Math.round(v.sum/v.count)}% · ${v.count} records`} />)}
+          {!subjectMarks.size ? <Empty text="No marks recorded yet." /> : null}</div>
+        </Block>
+      </div>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Block title="Registration cohorts · month joined">
+          <div className="space-y-2">{cohorts.map(([month,n]) => <KV key={month} label={month} value={`${n} students`} />)}
+          {!cohorts.length ? <Empty text="No registration history." /> : null}</div>
+          <p className="mt-2 text-[10px] text-muted-foreground">Signup cohorts show registrations only. Retention cannot be calculated reliably without historical activity events.</p>
+        </Block>
+        <Block title="Syllabus progress">
+          <div className="space-y-2">
+            <KV label="Completed" value={String(done)} />
+            <KV label="In progress" value={String(inProgress)} />
+            <KV label="Other / not started" value={String(Math.max(0,chapters.length-done-inProgress))} />
+            <KV label="Total tracked chapters" value={String(chapters.length)} />
           </div>
         </Block>
       </div>
-
-      <Block title="Study time by subject">
-        <div className="space-y-1.5">
-          {topSubjects.map(([s, mins]) => {
-            const max = topSubjects[0]?.[1] ?? 1;
-            return (
-              <div key={s} className="flex items-center gap-3">
-                <span className="w-40 shrink-0 truncate text-xs">{s}</span>
-                <div className="h-2 flex-1 overflow-hidden rounded-full bg-background">
-                  <div
-                    className="h-full rounded-full bg-primary"
-                    style={{ width: `${(mins / max) * 100}%` }}
-                  />
-                </div>
-                <span className="num w-16 shrink-0 text-right text-xs text-muted-foreground">
-                  {fmtHours(mins)}
-                </span>
-              </div>
-            );
-          })}
-          {topSubjects.length === 0 ? <Empty text="No sessions yet." /> : null}
-        </div>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Block title="Student profile breakdown">
+          <p className="mb-2 text-[11px] text-muted-foreground">Examination track</p>
+          <div className="flex flex-wrap gap-1.5">{byTrack.map(([k,n]) => <Tag key={k}>{k} · {n}</Tag>)}</div>
+          <p className="mb-2 mt-4 text-[11px] text-muted-foreground">Examination year</p>
+          <div className="flex flex-wrap gap-1.5">{byYear.map(([k,n]) => <Tag key={k}>{k} · {n}</Tag>)}</div>
+          <p className="mb-2 mt-4 text-[11px] text-muted-foreground">Stream</p>
+          <div className="flex flex-wrap gap-1.5">{byStream.map(([k,n]) => <Tag key={k}>{k} · {n}</Tag>)}</div>
+        </Block>
+        <Block title="Student subject interests">
+          <div className="space-y-2">{bySubjectInterest.slice(0,12).map(([subject,n]) => <KV key={subject} label={subject} value={String(n)} />)}
+          {!bySubjectInterest.length ? <Empty text="No subject preferences recorded." /> : null}</div>
+        </Block>
+      </div>
+      <Block title="Top districts">
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{byDistrict.slice(0,18).map(([district,n]) => <KV key={district} label={district} value={String(n)} />)}
+        {!byDistrict.length ? <Empty text="No district data available." /> : null}</div>
       </Block>
-
-      <Block title="Average marks by subject">
-        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {[...subjectAvg.entries()]
-            .sort((a, b) => b[1].sum / b[1].n - a[1].sum / a[1].n)
-            .map(([s, v]) => (
-              <KV key={s} label={s} value={`${Math.round(v.sum / v.n)}% · ${v.n} papers`} />
-            ))}
-          {subjectAvg.size === 0 ? <Empty text="No marks recorded yet." /> : null}
-        </div>
-      </Block>
+      <p className="text-[10px] text-muted-foreground">All figures are calculated from currently accessible records and the active Exclude demo filter. Missing data is shown as unavailable, not estimated.</p>
     </div>
   );
 }
