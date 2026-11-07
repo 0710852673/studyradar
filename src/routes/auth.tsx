@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { logSecurityEvent, rememberConsent } from "@/lib/studyos/security";
+import { googleConsentAction } from "@/lib/studyos/privacy-preferences";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -18,6 +19,8 @@ export const Route = createFileRoute("/auth")({
         content: "Sign in or create your Study Radar account to track GCE O/L and A/L study.",
       },
       { property: "og:title", content: "Sign in — Study Radar" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       {
         property: "og:description",
         content: "Track study hours, streaks and marks for GCE O/L and A/L.",
@@ -135,9 +138,15 @@ function AuthPage() {
   };
 
   const google = async () => {
+    if (busy) return;
+    const action = googleConsentAction(mode, agree);
+    if (action === "block") {
+      fail("Please accept the Terms and Privacy Policy to create an account.");
+      return;
+    }
     setBusy(true);
     setError(null);
-    rememberConsent();
+    if (action === "remember") rememberConsent();
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
     });
@@ -184,6 +193,12 @@ function AuthPage() {
 
           {mode !== "forgot" ? (
             <>
+              {mode === "up" ? (
+                <label className="mb-4 flex items-start gap-2 text-sm text-muted-foreground">
+                  <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} className="mt-1 accent-primary" />
+                  <span>I accept the <Link to="/terms" className="underline">Terms</Link> and <Link to="/privacy" className="underline">Privacy Policy</Link>. Optional product analytics is a separate choice, off by default.</span>
+                </label>
+              ) : null}
               <Button
                 type="button"
                 variant="secondary"
@@ -287,28 +302,6 @@ function AuthPage() {
                 </p>
               ) : null}
 
-              {mode === "up" ? (
-                <label className="flex cursor-pointer items-start gap-2 text-xs text-muted-foreground">
-                  <input
-                    type="checkbox"
-                    checked={agree}
-                    onChange={(e) => setAgree(e.target.checked)}
-                    className="mt-0.5 h-3.5 w-3.5 rounded border-border accent-primary"
-                  />
-                  <span>
-                    I accept the{" "}
-                    <Link to="/terms" className="underline underline-offset-4">
-                      Terms
-                    </Link>{" "}
-                    and{" "}
-                    <Link to="/privacy" className="underline underline-offset-4">
-                      Privacy Policy
-                    </Link>
-                    .
-                  </span>
-                </label>
-              ) : null}
-
               <Button type="submit" size="lg" className="w-full" disabled={busy}>
                 {busy
                   ? "Please wait…"
@@ -338,7 +331,7 @@ function AuthPage() {
             You stay signed in on this device until you sign out.
           </p>
           <p className="mt-3 text-center text-xs text-muted-foreground">
-            By continuing you agree to our{" "}
+            Read our{" "}
             <Link to="/terms" className="text-primary underline-offset-4 hover:underline">
               Terms
             </Link>{" "}
