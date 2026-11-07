@@ -1,13 +1,12 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
-import { analyticsAllowed, setAnalyticsAllowed, googleConsentAction } from "./privacy-preferences";
+import { analyticsAllowed, setAnalyticsAllowed, googleConsentAction } from "../src/lib/studyos/privacy-preferences";
 
 const values = new Map<string, string>();
 const insert = mock(async () => ({ error: null }));
 mock.module("@/integrations/supabase/client", () => ({ supabase: { from: () => ({ insert }) } }));
-const { recordActivity } = await import("./telemetry");
-const originalWindow = globalThis.window;
+const { recordActivity } = await import("../src/lib/studyos/telemetry");
 Object.defineProperty(globalThis, "window", { configurable: true, value: { location: { pathname: "/dashboard" } } });
-Object.defineProperty(globalThis, "localStorage", { configurable: true, value: { getItem: (k: string) => values.get(k) ?? null, setItem: (k: string, v: string) => values.set(k, v) } });
+Object.defineProperty(globalThis, "localStorage", { configurable: true, value: { getItem: (k) => values.get(k) ?? null, setItem: (k, v) => values.set(k, v) } });
 afterEach(() => { values.clear(); insert.mockClear(); });
 
 describe("affirmative Google consent", () => {
