@@ -520,7 +520,7 @@ function Overview({
             <KV label="Average study per active student · 7d" value={fmtHours(averagePerActive)} />
             <KV label="Syllabus marked done" value={chapters.length ? `${done} / ${chapters.length} · ${Math.round(done / chapters.length * 100)}%` : "No chapter data"} />
             <KV label="Marks recorded" value={String(marks.length)} />
-            <KV label="Security events" value={String(devices.length)} />
+            <KV label="Device / activity records" value={String(devices.length)} />
           </div>
         </Block>
         <Block title="Study by subject">
