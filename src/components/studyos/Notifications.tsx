@@ -137,7 +137,8 @@ function useNotificationWatchers() {
 
       const { data: awards } = await (supabase as any)
         .from("achievement_awards")
-        .select("id, user_id, title, awarded_at")
+        .select("id, user_id, title, awarded_at, email_status")
+        .neq("email_status", "skipped")
         .gte("awarded_at", since)
         .order("awarded_at", { ascending: false })
         .limit(30);
