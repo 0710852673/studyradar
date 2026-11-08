@@ -146,7 +146,9 @@ function useNotificationWatchers() {
       const { data: studentProfiles } = awardUserIds.length
         ? await supabase.from("profiles").select("id, name").in("id", awardUserIds)
         : { data: [] };
-      const studentNames = new Map((studentProfiles ?? []).map((p: any) => [p.id, p.name]));
+      const studentNames = new Map<string, string>(
+        (studentProfiles ?? []).map((p: any) => [p.id, p.name] as [string, string]),
+      );
       for (const award of awards ?? []) {
         const studentName = studentNames.get(award.user_id) ?? "A student";
         const isNew = pushNotice(userId, {
