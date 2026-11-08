@@ -99,12 +99,29 @@ function Dashboard() {
   const maxSubject = Math.max(1, ...subjectStats.map((x) => x.total));
   const f = forecast(sessions, profile);
   const notes = insights(sessions, profile);
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  const todayLabel = new Date().toLocaleDateString(undefined, {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
 
   return (
     <AppShell
       title={`${profile.track === "AL" ? "A/L" : "O/L"} ${profile.examYear}`}
       subtitle={profile.stream ? `${profile.stream} stream` : "Your study dashboard"}
     >
+      <section className="mb-4 rounded-2xl border border-border bg-elevated/70 px-4 py-4 sm:px-5">
+        <p className="text-xs text-muted-foreground">{todayLabel}</p>
+        <h2 className="mt-1 font-display text-xl font-semibold tracking-tight">
+          {greeting}, {profile.name}!
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Ready to make a little progress today?
+        </p>
+      </section>
+
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         <StatCard
           label="Today"
