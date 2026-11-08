@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { differenceInCalendarDays, parseISO, startOfMonth, startOfWeek } from "date-fns";
 import {
   CalendarClock,
@@ -7,6 +8,7 @@ import {
   Hourglass,
   Sparkles,
   TrendingUp,
+  Share2,
 } from "lucide-react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
@@ -25,6 +27,9 @@ import { AppShell } from "@/components/studyos/AppShell";
 import { EmptyState, Panel, StatCard } from "@/components/studyos/Primitives";
 import { Heatmap } from "@/components/studyos/Heatmap";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import { useStudyOS } from "@/lib/studyos/store";
 import {
   bySubject,
@@ -74,6 +79,52 @@ function ChartTip({ active, payload, label }: any) {
 
 function Dashboard() {
   const { data, profile } = useStudyOS();
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [referralCount, setReferralCount] = useState(0);
+
+  useEffect(() => {
+    if (!profile) return;
+    let active = true;
+    const loadReferrals = async () => {
+      const [codeResult, countResult] = await Promise.all([
+        (supabase as any).rpc("get_my_referral_code"),
+        (supabase as any)
+          .from("referral_signups")
+          .select("id", { count: "exact", head: true })
+          .eq("referrer_id", profile.id),
+      ]);
+      if (!active) return;
+      if (!codeResult.error) setReferralCode(codeResult.data as string);
+      if (!countResult.error) setReferralCount(countResult.count ?? 0);
+    };
+    void loadReferrals();
+    return () => {
+      active = false;
+    };
+  }, [profile?.id]);
+
+  const inviteFriends = async () => {
+    if (!referralCode) return;
+    const url = new URL("/auth", window.location.origin);
+    url.searchParams.set("ref", referralCode);
+    const inviteUrl = url.toString();
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: "Join me on Study Radar",
+          text: "Track your study progress and prepare for exams with me.",
+          url: inviteUrl,
+        });
+      } else {
+        await navigator.clipboard.writeText(inviteUrl);
+        toast.success("Invite link copied");
+      }
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      toast.error("Could not share the invite link. Try copying it from your browser.");
+    }
+  };
+
   if (!profile) return null;
   const sessions = data.sessions;
 
@@ -112,14 +163,25 @@ function Dashboard() {
       title={`${profile.track === "AL" ? "A/L" : "O/L"} ${profile.examYear}`}
       subtitle={profile.stream ? `${profile.stream} stream` : "Your study dashboard"}
     >
-      <section className="mb-4 rounded-2xl border border-border bg-elevated/70 px-4 py-4 sm:px-5">
-        <p className="text-xs text-muted-foreground">{todayLabel}</p>
-        <h2 className="mt-1 font-display text-xl font-semibold tracking-tight">
-          {greeting}, {profile.name}!
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Ready to make a little progress today?
-        </p>
+      <section className="mb-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-elevated/70 px-4 py-4 sm:px-5">
+        <div>
+          <p className="text-xs text-muted-foreground">{todayLabel}</p>
+          <h2 className="mt-1 font-display text-xl font-semibold tracking-tight">
+            {greeting}, {profile.name}!
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Ready to make a little progress today?
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <p className="text-xs text-muted-foreground">
+            {referralCount} {referralCount === 1 ? "friend" : "friends"} joined
+          </p>
+          <Button size="sm" onClick={() => void inviteFriends()} disabled={!referralCode}>
+            <Share2 className="mr-1.5 h-3.5 w-3.5" />
+            Invite friends
+          </Button>
+        </div>
       </section>
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
