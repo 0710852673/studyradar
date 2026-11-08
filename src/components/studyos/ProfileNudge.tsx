@@ -26,13 +26,15 @@ export function ProfileNudge() {
   if (!profile.examYear || profile.examYear < new Date().getFullYear())
     missing.push("your exam year");
   if (profile.track === "AL" && !profile.stream) missing.push("your A/L stream");
+  if (!profile.school?.trim()) missing.push("your school");
+  if (!profile.grade?.trim()) missing.push("your grade");
   if (!profile.subjects.length) missing.push("your subjects");
   if (!profile.dailyGoalHours || profile.dailyGoalHours <= 0)
     missing.push("your daily study goal");
   if (!profile.onboarded) missing.push("finish onboarding");
   if (missing.length === 0) return null;
 
-  const requiredFields = profile.track === "AL" ? 6 : 5;
+  const requiredFields = profile.track === "AL" ? 8 : 7;
   const completedFields = Math.max(0, requiredFields - missing.length);
 
   const dismiss = () => {
