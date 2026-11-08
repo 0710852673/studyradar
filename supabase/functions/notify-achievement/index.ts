@@ -105,7 +105,7 @@ Deno.serve(async (req) => {
   const description = escapeHtml(award.description);
   let response: Response;
   try {
-    const response = await fetch("https://api.resend.com/emails", {
+    response = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
