@@ -6,8 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { useStudyOS } from "@/lib/studyos/store";
-import { ACHIEVEMENTS } from "@/lib/studyos/achievements";
-import { streaks, totalMinutes } from "@/lib/studyos/analytics";
 import {
   clearNotices,
   getNotices,
@@ -48,23 +46,67 @@ function useNotificationWatchers() {
 
   useEffect(() => {
     if (!ready || !userId) return;
-    const s = streaks(data.sessions);
-    const ctx = {
-      totalHours: totalMinutes(data.sessions) / 60,
-      currentStreak: s.current,
-      longestStreak: s.longest,
-      sessions: data.sessions,
+    let alive = true;
+
+    const syncAchievements = async () => {
+      // The database function calculates awards from saved study sessions and
+      // enforces one award per user/achievement. Browser storage is only the UI cache.
+      const { data: unlocked, error } = await (supabase as any).rpc(
+        "award_my_eligible_achievements",
+      );
+      if (!alive) return;
+      if (error) {
+        console.error("[StudyRadar] Could not sync achievements:", error.message);
+        return;
+      }
+
+      for (const award of unlocked ?? []) {
+        const isNew = pushNotice(userId, {
+          id: `award:${award.id}`,
+          kind: "achievement",
+          title: `Achievement unlocked — ${award.title}`,
+          body: `${award.description}. Congratulations, that took real work.`,
+          at: new Date(award.awarded_at).getTime(),
+        });
+        if (isNew) {
+          toast.success(`Achievement unlocked: ${award.title}`, {
+            description: award.description,
+          });
+          const { error: emailError } = await supabase.functions.invoke("notify-achievement", {
+            body: { awardId: award.id },
+          });
+          if (emailError) {
+            console.warn("[StudyRadar] Achievement email is pending configuration or retry:", emailError.message);
+          }
+        }
+      }
+
+      // Restore notices on a new device/browser from the durable award history.
+      const { data: allAwards, error: readError } = await (supabase as any)
+        .from("achievement_awards")
+        .select("id, title, description, awarded_at")
+        .eq("user_id", userId)
+        .order("awarded_at", { ascending: false })
+        .limit(40);
+      if (readError) {
+        console.error("[StudyRadar] Could not load achievement history:", readError.message);
+        return;
+      }
+      for (const award of allAwards ?? []) {
+        pushNotice(userId, {
+          id: `award:${award.id}`,
+          kind: "achievement",
+          title: `Achievement unlocked — ${award.title}`,
+          body: award.description,
+          at: new Date(award.awarded_at).getTime(),
+        });
+      }
     };
-    for (const a of ACHIEVEMENTS) {
-      if (a.progress(ctx) < a.goal) continue;
-      const isNew = pushNotice(userId, {
-        id: `ach:${a.id}`,
-        kind: "achievement",
-        title: `Achievement unlocked — ${a.title}`,
-        body: `${a.description}. Congratulations, that took real work.`,
-      });
-      if (isNew) toast.success(`Achievement unlocked: ${a.title}`, { description: a.description });
-    }
+
+    void syncAchievements();
+    return () => {
+      alive = false;
+    };
   }, [ready, userId, data.sessions]);
 
   useEffect(() => {
@@ -91,6 +133,29 @@ function useNotificationWatchers() {
         if (isNew && r.severity === "critical") {
           toast.error(`Security alert: ${r.kind}`, { description: r.email ?? undefined });
         }
+      }
+
+      const { data: awards } = await (supabase as any)
+        .from("achievement_awards")
+        .select("id, user_id, title, awarded_at")
+        .gte("awarded_at", since)
+        .order("awarded_at", { ascending: false })
+        .limit(30);
+      const awardUserIds = [...new Set((awards ?? []).map((a: any) => a.user_id))];
+      const { data: studentProfiles } = awardUserIds.length
+        ? await supabase.from("profiles").select("id, name").in("id", awardUserIds)
+        : { data: [] };
+      const studentNames = new Map((studentProfiles ?? []).map((p: any) => [p.id, p.name]));
+      for (const award of awards ?? []) {
+        const studentName = studentNames.get(award.user_id) ?? "A student";
+        const isNew = pushNotice(userId, {
+          id: `admin-award:${award.id}`,
+          kind: "achievement",
+          title: `${studentName} unlocked an achievement`,
+          body: award.title,
+          at: new Date(award.awarded_at).getTime(),
+        });
+        if (isNew) toast.info(`${studentName} earned ${award.title}`);
       }
     };
     void check();
