@@ -98,9 +98,22 @@ function AdminPage() {
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "achievement_awards" },
-        () => {
-          toast.info("A student unlocked an achievement");
-          void reload();
+        (payload) => {
+          const award = payload.new as { user_id?: string; title?: string };
+          const announce = async () => {
+            let studentName = "A student";
+            if (award.user_id) {
+              const { data: student } = await supabase
+                .from("profiles")
+                .select("name")
+                .eq("id", award.user_id)
+                .maybeSingle();
+              if (student?.name) studentName = student.name;
+            }
+            toast.info(`${studentName} unlocked ${award.title ?? "an achievement"}`);
+            await reload();
+          };
+          void announce();
         },
       )
       .subscribe();
