@@ -1,9 +1,9 @@
 /**
  * In-app notification centre.
  *
- * Notifications are stored per account in localStorage so they survive reloads
- * without another backend round-trip. Email delivery can be layered on later,
- * once a verified sending domain exists.
+ * The local list is a lightweight UI cache. Achievement awards themselves are
+ * persisted in Supabase so they sync across devices and are visible to admins.
+ * Achievement emails are delivered by the notify-achievement Edge Function.
  */
 
 export type NoticeKind = "achievement" | "security" | "system";
