@@ -22,6 +22,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useStudyOS } from "@/lib/studyos/store";
 import { NotificationBell } from "./Notifications";
 import { AssistantWidget } from "./AssistantWidget";
+import { ProfileNudge } from "./ProfileNudge";
 
 
 const PRIMARY = [
@@ -154,6 +155,7 @@ export function AppShell({
         </DialogContent>
       </Dialog>
 
+      <ProfileNudge />
       <AssistantWidget />
     </div>
   );
