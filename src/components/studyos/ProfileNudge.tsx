@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Camera, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { useStudyOS } from "@/lib/studyos/store";
 
 /**
@@ -12,7 +13,7 @@ export function ProfileNudge() {
   const { profile, avatarSrc, uploadAvatar } = useStudyOS();
   const [hidden, setHidden] = useState(() => {
     if (typeof sessionStorage === "undefined") return false;
-    return sessionStorage.getItem("sr_nudge_hidden") === "1";
+    return sessionStorage.getItem("sr_nudge_hidden_" + (profile?.id ?? "guest")) === "1";
   });
   const fileRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
@@ -22,14 +23,22 @@ export function ProfileNudge() {
   const missing: string[] = [];
   if (!profile.name || profile.name.trim() === "" || profile.name === "Student")
     missing.push("your name");
-  if (!avatarSrc) missing.push("a profile picture");
+  if (!profile.examYear || profile.examYear < new Date().getFullYear())
+    missing.push("your exam year");
+  if (profile.track === "AL" && !profile.stream) missing.push("your A/L stream");
   if (!profile.subjects.length) missing.push("your subjects");
+  if (!profile.dailyGoalHours || profile.dailyGoalHours <= 0)
+    missing.push("your daily study goal");
+  if (!profile.onboarded && missing.length === 0) missing.push("your exam setup");
   if (missing.length === 0) return null;
+
+  const requiredFields = 5;
+  const completedFields = Math.max(0, requiredFields - missing.length);
 
   const dismiss = () => {
     setHidden(true);
     try {
-      sessionStorage.setItem("sr_nudge_hidden", "1");
+      sessionStorage.setItem("sr_nudge_hidden_" + profile.id, "1");
     } catch {
       /* ignore */
     }
@@ -44,10 +53,17 @@ export function ProfileNudge() {
       >
         <X className="h-4 w-4" />
       </button>
-      <p className="pr-6 text-sm font-medium">Finish setting up your profile</p>
+      <p className="pr-6 text-sm font-medium">Complete your study profile</p>
       <p className="mt-1 text-xs text-muted-foreground">
-        Add {missing.join(", ")} so your dashboard and reports look right.
+        Add {missing.join(", ")} to personalise your study plan and progress reports.
       </p>
+      <div className="mt-3">
+        <div className="mb-1.5 flex justify-between text-[11px] text-muted-foreground">
+          <span>Study profile</span>
+          <span>{completedFields}/{requiredFields} essentials</span>
+        </div>
+        <Progress value={(completedFields / requiredFields) * 100} className="h-1.5" />
+      </div>
       <div className="mt-3 flex flex-wrap gap-2">
         {!avatarSrc ? (
           <>
@@ -66,7 +82,7 @@ export function ProfileNudge() {
             />
             <Button size="sm" disabled={busy} onClick={() => fileRef.current?.click()}>
               <Camera className="mr-1.5 h-3.5 w-3.5" />
-              {busy ? "Uploading…" : "Upload photo"}
+              {busy ? "Uploading…" : "Add optional photo"}
             </Button>
           </>
         ) : null}
