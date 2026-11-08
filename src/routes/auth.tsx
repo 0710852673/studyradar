@@ -76,6 +76,7 @@ function AuthPage() {
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
   const [agree, setAgree] = useState(false);
+  const referralCode = typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("ref");
 
   const fail = (message: string) => {
     const text = friendly(message);
@@ -110,7 +111,7 @@ function AuthPage() {
         password,
         options: {
           emailRedirectTo: window.location.origin,
-          data: { name: name.trim() || email.split("@")[0] },
+          data: { name: name.trim() || email.split("@")[0], referred_by: referralCode ?? undefined },
         },
       });
       if (err) fail(err.message);
@@ -147,11 +148,23 @@ function AuthPage() {
     setBusy(true);
     setError(null);
     if (action === "remember") rememberConsent();
+    if (referralCode) {
+      try {
+        sessionStorage.setItem("sr_pending_referral", referralCode);
+      } catch {
+        /* Referral tracking is optional if browser storage is unavailable. */
+      }
+    }
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
     });
     const err = (result as { error?: unknown }).error;
     if (err) {
+      try {
+        sessionStorage.removeItem("sr_pending_referral");
+      } catch {
+        /* ignore */
+      }
       fail(err instanceof Error ? err.message : "Google sign-in failed.");
       void logSecurityEvent("google_sign_in_failed", {
         severity: "warning",
