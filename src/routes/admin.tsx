@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { InboxPanel } from "@/components/studyos/AdminInbox";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Activity,
@@ -60,6 +61,7 @@ const SECTIONS = [
   { id: "activity", label: "Activity & devices", icon: Globe },
   { id: "security", label: "Security", icon: ShieldAlert },
   { id: "settings", label: "Site settings", icon: Sliders },
+  { id: "inbox", label: "Inbox & feedback", icon: Inbox },
   { id: "data", label: "Data & backups", icon: Database },
 ] as const;
 type SectionId = (typeof SECTIONS)[number]["id"];
@@ -342,6 +344,7 @@ function AdminPage() {
               <SiteSettingsPanel settings={settings} onSaved={refreshSettings} />
             ) : null}
 
+            {section === "inbox" ? <InboxPanel /> : null}
             {section === "data" ? <DataPanel snap={snap} /> : null}
           </>
         )}
