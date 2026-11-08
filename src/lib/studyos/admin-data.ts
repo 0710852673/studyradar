@@ -96,7 +96,7 @@ export type AdminAchievement = {
   title: string;
   description: string;
   awarded_at: string;
-  email_status: "pending" | "sending" | "sent" | "failed";
+  email_status: "pending" | "sending" | "sent" | "failed" | "skipped";
   email_sent_at: string | null;
 };
 
