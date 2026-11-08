@@ -81,12 +81,16 @@ function Dashboard() {
   const { data, profile } = useStudyOS();
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [referralCount, setReferralCount] = useState(0);
+  const [referralLoading, setReferralLoading] = useState(true);
+  const [referralError, setReferralError] = useState<string | null>(null);
   const profileId = profile?.id;
 
   useEffect(() => {
     if (!profileId) return;
     let active = true;
     const loadReferrals = async () => {
+      setReferralLoading(true);
+      setReferralError(null);
       const [codeResult, countResult] = await Promise.all([
         (supabase as any).rpc("get_my_referral_code"),
         (supabase as any)
@@ -95,8 +99,16 @@ function Dashboard() {
           .eq("referrer_id", profileId),
       ]);
       if (!active) return;
-      if (!codeResult.error) setReferralCode(codeResult.data as string);
+      if (codeResult.error || typeof codeResult.data !== "string" || !codeResult.data) {
+        console.error("[StudyRadar] Referral code could not be loaded:", codeResult.error);
+        setReferralCode(null);
+        setReferralError("Invite links are not available yet. Please try again later.");
+      } else {
+        setReferralCode(codeResult.data);
+      }
       if (!countResult.error) setReferralCount(countResult.count ?? 0);
+      else console.error("[StudyRadar] Referral count could not be loaded:", countResult.error);
+      setReferralLoading(false);
     };
     void loadReferrals();
     return () => {
@@ -105,24 +117,36 @@ function Dashboard() {
   }, [profileId]);
 
   const inviteFriends = async () => {
-    if (!referralCode) return;
+    if (!referralCode) {
+      toast.error("Invite link unavailable", {
+        description: referralError ?? "Your personal invite link is still loading. Try again in a moment.",
+      });
+      return;
+    }
     const url = new URL("/auth", window.location.origin);
     url.searchParams.set("ref", referralCode);
     const inviteUrl = url.toString();
-    try {
-      if (navigator.share) {
+
+    if (navigator.share) {
+      try {
         await navigator.share({
           title: "Join me on Study Radar",
           text: "Track your study progress and prepare for exams with me.",
           url: inviteUrl,
         });
-      } else {
-        await navigator.clipboard.writeText(inviteUrl);
-        toast.success("Invite link copied");
+        return;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        // If native sharing is unavailable or fails, fall through to copy.
       }
-    } catch (error) {
-      if (error instanceof DOMException && error.name === "AbortError") return;
-      toast.error("Could not share the invite link. Try copying it from your browser.");
+    }
+
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error("Clipboard unavailable");
+      await navigator.clipboard.writeText(inviteUrl);
+      toast.success("Invite link copied", { description: "Send it to a friend to invite them." });
+    } catch {
+      window.prompt("Copy your personal Study Radar invite link:", inviteUrl);
     }
   };
 
@@ -178,9 +202,9 @@ function Dashboard() {
           <p className="text-xs text-muted-foreground">
             {referralCount} {referralCount === 1 ? "friend" : "friends"} joined
           </p>
-          <Button size="sm" onClick={() => void inviteFriends()} disabled={!referralCode}>
+          <Button size="sm" onClick={() => void inviteFriends()} disabled={referralLoading}>
             <Share2 className="mr-1.5 h-3.5 w-3.5" />
-            Invite friends
+            {referralLoading ? "Loading invite…" : "Invite friends"}
           </Button>
         </div>
       </section>
