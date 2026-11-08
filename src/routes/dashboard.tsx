@@ -81,9 +81,10 @@ function Dashboard() {
   const { data, profile } = useStudyOS();
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [referralCount, setReferralCount] = useState(0);
+  const profileId = profile?.id;
 
   useEffect(() => {
-    if (!profile) return;
+    if (!profileId) return;
     let active = true;
     const loadReferrals = async () => {
       const [codeResult, countResult] = await Promise.all([
@@ -91,7 +92,7 @@ function Dashboard() {
         (supabase as any)
           .from("referral_signups")
           .select("id", { count: "exact", head: true })
-          .eq("referrer_id", profile.id),
+          .eq("referrer_id", profileId),
       ]);
       if (!active) return;
       if (!codeResult.error) setReferralCode(codeResult.data as string);
@@ -101,7 +102,7 @@ function Dashboard() {
     return () => {
       active = false;
     };
-  }, [profile?.id]);
+  }, [profileId]);
 
   const inviteFriends = async () => {
     if (!referralCode) return;
