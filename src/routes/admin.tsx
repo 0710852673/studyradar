@@ -10,6 +10,7 @@ import {
   Database,
   Download,
   Globe,
+  Inbox,
   LayoutGrid,
   Radar,
   RefreshCw,
