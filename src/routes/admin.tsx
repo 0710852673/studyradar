@@ -954,14 +954,14 @@ function AchievementsPanel({
       .includes(term),
   );
   const sent = awards.filter((award) => award.email_status === "sent").length;
-  const pending = awards.filter((award) => award.email_status !== "sent").length;
+  const pending = awards.filter((award) => ["pending", "sending", "failed"].includes(award.email_status)).length;
 
   return (
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-3">
         <Card label="Achievements earned" value={String(awards.length)} icon={Trophy} />
         <Card label="Emails delivered" value={String(sent)} icon={Mail} />
-        <Card label="Email follow-up needed" value={String(pending)} icon={Clock} />
+        <Card label="Emails awaiting delivery" value={String(pending)} icon={Clock} />
       </div>
       <SearchBar value={query} onChange={onQueryChange} placeholder="Student or achievement…" />
       <div className="space-y-2">
@@ -978,7 +978,7 @@ function AchievementsPanel({
                   {names.get(award.user_id) ?? "Unknown student"} · {award.description}
                 </p>
                 <p className="mt-1 text-[11px] text-muted-foreground">
-                  {new Date(award.awarded_at).toLocaleString()}
+                  {award.email_status === "skipped" ? "Previously earned · recorded " : "Recorded "}{new Date(award.awarded_at).toLocaleString()}
                 </p>
               </div>
             </div>
@@ -986,7 +986,7 @@ function AchievementsPanel({
               <Tag tone={award.email_status === "sent" ? "good" : award.email_status === "failed" ? "bad" : undefined}>
                 Email {award.email_status}
               </Tag>
-              {award.email_status !== "sent" && award.email_status !== "sending" ? (
+              {(award.email_status === "pending" || award.email_status === "failed") ? (
                 <Button size="sm" variant="outline" onClick={() => onRetry(award.id)}>
                   Retry email
                 </Button>
@@ -1146,6 +1146,7 @@ function DataPanel({ snap }: { snap: AdminSnapshot }) {
     { name: "sessions", rows: snap.sessions as unknown as Record<string, unknown>[] },
     { name: "marks", rows: snap.marks as unknown as Record<string, unknown>[] },
     { name: "chapters", rows: snap.chapters as unknown as Record<string, unknown>[] },
+    { name: "achievements", rows: snap.achievements as unknown as Record<string, unknown>[] },
     { name: "security-events", rows: snap.events as unknown as Record<string, unknown>[] },
     { name: "device-events", rows: snap.devices as unknown as Record<string, unknown>[] },
   ];
