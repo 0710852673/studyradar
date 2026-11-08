@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { syncConsent } from "./security";
 import { recordActivity } from "./telemetry";
 import { allowWrite, retryInSeconds, setWriteLimit } from "./ratelimit";
+import { defaultExamDate } from "./subjects";
 import {
   DEFAULT_SETTINGS,
   EMPTY_DATA,
@@ -63,7 +64,7 @@ export function rowToProfile(r: ProfileRow): Profile {
     name: r.name,
     track,
     examYear: r.exam_year,
-    examDate: r.exam_date ?? `${r.exam_year}-${track === "AL" ? "11" : "12"}-01`,
+    examDate: defaultExamDate(track, r.exam_year),
     stream: r.stream ?? undefined,
     subjects: r.subjects ?? [],
     dailyGoalHours: Number(r.daily_target_hours),
