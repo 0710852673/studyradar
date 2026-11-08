@@ -40,3 +40,8 @@ Optionally set `SITE_ORIGIN` to the production Study Radar origin to restrict br
 5. If delivery failed or was not configured, set the secrets and use **Retry email** in the admin panel.
 
 Historical awards are marked `skipped` for email so existing members do not receive a burst of old milestone emails.
+
+
+## Student invite links
+
+The same database migration adds per-student invite codes and signup attribution. The dashboard creates a code automatically when a student opens the invite control. Email signups are attributed by the signup metadata trigger; Google signups complete attribution after the OAuth redirect. A referred account is counted only once.
