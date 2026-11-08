@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { InboxPanel } from "@/components/studyos/AdminInbox";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
@@ -18,6 +18,8 @@ import {
   ShieldAlert,
   Sliders,
   Users,
+  Trophy,
+  Mail,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -37,6 +39,7 @@ import {
   loadSnapshot,
   toCsv,
   type AdminProfile,
+  type AdminAchievement,
   type AdminSnapshot,
 } from "@/lib/studyos/admin-data";
 import { cn } from "@/lib/utils";
@@ -58,6 +61,7 @@ export const Route = createFileRoute("/admin")({
 const SECTIONS = [
   { id: "overview", label: "Overview", icon: LayoutGrid },
   { id: "students", label: "Students", icon: Users },
+  { id: "achievements", label: "Achievements", icon: Trophy },
   { id: "analytics", label: "Analytics", icon: BarChart3 },
   { id: "activity", label: "Activity & devices", icon: Globe },
   { id: "security", label: "Security", icon: ShieldAlert },
@@ -76,16 +80,31 @@ function AdminPage() {
   const [excludeDemo, setExcludeDemo] = useState(true);
   const [focusId, setFocusId] = useState<string | null>(null);
 
-  const reload = async () => {
+  const reload = useCallback(async () => {
     setLoading(true);
     setSnap(await loadSnapshot());
     setLoading(false);
-  };
+  }, []);
 
   useEffect(() => {
     if (!isAdmin) return;
     void reload();
-  }, [isAdmin]);
+  }, [isAdmin, reload]);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    const channel = supabase
+      .channel("admin-achievement-awards")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "achievement_awards" },
+        () => void reload(),
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [isAdmin, reload]);
 
   const demoIds = useMemo(
     () => new Set(snap.profiles.filter((p) => p.is_demo).map((p) => p.id)),
@@ -98,6 +117,7 @@ function AdminPage() {
   const marks = snap.marks.filter((m) => keep(m.user_id));
   const chapters = snap.chapters.filter((c) => keep(c.user_id));
   const devices = snap.devices.filter((d) => keep(d.user_id));
+  const achievements = snap.achievements.filter((a) => keep(a.user_id));
 
   const adminIds = new Set(snap.roles.filter((r) => r.role === "admin").map((r) => r.user_id));
   const minutesByUser = useMemo(() => {
@@ -339,6 +359,16 @@ function AdminPage() {
                   {snap.events.length === 0 ? <Empty text="Nothing suspicious recorded." /> : null}
                 </div>
               </>
+            ) : null}
+
+            {section === "achievements" ? (
+              <AchievementsPanel
+                awards={achievements}
+                people={people}
+                query={q}
+                onQueryChange={setQ}
+                onRetry={(id) => void retryAchievementEmail(id, reload)}
+              />
             ) : null}
 
             {section === "settings" ? (
@@ -901,6 +931,87 @@ function StudentDetail({
       </div>
     </div>
   );
+}
+
+function AchievementsPanel({
+  awards,
+  people,
+  query,
+  onQueryChange,
+  onRetry,
+}: {
+  awards: AdminAchievement[];
+  people: AdminProfile[];
+  query: string;
+  onQueryChange: (value: string) => void;
+  onRetry: (id: string) => void;
+}) {
+  const names = new Map(people.map((person) => [person.id, person.name]));
+  const term = query.trim().toLowerCase();
+  const visible = awards.filter((award) =>
+    `${names.get(award.user_id) ?? award.user_id} ${award.title} ${award.description} ${award.email_status}`
+      .toLowerCase()
+      .includes(term),
+  );
+  const sent = awards.filter((award) => award.email_status === "sent").length;
+  const pending = awards.filter((award) => award.email_status !== "sent").length;
+
+  return (
+    <div className="space-y-4">
+      <div className="grid gap-3 sm:grid-cols-3">
+        <Card label="Achievements earned" value={String(awards.length)} icon={Trophy} />
+        <Card label="Emails delivered" value={String(sent)} icon={Mail} />
+        <Card label="Email follow-up needed" value={String(pending)} icon={Clock} />
+      </div>
+      <SearchBar value={query} onChange={onQueryChange} placeholder="Student or achievement…" />
+      <div className="space-y-2">
+        {visible.map((award) => (
+          <div
+            key={award.id}
+            className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-elevated p-3"
+          >
+            <div className="flex min-w-0 items-start gap-3">
+              <Trophy className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium">{award.title}</p>
+                <p className="truncate text-xs text-muted-foreground">
+                  {names.get(award.user_id) ?? "Unknown student"} · {award.description}
+                </p>
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  {new Date(award.awarded_at).toLocaleString()}
+                </p>
+              </div>
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              <Tag tone={award.email_status === "sent" ? "good" : award.email_status === "failed" ? "bad" : undefined}>
+                Email {award.email_status}
+              </Tag>
+              {award.email_status !== "sent" && award.email_status !== "sending" ? (
+                <Button size="sm" variant="outline" onClick={() => onRetry(award.id)}>
+                  Retry email
+                </Button>
+              ) : null}
+            </div>
+          </div>
+        ))}
+        {visible.length === 0 ? (
+          <Empty text={awards.length ? "No achievements match this search." : "No achievements have been awarded yet."} />
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+async function retryAchievementEmail(awardId: string, reload: () => Promise<void>) {
+  const { error } = await supabase.functions.invoke("notify-achievement", {
+    body: { awardId },
+  });
+  if (error) {
+    toast.error("Could not send achievement email", { description: error.message });
+  } else {
+    toast.success("Achievement email processed");
+    await reload();
+  }
 }
 
 function SiteSettingsPanel({
