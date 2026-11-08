@@ -190,6 +190,24 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
     const prof = p.data ? rowToProfile(p.data as ProfileRow) : null;
     setProfile(prof);
 
+    // OAuth redirects return to the app root, so finish referral attribution
+    // from the short-lived tab value after the new session is available.
+    try {
+      const pendingReferral =
+        typeof sessionStorage === "undefined"
+          ? null
+          : sessionStorage.getItem("sr_pending_referral");
+      if (pendingReferral) {
+        const { error: referralError } = await (supabase as any).rpc(
+          "record_my_referral",
+          { p_code: pendingReferral },
+        );
+        if (!referralError) sessionStorage.removeItem("sr_pending_referral");
+      }
+    } catch {
+      /* Referral attribution is optional and must never block profile loading. */
+    }
+
     // Consent captured before an OAuth redirect lands on the profile row here.
     void syncConsent(uid, Boolean((p.data as { terms_accepted_at?: string } | null)?.terms_accepted_at));
 
