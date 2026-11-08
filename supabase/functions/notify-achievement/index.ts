@@ -72,7 +72,7 @@ Deno.serve(async (req) => {
     }
   }
 
-  if (award.email_status === "sent") return json({ ok: true, alreadySent: true });
+  if (award.email_status === "sent" || award.email_status === "skipped") return json({ ok: true, alreadySent: true });
 
   const apiKey = Deno.env.get("RESEND_API_KEY");
   const from = Deno.env.get("RESEND_FROM_EMAIL");
