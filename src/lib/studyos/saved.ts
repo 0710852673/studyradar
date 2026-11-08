@@ -7,8 +7,8 @@ export type SavedItem = {
   id: string;
   title: string;
   kind: SavedKind;
-  note?: string;
-  href?: string;
+  note?: string | undefined;
+  href?: string | undefined;
   savedAt: string;
 };
 

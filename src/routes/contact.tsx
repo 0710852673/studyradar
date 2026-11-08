@@ -40,7 +40,7 @@ function ContactPage() {
   const [busy, setBusy] = useState(false);
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (message.trim().length < 5) return toast.error("Please write a little more.");
+    if (message.trim().length < 5) { toast.error("Please write a little more."); return; }
     setBusy(true);
     const { data: auth } = await supabase.auth.getUser();
     const { error } = await supabase.from("contact_messages").insert({
@@ -51,7 +51,7 @@ function ContactPage() {
       user_id: auth.user?.id ?? null,
     });
     setBusy(false);
-    if (error) return toast.error("Couldn't send your message. Please try again.");
+    if (error) { toast.error("Couldn't send your message. Please try again."); return; }
     setSent(true);
     toast.success("Message sent to the Study Radar team.");
   };

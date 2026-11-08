@@ -25,7 +25,7 @@ export function InboxPanel() {
 
   const mark = async (table: "contact_messages" | "feedback", id: string, status: string) => {
     const { error } = await supabase.from(table).update({ status }).eq("id", id);
-    if (error) return toast.error("Couldn't update");
+    if (error) { toast.error("Couldn't update"); return; }
     void load();
   };
 
