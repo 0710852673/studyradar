@@ -89,6 +89,17 @@ export type AdminDevice = {
 
 export type AdminRole = { user_id: string; role: string };
 
+export type AdminAchievement = {
+  id: string;
+  user_id: string;
+  achievement_id: string;
+  title: string;
+  description: string;
+  awarded_at: string;
+  email_status: "pending" | "sending" | "sent" | "failed";
+  email_sent_at: string | null;
+};
+
 export interface AdminSnapshot {
   profiles: AdminProfile[];
   sessions: AdminSession[];
@@ -98,6 +109,7 @@ export interface AdminSnapshot {
   devices: AdminDevice[];
   roles: AdminRole[];
   wasted: { id: string; user_id: string; date: string; minutes: number; reason: string | null; created_at: string }[];
+  achievements: AdminAchievement[];
 }
 
 export const EMPTY_SNAPSHOT: AdminSnapshot = {
@@ -109,13 +121,14 @@ export const EMPTY_SNAPSHOT: AdminSnapshot = {
   devices: [],
   roles: [],
   wasted: [],
+  achievements: [],
 };
 
 /** One round trip for the entire platform — admin RLS policies allow the reads. */
 export type AdminWaste = { id: string; user_id: string; date: string; minutes: number; reason: string | null; created_at: string };
 
 export async function loadSnapshot(): Promise<AdminSnapshot> {
-  const [p, s, m, c, e, d, r, w] = await Promise.all([
+  const [p, s, m, c, e, d, r, w, a] = await Promise.all([
     supabase.from("profiles").select("*").order("created_at", { ascending: false }),
     supabase.from("study_sessions").select("*"),
     supabase.from("marks").select("*"),
@@ -132,6 +145,11 @@ export async function loadSnapshot(): Promise<AdminSnapshot> {
       .limit(1000),
     supabase.from("user_roles").select("user_id, role"),
     (supabase as any).from("wasted_time").select("*"),
+    (supabase as any)
+      .from("achievement_awards")
+      .select("*")
+      .order("awarded_at", { ascending: false })
+      .limit(1000),
   ]);
   return {
     profiles: (p.data ?? []) as AdminProfile[],
@@ -142,6 +160,7 @@ export async function loadSnapshot(): Promise<AdminSnapshot> {
     devices: (d.data ?? []) as AdminDevice[],
     roles: (r.data ?? []) as AdminRole[],
     wasted: ((w as any).data ?? []) as AdminWaste[],
+    achievements: ((a as any).data ?? []) as AdminAchievement[],
   };
 }
 
