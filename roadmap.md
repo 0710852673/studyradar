@@ -1,6 +1,11 @@
-# Readiness pass
-- [x] Affirmative Google signup consent without changing returning sign-in consent.
-- [x] Remove network/location analytics; optional consent control and accurate privacy notice.
-- [x] Review throttle; leave database writes unchanged because safe server enforcement requires a separate design and concurrency review.
-- [x] Non-destructive public browser checks and synthetic privacy tests.
-- [ ] Live OAuth/post-session validation and hosted provider logging review: requires a separate consent-aware account gate and provider-settings audit; not tested against real student records in this pass.
+# Study Radar ecosystem roadmap (see .lovable/plan/ for the approved plan)
+- [x] Phase 1a: real Contact form, Saved (per account), Feedback, Help, Community Guidelines, admin Inbox
+- [ ] Phase 0: Playwright e2e suite with throwaway accounts (save, refresh, privacy between students)
+- [ ] Phase 1b: notifications table, reports, audit log, per-module release switches
+- [ ] Phase 2: Content Hub + Reels from the database, admin content editor
+- [ ] Phase 3: Community rooms + Ask a Senior with reporting and moderation
+- [ ] Phase 4: Mentor / consulting cases (waits on: who the mentors are, under-18 volunteer policy)
+- [ ] Phase 5: Pathway, Opportunities (admin-curated, sourced), Skill Lab, Portfolio
+- [ ] Phase 6: real AI recommendations (waits on: OK to use AI credits)
+- [ ] Phase 7–8: admin expansion, curriculum tables
+- [ ] Phase 9: release-announcement workflow, send disabled (waits on: email sender domain)

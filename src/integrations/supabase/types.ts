@@ -44,6 +44,39 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_messages: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          status: string
+          topic: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          status?: string
+          topic: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          status?: string
+          topic?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       device_events: {
         Row: {
           city: string | null
@@ -98,6 +131,36 @@ export type Database = {
           timezone?: string | null
           user_agent?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      feedback: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          message: string
+          page: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind?: string
+          message: string
+          page?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          message?: string
+          page?: string | null
+          status?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -221,6 +284,39 @@ export type Database = {
           terms_accepted_at?: string | null
           track?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      saved_items: {
+        Row: {
+          created_at: string
+          href: string | null
+          id: string
+          item_key: string
+          kind: string
+          note: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          href?: string | null
+          id?: string
+          item_key: string
+          kind: string
+          note?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          href?: string | null
+          id?: string
+          item_key?: string
+          kind?: string
+          note?: string | null
+          title?: string
+          user_id?: string
         }
         Relationships: []
       }
