@@ -949,7 +949,7 @@ function AchievementsPanel({
   onQueryChange: (value: string) => void;
   onRetry: (id: string) => void;
 }) {
-  const names = new Map(people.map((person) => [person.id, person.name]));
+  const names = new Map(people.map((person) => [person.id, person.name] as const));
   const term = query.trim().toLowerCase();
   const visible = awards.filter((award) =>
     `${names.get(award.user_id) ?? award.user_id} ${award.title} ${award.description} ${award.email_status}`
