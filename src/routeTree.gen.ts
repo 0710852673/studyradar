@@ -24,6 +24,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as FeaturesRouteImport } from './routes/features'
 import { Route as FeedbackRouteImport } from './routes/feedback'
+import { Route as GuidelinesRouteImport } from './routes/guidelines'
 import { Route as HelpRouteImport } from './routes/help'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as LearnRouteImport } from './routes/learn'
@@ -119,6 +120,11 @@ const FeaturesRoute = FeaturesRouteImport.update({
 const FeedbackRoute = FeedbackRouteImport.update({
   id: '/feedback',
   path: '/feedback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuidelinesRoute = GuidelinesRouteImport.update({
+  id: '/guidelines',
+  path: '/guidelines',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HelpRoute = HelpRouteImport.update({
@@ -243,6 +249,7 @@ export interface FileRoutesByFullPath {
   '/explore': typeof ExploreRoute
   '/features': typeof FeaturesRoute
   '/feedback': typeof FeedbackRoute
+  '/guidelines': typeof GuidelinesRoute
   '/help': typeof HelpRoute
   '/how-it-works': typeof HowItWorksRoute
   '/learn': typeof LearnRoute
@@ -281,6 +288,7 @@ export interface FileRoutesByTo {
   '/explore': typeof ExploreRoute
   '/features': typeof FeaturesRoute
   '/feedback': typeof FeedbackRoute
+  '/guidelines': typeof GuidelinesRoute
   '/help': typeof HelpRoute
   '/how-it-works': typeof HowItWorksRoute
   '/learn': typeof LearnRoute
@@ -319,6 +327,7 @@ export interface FileRoutesById {
   '/explore': typeof ExploreRoute
   '/features': typeof FeaturesRoute
   '/feedback': typeof FeedbackRoute
+  '/guidelines': typeof GuidelinesRoute
   '/help': typeof HelpRoute
   '/how-it-works': typeof HowItWorksRoute
   '/learn': typeof LearnRoute
@@ -359,6 +368,7 @@ export interface FileRouteTypes {
     | '/explore'
     | '/features'
     | '/feedback'
+    | '/guidelines'
     | '/help'
     | '/how-it-works'
     | '/learn'
@@ -397,6 +407,7 @@ export interface FileRouteTypes {
     | '/explore'
     | '/features'
     | '/feedback'
+    | '/guidelines'
     | '/help'
     | '/how-it-works'
     | '/learn'
@@ -434,6 +445,7 @@ export interface FileRouteTypes {
     | '/explore'
     | '/features'
     | '/feedback'
+    | '/guidelines'
     | '/help'
     | '/how-it-works'
     | '/learn'
@@ -473,6 +485,7 @@ export interface RootRouteChildren {
   ExploreRoute: typeof ExploreRoute
   FeaturesRoute: typeof FeaturesRoute
   FeedbackRoute: typeof FeedbackRoute
+  GuidelinesRoute: typeof GuidelinesRoute
   HelpRoute: typeof HelpRoute
   HowItWorksRoute: typeof HowItWorksRoute
   LearnRoute: typeof LearnRoute
@@ -599,6 +612,13 @@ declare module '@tanstack/react-router' {
       path: '/feedback'
       fullPath: '/feedback'
       preLoaderRoute: typeof FeedbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guidelines': {
+      id: '/guidelines'
+      path: '/guidelines'
+      fullPath: '/guidelines'
+      preLoaderRoute: typeof GuidelinesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/help': {
@@ -781,6 +801,7 @@ const rootRouteChildren: RootRouteChildren = {
   ExploreRoute: ExploreRoute,
   FeaturesRoute: FeaturesRoute,
   FeedbackRoute: FeedbackRoute,
+  GuidelinesRoute: GuidelinesRoute,
   HelpRoute: HelpRoute,
   HowItWorksRoute: HowItWorksRoute,
   LearnRoute: LearnRoute,
