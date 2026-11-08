@@ -62,6 +62,15 @@ export function subjectColor(subject: string): string {
   return `oklch(0.75 0.14 ${hash})`;
 }
 
+/**
+ * Central exam-date schedule used by onboarding, profile updates and the
+ * dashboard countdown. 2028 dates are provisional month markers (day 01).
+ */
 export function defaultExamDate(track: "AL" | "OL", year: number): string {
+  if (year === 2026 && track === "OL") return "2026-12-08";
+  if (year === 2027 && track === "AL") return "2027-08-03";
+  if (year === 2028) return track === "AL" ? "2028-08-01" : "2028-12-01";
+
+  // Keep the established month/day defaults for other exam years.
   return track === "AL" ? `${year}-08-03` : `${year}-12-08`;
 }
