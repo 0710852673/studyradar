@@ -78,6 +78,16 @@ export function SiteFooter() {
                 Terms &amp; Conditions
               </Link>
             </li>
+            <li>
+              <Link to="/help" className="transition-colors hover:text-foreground">
+                Help
+              </Link>
+            </li>
+            <li>
+              <Link to="/guidelines" className="transition-colors hover:text-foreground">
+                Community Guidelines
+              </Link>
+            </li>
           </ul>
         </div>
 
