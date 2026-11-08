@@ -98,7 +98,10 @@ function AdminPage() {
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "achievement_awards" },
-        () => void reload(),
+        () => {
+          toast.info("A student unlocked an achievement");
+          void reload();
+        },
       )
       .subscribe();
     return () => {
@@ -1003,14 +1006,20 @@ function AchievementsPanel({
 }
 
 async function retryAchievementEmail(awardId: string, reload: () => Promise<void>) {
-  const { error } = await supabase.functions.invoke("notify-achievement", {
-    body: { awardId },
-  });
-  if (error) {
-    toast.error("Could not send achievement email", { description: error.message });
-  } else {
-    toast.success("Achievement email processed");
-    await reload();
+  try {
+    const { error } = await supabase.functions.invoke("notify-achievement", {
+      body: { awardId },
+    });
+    if (error) {
+      toast.error("Could not send achievement email", { description: error.message });
+    } else {
+      toast.success("Achievement email processed");
+      await reload();
+    }
+  } catch (error) {
+    toast.error("Could not send achievement email", {
+      description: error instanceof Error ? error.message : "Network error",
+    });
   }
 }
 
