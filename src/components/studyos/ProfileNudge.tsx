@@ -29,10 +29,10 @@ export function ProfileNudge() {
   if (!profile.subjects.length) missing.push("your subjects");
   if (!profile.dailyGoalHours || profile.dailyGoalHours <= 0)
     missing.push("your daily study goal");
-  if (!profile.onboarded && missing.length === 0) missing.push("your exam setup");
+  if (!profile.onboarded) missing.push("finish onboarding");
   if (missing.length === 0) return null;
 
-  const requiredFields = 5;
+  const requiredFields = profile.track === "AL" ? 6 : 5;
   const completedFields = Math.max(0, requiredFields - missing.length);
 
   const dismiss = () => {
