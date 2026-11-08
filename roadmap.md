@@ -1,11 +1,23 @@
-# Study Radar ecosystem roadmap (see .lovable/plan/ for the approved plan)
-- [x] Phase 1a: real Contact form, Saved (per account), Feedback, Help, Community Guidelines, admin Inbox
-- [ ] Phase 0: Playwright e2e suite with throwaway accounts (save, refresh, privacy between students)
-- [ ] Phase 1b: notifications table, reports, audit log, per-module release switches
-- [ ] Phase 2: Content Hub + Reels from the database, admin content editor
-- [ ] Phase 3: Community rooms + Ask a Senior with reporting and moderation
-- [ ] Phase 4: Mentor / consulting cases (waits on: who the mentors are, under-18 volunteer policy)
-- [ ] Phase 5: Pathway, Opportunities (admin-curated, sourced), Skill Lab, Portfolio
-- [ ] Phase 6: real AI recommendations (waits on: OK to use AI credits)
-- [ ] Phase 7–8: admin expansion, curriculum tables
-- [ ] Phase 9: release-announcement workflow, send disabled (waits on: email sender domain)
+# Study Radar roadmap — startup-first (standalone value before community)
+
+Rules: additive migrations only, no data resets, privacy-by-default, no outbound sending, no AI credits, no publish without owner approval.
+
+## Now (standalone value for one student)
+- [x] Phase 1a: real Contact form, Saved, Feedback, Help, Guidelines, admin Inbox
+- [ ] Phase 0: end-to-end checks — study + wasted entries save and survive refresh; two students can't see each other's data
+- [ ] Phase 1b: admin release switches per module, admin audit log (no sending of anything)
+- [ ] Phase 2: Content Hub + Reels — admin-curated, database-backed, honest empty states, no uploads/likes/comments
+- [ ] Phase 5: Pathways, Opportunities (admin-curated with source link + verified date), Skill Lab progress, Portfolio (private)
+
+## Later (blocked)
+- Phase 9 announcements — blocked on a verified email sender domain and owner approval; sending stays disabled.
+- Phase 6 AI recommendations — blocked: AI credit usage not approved.
+- Phase 8 curriculum tables — after Phase 5.
+
+## Deferred community features (activate only when criteria are met)
+Community Rooms, Ask a Senior, peer discussion, mentor matching/consulting, community activities, social features.
+Activation criteria (all, measured from real data, demo accounts excluded):
+- At least 300 students active in a 30-day window, and at least 100 active weekly for 4 consecutive weeks.
+- At least 30 active students per subject before opening that subject's room.
+- Moderation ready: reporting, admin queue, guidelines acceptance, database-enforced rate limits.
+- Mentor matching additionally needs real, admin-verified mentors and an agreed under-18 safeguarding policy.
