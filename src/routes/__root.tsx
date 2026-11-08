@@ -132,6 +132,8 @@ const PUBLIC_PATHS = [
   "/ol-al",
   "/about",
   "/contact",
+  "/help",
+  "/guidelines",
 ];
 
 /** Modules that are built but not released yet — redirected away from. */

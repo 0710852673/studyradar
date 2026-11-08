@@ -5,6 +5,8 @@ import {
   CalendarDays,
   GraduationCap,
   Home,
+  Bookmark,
+  MessageSquare,
   ListChecks,
   Plus,
   Shield,
@@ -36,6 +38,8 @@ const SECONDARY = [
   { to: "/revision", label: "Syllabus", icon: ListChecks },
   { to: "/calendar", label: "Calendar", icon: CalendarDays },
   { to: "/achievements", label: "Achievements", icon: Trophy },
+  { to: "/saved", label: "Saved", icon: Bookmark },
+  { to: "/feedback", label: "Feedback", icon: MessageSquare },
 ] as const;
 
 function isActive(pathname: string, to: string) {

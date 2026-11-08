@@ -23,6 +23,8 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as FeaturesRouteImport } from './routes/features'
+import { Route as FeedbackRouteImport } from './routes/feedback'
+import { Route as HelpRouteImport } from './routes/help'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as LearnRouteImport } from './routes/learn'
 import { Route as MarksRouteImport } from './routes/marks'
@@ -35,6 +37,7 @@ import { Route as ProgressRouteImport } from './routes/progress'
 import { Route as ReelsRouteImport } from './routes/reels'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RevisionRouteImport } from './routes/revision'
+import { Route as SavedRouteImport } from './routes/saved'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SkillLabRouteImport } from './routes/skill-lab'
 import { Route as SubjectsRouteImport } from './routes/subjects'
@@ -113,6 +116,16 @@ const FeaturesRoute = FeaturesRouteImport.update({
   path: '/features',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FeedbackRoute = FeedbackRouteImport.update({
+  id: '/feedback',
+  path: '/feedback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HelpRoute = HelpRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HowItWorksRoute = HowItWorksRouteImport.update({
   id: '/how-it-works',
   path: '/how-it-works',
@@ -173,6 +186,11 @@ const RevisionRoute = RevisionRouteImport.update({
   path: '/revision',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SavedRoute = SavedRouteImport.update({
+  id: '/saved',
+  path: '/saved',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -224,6 +242,8 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/explore': typeof ExploreRoute
   '/features': typeof FeaturesRoute
+  '/feedback': typeof FeedbackRoute
+  '/help': typeof HelpRoute
   '/how-it-works': typeof HowItWorksRoute
   '/learn': typeof LearnRoute
   '/marks': typeof MarksRoute
@@ -236,6 +256,7 @@ export interface FileRoutesByFullPath {
   '/reels': typeof ReelsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/revision': typeof RevisionRoute
+  '/saved': typeof SavedRoute
   '/settings': typeof SettingsRoute
   '/skill-lab': typeof SkillLabRoute
   '/subjects': typeof SubjectsRouteWithChildren
@@ -259,6 +280,8 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/explore': typeof ExploreRoute
   '/features': typeof FeaturesRoute
+  '/feedback': typeof FeedbackRoute
+  '/help': typeof HelpRoute
   '/how-it-works': typeof HowItWorksRoute
   '/learn': typeof LearnRoute
   '/marks': typeof MarksRoute
@@ -271,6 +294,7 @@ export interface FileRoutesByTo {
   '/reels': typeof ReelsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/revision': typeof RevisionRoute
+  '/saved': typeof SavedRoute
   '/settings': typeof SettingsRoute
   '/skill-lab': typeof SkillLabRoute
   '/terms': typeof TermsRoute
@@ -294,6 +318,8 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/explore': typeof ExploreRoute
   '/features': typeof FeaturesRoute
+  '/feedback': typeof FeedbackRoute
+  '/help': typeof HelpRoute
   '/how-it-works': typeof HowItWorksRoute
   '/learn': typeof LearnRoute
   '/marks': typeof MarksRoute
@@ -306,6 +332,7 @@ export interface FileRoutesById {
   '/reels': typeof ReelsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/revision': typeof RevisionRoute
+  '/saved': typeof SavedRoute
   '/settings': typeof SettingsRoute
   '/skill-lab': typeof SkillLabRoute
   '/subjects': typeof SubjectsRouteWithChildren
@@ -331,6 +358,8 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/explore'
     | '/features'
+    | '/feedback'
+    | '/help'
     | '/how-it-works'
     | '/learn'
     | '/marks'
@@ -343,6 +372,7 @@ export interface FileRouteTypes {
     | '/reels'
     | '/reset-password'
     | '/revision'
+    | '/saved'
     | '/settings'
     | '/skill-lab'
     | '/subjects'
@@ -366,6 +396,8 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/explore'
     | '/features'
+    | '/feedback'
+    | '/help'
     | '/how-it-works'
     | '/learn'
     | '/marks'
@@ -378,6 +410,7 @@ export interface FileRouteTypes {
     | '/reels'
     | '/reset-password'
     | '/revision'
+    | '/saved'
     | '/settings'
     | '/skill-lab'
     | '/terms'
@@ -400,6 +433,8 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/explore'
     | '/features'
+    | '/feedback'
+    | '/help'
     | '/how-it-works'
     | '/learn'
     | '/marks'
@@ -412,6 +447,7 @@ export interface FileRouteTypes {
     | '/reels'
     | '/reset-password'
     | '/revision'
+    | '/saved'
     | '/settings'
     | '/skill-lab'
     | '/subjects'
@@ -436,6 +472,8 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   ExploreRoute: typeof ExploreRoute
   FeaturesRoute: typeof FeaturesRoute
+  FeedbackRoute: typeof FeedbackRoute
+  HelpRoute: typeof HelpRoute
   HowItWorksRoute: typeof HowItWorksRoute
   LearnRoute: typeof LearnRoute
   MarksRoute: typeof MarksRoute
@@ -448,6 +486,7 @@ export interface RootRouteChildren {
   ReelsRoute: typeof ReelsRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   RevisionRoute: typeof RevisionRoute
+  SavedRoute: typeof SavedRoute
   SettingsRoute: typeof SettingsRoute
   SkillLabRoute: typeof SkillLabRoute
   SubjectsRoute: typeof SubjectsRouteWithChildren
@@ -555,6 +594,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FeaturesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/feedback': {
+      id: '/feedback'
+      path: '/feedback'
+      fullPath: '/feedback'
+      preLoaderRoute: typeof FeedbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/help': {
+      id: '/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof HelpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/how-it-works': {
       id: '/how-it-works'
       path: '/how-it-works'
@@ -639,6 +692,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RevisionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/saved': {
+      id: '/saved'
+      path: '/saved'
+      fullPath: '/saved'
+      preLoaderRoute: typeof SavedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings': {
       id: '/settings'
       path: '/settings'
@@ -720,6 +780,8 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   ExploreRoute: ExploreRoute,
   FeaturesRoute: FeaturesRoute,
+  FeedbackRoute: FeedbackRoute,
+  HelpRoute: HelpRoute,
   HowItWorksRoute: HowItWorksRoute,
   LearnRoute: LearnRoute,
   MarksRoute: MarksRoute,
@@ -732,6 +794,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReelsRoute: ReelsRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   RevisionRoute: RevisionRoute,
+  SavedRoute: SavedRoute,
   SettingsRoute: SettingsRoute,
   SkillLabRoute: SkillLabRoute,
   SubjectsRoute: SubjectsRouteWithChildren,
