@@ -103,20 +103,26 @@ Deno.serve(async (req) => {
 
   const title = escapeHtml(award.title);
   const description = escapeHtml(award.description);
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from,
-      to: [recipient],
-      subject: `Study Radar achievement unlocked: ${award.title}`,
-      text: `Congratulations! You unlocked "${award.title}" on Study Radar. ${award.description}`,
-      html: `<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;padding:28px;color:#172033"><p style="color:#64748b;font-size:12px;letter-spacing:1px;text-transform:uppercase">Study Radar achievement</p><h1 style="font-size:26px;margin:12px 0">🏆 ${title}</h1><p style="line-height:1.6;color:#475569">${description}</p><p style="margin-top:28px;color:#64748b;font-size:13px">Keep learning, one session at a time.</p></div>`,
-    }),
-  });
+  let response: Response;
+  try {
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from,
+        to: [recipient],
+        subject: `Study Radar achievement unlocked: ${award.title}`,
+        text: `Congratulations! You unlocked "${award.title}" on Study Radar. ${award.description}`,
+        html: `<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;padding:28px;color:#172033"><p style="color:#64748b;font-size:12px;letter-spacing:1px;text-transform:uppercase">Study Radar achievement</p><h1 style="font-size:26px;margin:12px 0">🏆 ${title}</h1><p style="line-height:1.6;color:#475569">${description}</p><p style="margin-top:28px;color:#64748b;font-size:13px">Keep learning, one session at a time.</p></div>`,
+      }),
+    });
+  } catch {
+    await admin.from("achievement_awards").update({ email_status: "failed" }).eq("id", awardId);
+    return json({ error: "Email provider could not be reached" }, 502);
+  }
 
   if (!response.ok) {
     await admin.from("achievement_awards").update({ email_status: "failed" }).eq("id", awardId);
