@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { PageHero, PublicHeader } from "@/components/studyos/PublicHeader";
 import { SiteFooter } from "@/components/studyos/Footer";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -36,10 +37,23 @@ function ContactPage() {
   const [message, setMessage] = useState("");
   const [sent, setSent] = useState(false);
 
-  const submit = (e: React.FormEvent) => {
+  const [busy, setBusy] = useState(false);
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (message.trim().length < 5) return toast.error("Please write a little more.");
+    setBusy(true);
+    const { data: auth } = await supabase.auth.getUser();
+    const { error } = await supabase.from("contact_messages").insert({
+      topic,
+      name: name.trim().slice(0, 100),
+      email: email.trim().slice(0, 255),
+      message: message.trim().slice(0, 2000),
+      user_id: auth.user?.id ?? null,
+    });
+    setBusy(false);
+    if (error) return toast.error("Couldn't send your message. Please try again.");
     setSent(true);
-    toast.success("Thanks — your message has been noted.");
+    toast.success("Message sent to the Study Radar team.");
   };
 
   return (
@@ -59,7 +73,7 @@ function ContactPage() {
                 <h2 className="font-display text-lg font-semibold">Message received</h2>
                 <p className="mt-2 text-sm text-muted-foreground">
                   Thanks {name || "there"} — we'll reply to {email || "your email"} as soon as we
-                  can. For anything urgent, email us directly.
+                  can.
                 </p>
                 <Button variant="secondary" className="mt-5" onClick={() => setSent(false)}>
                   Send another message
@@ -104,7 +118,7 @@ function ContactPage() {
                   onChange={(e) => setMessage(e.target.value)}
                   required
                 />
-                <Button type="submit" size="lg" className="w-full">
+                <Button type="submit" size="lg" className="w-full" disabled={busy}>
                   <Send className="h-4 w-4" /> Send message
                 </Button>
                 <p className="text-xs text-muted-foreground">
