@@ -63,5 +63,5 @@ export function subjectColor(subject: string): string {
 }
 
 export function defaultExamDate(track: "AL" | "OL", year: number): string {
-  return track === "AL" ? `${year}-11-01` : `${year}-12-01`;
+  return track === "AL" ? `${year}-08-03` : `${year}-12-08`;
 }
