@@ -55,7 +55,10 @@ function FeedbackPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const text = message.trim();
-    if (text.length < 5) { toast.error("Please write a little more."); return; }
+    if (text.length < 5) {
+      toast.error("Please write a little more.");
+      return;
+    }
     setBusy(true);
     const { data: auth } = await supabase.auth.getUser();
     const { error } = auth.user
@@ -64,7 +67,10 @@ function FeedbackPage() {
           .insert({ user_id: auth.user.id, kind, message: text.slice(0, 2000), page: "/feedback" })
       : { error: new Error("signed out") };
     setBusy(false);
-    if (error) { toast.error("Couldn't send feedback. Please try again."); return; }
+    if (error) {
+      toast.error("Couldn't send feedback. Please try again.");
+      return;
+    }
     setMessage("");
     toast.success("Thanks — the team will read this.");
     void load();
