@@ -6,7 +6,7 @@ import {
   splitSubjects,
 } from "../src/lib/studyos/resources";
 import { buildInviteUrl, shareLink } from "../src/lib/studyos/share";
-import { sanitizeSecurityEvent } from "../src/lib/studyos/security";
+import { sanitizeSecurityEvent } from "../src/lib/studyos/security-events";
 
 describe("resource URL helpers", () => {
   test("accepts public HTTP and HTTPS URLs and removes fragments", () => {
