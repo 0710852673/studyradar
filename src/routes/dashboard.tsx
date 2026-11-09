@@ -45,6 +45,7 @@ import {
   toKey,
 } from "@/lib/studyos/analytics";
 import { subjectColor } from "@/lib/studyos/subjects";
+import { buildInviteUrl, shareLink } from "@/lib/studyos/share";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -123,30 +124,12 @@ function Dashboard() {
       });
       return;
     }
-    const url = new URL("/auth", window.location.origin);
-    url.searchParams.set("ref", referralCode);
-    const inviteUrl = url.toString();
-
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: "Join me on Study Radar",
-          text: "Track your study progress and prepare for exams with me.",
-          url: inviteUrl,
-        });
-        return;
-      } catch (error) {
-        if (error instanceof DOMException && error.name === "AbortError") return;
-        // If native sharing is unavailable or fails, fall through to copy.
-      }
-    }
-
-    try {
-      if (!navigator.clipboard?.writeText) throw new Error("Clipboard unavailable");
-      await navigator.clipboard.writeText(inviteUrl);
+    const inviteUrl = buildInviteUrl(window.location.origin, referralCode);
+    const result = await shareLink(inviteUrl);
+    if (result === "copied") {
       toast.success("Invite link copied", { description: "Send it to a friend to invite them." });
-    } catch {
-      window.prompt("Copy your personal Study Radar invite link:", inviteUrl);
+    } else if (result === "unavailable") {
+      toast.error("Could not share invite link", { description: "Your browser blocked sharing and copying. Try another browser." });
     }
   };
 
