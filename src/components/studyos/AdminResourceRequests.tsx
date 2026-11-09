@@ -73,14 +73,14 @@ export function AdminResourceRequests() {
         name: draft.name.trim(), url, normalized_url: resourceUrlKey(url),
         description: draft.description.trim(), category: draft.category.trim() || "Other",
         subjects: splitSubjects(draft.subjects), exams: draft.exams, publisher: draft.publisher.trim(),
-        status: draft.status, featured: draft.featured, created_by: auth.user.id,
+        status: draft.status, featured: draft.featured,
       };
       if (payload.name.length < 2 || payload.description.length < 10 || payload.publisher.length < 1 || payload.exams.length === 0) {
         throw new Error("Complete all required fields and choose at least one exam.");
       }
       const result = draft.id
         ? await supabase.from("resources").update(payload).eq("id", draft.id)
-        : await supabase.from("resources").insert(payload);
+        : await supabase.from("resources").insert({ ...payload, created_by: auth.user.id });
       if (result.error) throw result.error;
       toast.success(draft.id ? "Resource updated" : draft.status === "published" ? "Resource published" : "Resource saved as draft");
       setEditorOpen(false);
