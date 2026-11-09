@@ -228,6 +228,9 @@ function AdminPage() {
             />
             Exclude demo
           </label>
+          <Button size="sm" variant={section === "resources" ? "default" : "outline"} onClick={() => { setSection("resources"); setFocusId(null); }}>
+            <Globe className="mr-1.5 h-3.5 w-3.5" /> Manage resources
+          </Button>
           <Button size="sm" variant="outline" onClick={() => void reload()} disabled={loading}>
             <RefreshCw className={cn("mr-1.5 h-3.5 w-3.5", loading && "animate-spin")} />
             Refresh
