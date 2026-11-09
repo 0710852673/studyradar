@@ -3,3 +3,4 @@ DROP TRIGGER IF EXISTS achievement_awards_local_only ON public.achievement_award
 DROP FUNCTION IF EXISTS public.keep_achievement_awards_local();
 ALTER TABLE public.achievement_awards
   ALTER COLUMN email_status SET DEFAULT 'pending';
+COMMENT ON COLUMN public.achievement_awards.email_status IS 'Outbound achievement email delivery state.';
