@@ -9,8 +9,9 @@ import {
   Sparkles,
   TrendingUp,
   Share2,
+  Library,
 } from "lucide-react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Area,
   AreaChart,
@@ -181,7 +182,10 @@ function Dashboard() {
             Ready to make a little progress today?
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <Button asChild size="sm" variant="outline">
+            <Link to="/resources"><Library className="mr-1.5 h-3.5 w-3.5" />Resources</Link>
+          </Button>
           <p className="text-xs text-muted-foreground">
             {referralCount} {referralCount === 1 ? "friend" : "friends"} joined
           </p>
