@@ -69,7 +69,7 @@ const SECTIONS = [
   { id: "security", label: "Security", icon: ShieldAlert },
   { id: "settings", label: "Site settings", icon: Sliders },
   { id: "inbox", label: "Inbox & feedback", icon: Inbox },
-  { id: "resources", label: "Resource requests", icon: Link2 },
+  { id: "resources", label: "Resource Hub", icon: Link2 },
   { id: "data", label: "Data & backups", icon: Database },
 ] as const;
 type SectionId = (typeof SECTIONS)[number]["id"];
