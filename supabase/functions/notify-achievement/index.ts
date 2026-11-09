@@ -62,17 +62,22 @@ Deno.serve(async (req) => {
 
   if (awardError || !award) return json({ error: "Achievement not found" }, 404);
 
-  if (award.user_id !== authData.user.id) {
-    const { data: roles } = await admin
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", authData.user.id);
-    if (!(roles ?? []).some((row) => row.role === "admin")) {
-      return json({ error: "Not allowed" }, 403);
-    }
+  const { data: roles } = await admin
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", authData.user.id);
+  const isAdmin = (roles ?? []).some((row) => row.role === "admin");
+
+  if (award.user_id !== authData.user.id && !isAdmin) {
+    return json({ error: "Not allowed" }, 403);
   }
 
-  if (award.email_status === "sent" || award.email_status === "skipped") return json({ ok: true, alreadySent: true });
+  if (award.email_status === "sent") return json({ ok: true, alreadySent: true });
+  // Historical awards are skipped by default to avoid mass retroactive email.
+  // Only an administrator may explicitly resend one from the Control Room.
+  if (award.email_status === "skipped" && !isAdmin) {
+    return json({ error: "Only an administrator can send historical achievement emails" }, 403);
+  }
 
   const apiKey = Deno.env.get("RESEND_API_KEY");
   const from = Deno.env.get("RESEND_FROM_EMAIL");
@@ -87,7 +92,7 @@ Deno.serve(async (req) => {
     .from("achievement_awards")
     .update({ email_status: "sending" })
     .eq("id", awardId)
-    .in("email_status", ["pending", "failed"])
+    .in("email_status", isAdmin ? ["pending", "failed", "skipped"] : ["pending", "failed"])
     .select("id")
     .maybeSingle();
 
