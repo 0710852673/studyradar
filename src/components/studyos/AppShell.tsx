@@ -4,27 +4,18 @@ import {
   BookOpen,
   CalendarDays,
   ChartNoAxesCombined,
-  Compass,
-  FlaskConical,
-  Lightbulb,
-  LibraryBig,
-  MessageCircleQuestion,
-  BriefcaseBusiness,
-  Route,
-  Users,
-  Video,
   GraduationCap,
   Home,
   Bookmark,
-  MessageSquare,
   ListChecks,
   Menu,
   Plus,
   Shield,
-  Sparkles,
   Timer,
   Trophy,
   User,
+  MessageSquare,
+  LibraryBig,
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
@@ -44,25 +35,15 @@ const PRIMARY = [
 ] as const;
 
 const SECONDARY = [
-  { to: "/ai", label: "Study assistant", icon: Sparkles },
-  { to: "/timer", label: "Timer", icon: Timer },
   { to: "/marks", label: "Marks", icon: GraduationCap },
   { to: "/revision", label: "Syllabus", icon: ListChecks },
   { to: "/calendar", label: "Calendar", icon: CalendarDays },
+  { to: "/timer", label: "Timer", icon: Timer },
   { to: "/achievements", label: "Achievements", icon: Trophy },
-  { to: "/saved", label: "Saved", icon: Bookmark },
-  { to: "/feedback", label: "Feedback", icon: MessageSquare },
   { to: "/analytics", label: "Analytics", icon: ChartNoAxesCombined },
-  { to: "/ask-a-senior", label: "Ask a senior", icon: MessageCircleQuestion },
-  { to: "/community", label: "Community", icon: Users },
-  { to: "/explore", label: "Explore", icon: Compass },
-  { to: "/learn", label: "Learn", icon: Lightbulb },
-  { to: "/opportunities", label: "Opportunities", icon: BriefcaseBusiness },
-  { to: "/pathway", label: "Pathway", icon: Route },
-  { to: "/portfolio", label: "Portfolio", icon: GraduationCap },
-  { to: "/reels", label: "Reels", icon: Video },
+  { to: "/saved", label: "Saved", icon: Bookmark },
   { to: "/resources", label: "Resources", icon: LibraryBig },
-  { to: "/skill-lab", label: "Skill lab", icon: FlaskConical },
+  { to: "/feedback", label: "Feedback", icon: MessageSquare },
 ] as const;
 
 function isActive(pathname: string, to: string) {
@@ -200,7 +181,7 @@ export function AppShell({
         >
           <SheetHeader className="mb-5 pr-8 text-left">
             <SheetTitle>All features</SheetTitle>
-            <SheetDescription>Every Study Radar destination, in one place.</SheetDescription>
+            <SheetDescription>Available study tools and account features.</SheetDescription>
           </SheetHeader>
           <nav aria-label="All Study Radar features" className="grid grid-cols-2 gap-2">
             {mobileMoreNav.map((item) => {
