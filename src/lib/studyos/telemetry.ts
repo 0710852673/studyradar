@@ -8,20 +8,18 @@ export function pageCategory(path: string) {
   return CATEGORIES.has(first) ? first : "other";
 }
 
-/** Fire-and-forget activity record. `kind` is e.g. "visit", "login", "signup". */
+/** Records coarse, consent-based page activity for the signed-in member only. */
 export async function recordActivity(
   kind: string,
   opts: { userId?: string | null; email?: string | null; path?: string } = {},
 ) {
-  if (typeof window === "undefined") return;
-  if (!analyticsAllowed(opts.userId)) return;
-  if (kind !== "visit" && kind !== "login") return;
+  if (typeof window === "undefined" || !opts.userId) return;
+  if (!analyticsAllowed(opts.userId) || kind !== "visit") return;
   try {
     const ua = navigator.userAgent;
     const browser = /Edg\//.test(ua) ? "Edge" : /Firefox\//.test(ua) ? "Firefox" : /Chrome\//.test(ua) ? "Chrome" : /Safari\//.test(ua) ? "Safari" : "Other";
-    // Reuse existing nullable columns for coarse labels, never raw device details.
     await supabase.from("device_events").insert({
-      kind,
+      kind: "visit",
       path: pageCategory(opts.path ?? window.location.pathname),
       user_agent: browser,
       platform: /Mobi|Android/i.test(ua) ? "mobile" : "desktop",
@@ -33,9 +31,9 @@ export async function recordActivity(
 
 const seen = new Set<string>();
 
-/** Records a page view at most once per path per tab, to keep the log readable. */
+/** Records a page view at most once per path category per tab. */
 export function recordVisitOnce(path: string, userId: string | null, email?: string | null) {
-  if (!analyticsAllowed(userId)) return;
+  if (!userId || !analyticsAllowed(userId)) return;
   const key = `${userId}:${pageCategory(path)}`;
   if (seen.has(key)) return;
   seen.add(key);

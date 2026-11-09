@@ -8,6 +8,7 @@ import {
   Bookmark,
   MessageSquare,
   ListChecks,
+  Library,
   Plus,
   Shield,
   Sparkles,
@@ -33,6 +34,7 @@ const PRIMARY = [
 ] as const;
 
 const SECONDARY = [
+  { to: "/resources", label: "Resources", icon: Library },
   { to: "/ai", label: "Study assistant", icon: Sparkles },
   { to: "/timer", label: "Timer", icon: Timer },
   { to: "/marks", label: "Marks", icon: GraduationCap },
@@ -111,6 +113,10 @@ export function AppShell({
             ) : null}
           </div>
           <div className="flex shrink-0 items-center gap-2">
+            <Link to="/resources" aria-label="Open Resource Hub" className={cn("inline-flex items-center gap-1.5 rounded-lg px-2 py-2 text-xs transition-colors", isActive(pathname, "/resources") ? "bg-brand-soft text-primary" : "text-muted-foreground hover:bg-accent hover:text-foreground")}>
+              <Library className="h-4 w-4" />
+              <span className="hidden sm:inline">Resources</span>
+            </Link>
             <NotificationBell />
             <div className="hidden sm:block">
               <QuickLogButton />

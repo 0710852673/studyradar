@@ -131,7 +131,7 @@ function AuthPage() {
         void logSecurityEvent("sign_in_failed", {
           severity: "warning",
           email: email.trim(),
-          detail: err.message,
+          detail: "Password sign-in was rejected.",
         });
       } else void navigate({ to: "/dashboard", replace: true });
     }
@@ -168,7 +168,7 @@ function AuthPage() {
       fail(err instanceof Error ? err.message : "Google sign-in failed.");
       void logSecurityEvent("google_sign_in_failed", {
         severity: "warning",
-        detail: err instanceof Error ? err.message : "unknown",
+        detail: "Google OAuth initialization failed.",
       });
       setBusy(false);
       return;

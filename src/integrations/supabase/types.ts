@@ -701,6 +701,7 @@ export type Database = {
         Returns: boolean
       }
       normalize_resource_url: { Args: { input: string }; Returns: string }
+      approve_resource_suggestion: { Args: { p_suggestion_id: string; p_admin_response?: string | null }; Returns: string }
       record_my_referral: { Args: { p_code: string }; Returns: boolean }
     }
     Enums: {

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { InboxPanel } from "@/components/studyos/AdminInbox";
+import { AdminResourcesPanel } from "@/components/studyos/AdminResourcesPanel";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Activity,
@@ -62,6 +63,7 @@ const SECTIONS = [
   { id: "overview", label: "Overview", icon: LayoutGrid },
   { id: "students", label: "Students", icon: Users },
   { id: "achievements", label: "Achievements", icon: Trophy },
+  { id: "resources", label: "Resources", icon: Globe },
   { id: "analytics", label: "Analytics", icon: BarChart3 },
   { id: "activity", label: "Activity & devices", icon: Globe },
   { id: "security", label: "Security", icon: ShieldAlert },
@@ -226,6 +228,9 @@ function AdminPage() {
             />
             Exclude demo
           </label>
+          <Button size="sm" variant={section === "resources" ? "default" : "outline"} onClick={() => { setSection("resources"); setFocusId(null); }}>
+            <Globe className="mr-1.5 h-3.5 w-3.5" /> Manage resources
+          </Button>
           <Button size="sm" variant="outline" onClick={() => void reload()} disabled={loading}>
             <RefreshCw className={cn("mr-1.5 h-3.5 w-3.5", loading && "animate-spin")} />
             Refresh
@@ -386,6 +391,8 @@ function AdminPage() {
                 onRetry={(id) => void retryAchievementEmail(id, reload)}
               />
             ) : null}
+
+            {section === "resources" ? <AdminResourcesPanel /> : null}
 
             {section === "settings" ? (
               <SiteSettingsPanel settings={settings} onSaved={refreshSettings} />
