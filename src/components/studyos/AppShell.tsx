@@ -57,7 +57,7 @@ export function AppShell({
   children: ReactNode;
 }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { isAdmin } = useStudyOS();
+  const { isAdmin, isAdminPreviewData } = useStudyOS();
   const [logOpen, setLogOpen] = useState(false);
 
   const desktopNav = [
@@ -119,7 +119,14 @@ export function AppShell({
 
         </header>
 
-        <main className="px-4 pb-28 pt-5 sm:px-6 lg:pb-10">{children}</main>
+        <main className="px-4 pb-28 pt-5 sm:px-6 lg:pb-10">
+          {isAdminPreviewData ? (
+            <div className="mb-4 rounded-xl border border-primary/25 bg-primary/5 px-3 py-2 text-xs text-muted-foreground">
+              Personal preview data is active. These sample study records are stored only in this browser for your admin account and are excluded from platform/admin analytics.
+            </div>
+          ) : null}
+          {children}
+        </main>
 
         <footer className="border-t border-border px-4 py-6 text-center text-[11px] text-muted-foreground sm:px-6 lg:pb-8">
           Study Radar · built for Sri Lankan O/L &amp; A/L students
