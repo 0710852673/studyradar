@@ -20,3 +20,8 @@ BEGIN
   RETURN NEW;
 END;
 $$;
+
+DROP TRIGGER IF EXISTS profiles_protect_moderation ON public.profiles;
+CREATE TRIGGER profiles_protect_moderation
+  BEFORE UPDATE ON public.profiles
+  FOR EACH ROW EXECUTE FUNCTION public.protect_profile_moderation();
