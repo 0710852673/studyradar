@@ -1,6 +1,7 @@
 import type { Profile, StudyOSData, StudySession } from "./types";
 
 const KEY_PREFIX = "study-radar:admin-personal-preview:v1:";
+const dateKey = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 
 const fallbackSubjects = (track: Profile["track"]) =>
   track === "OL"
@@ -31,7 +32,7 @@ function makePreviewData(profile: Profile): StudyOSData {
     for (let i = 0; i < count; i++) {
       const subject = subjects[Math.floor(random() * subjects.length)]!;
       const minutes = 35 + Math.floor(random() * 86);
-      const date = day.toISOString().slice(0, 10);
+      const date = dateKey(day);
       sessions.push({
         id: `admin-preview:session:${date}:${sessions.length}`,
         date,
@@ -72,7 +73,7 @@ function makePreviewData(profile: Profile): StudyOSData {
         id: `admin-preview:mark:${index}:${attempt}`,
         subject,
         examName: ["Monthly test", "Timed paper", "Term assessment"][attempt]!,
-        date: date.toISOString().slice(0, 10),
+        date: dateKey(date),
         marks: Math.min(96, base),
         total,
       };
