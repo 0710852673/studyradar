@@ -36,28 +36,18 @@ export function AdminResourcesPanel() {
     try {
       const response = (responses[item.id] ?? "").trim();
       if (decision === "approved") {
-        const { data: userResult } = await supabase.auth.getUser();
-        const publisher = new URL(item.url).hostname.replace(/^www\./, "");
-        const { error: publishError } = await supabase.from("resources").insert({
-          name: item.name,
-          url: item.url,
-          normalized_url: item.url.replace(/^https?:\/\//i, "").replace(/#.*$/, "").replace(/\/+$/, "").toLowerCase(),
-          description: item.description,
-          category: item.category,
-          subjects: item.subjects,
-          exams: item.exams,
-          publisher,
-          status: "published",
-          featured: false,
-          created_by: userResult.user?.id ?? null,
+        const { error } = await supabase.rpc("approve_resource_suggestion", {
+          p_suggestion_id: item.id,
+          p_admin_response: response || null,
         });
-        if (publishError) throw publishError;
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("resource_suggestions").update({
+          status: "rejected",
+          admin_response: response || "Thanks for the suggestion. It was not added to the directory.",
+        }).eq("id", item.id);
+        if (error) throw error;
       }
-      const { error } = await supabase.from("resource_suggestions").update({
-        status: decision,
-        admin_response: response || (decision === "approved" ? "Approved and added to the Resource Hub." : "Thanks for the suggestion. It was not added to the directory."),
-      }).eq("id", item.id);
-      if (error) throw error;
       toast.success(decision === "approved" ? "Resource published" : "Suggestion declined");
       await load();
     } catch (error) {
