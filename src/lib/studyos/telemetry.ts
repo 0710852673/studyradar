@@ -19,7 +19,6 @@ export async function recordActivity(
     const ua = navigator.userAgent;
     const browser = /Edg\//.test(ua) ? "Edge" : /Firefox\//.test(ua) ? "Firefox" : /Chrome\//.test(ua) ? "Chrome" : /Safari\//.test(ua) ? "Safari" : "Other";
     await supabase.from("device_events").insert({
-      user_id: opts.userId,
       kind: "visit",
       path: pageCategory(opts.path ?? window.location.pathname),
       user_agent: browser,
