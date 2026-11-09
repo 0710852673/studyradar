@@ -37,6 +37,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProgressRouteImport } from './routes/progress'
 import { Route as ReelsRouteImport } from './routes/reels'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as ResourcesRouteImport } from './routes/resources'
 import { Route as RevisionRouteImport } from './routes/revision'
 import { Route as SavedRouteImport } from './routes/saved'
 import { Route as SettingsRouteImport } from './routes/settings'
@@ -187,6 +188,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResourcesRoute = ResourcesRouteImport.update({
+  id: '/resources',
+  path: '/resources',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RevisionRoute = RevisionRouteImport.update({
   id: '/revision',
   path: '/revision',
@@ -262,6 +268,7 @@ export interface FileRoutesByFullPath {
   '/progress': typeof ProgressRoute
   '/reels': typeof ReelsRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/resources': typeof ResourcesRoute
   '/revision': typeof RevisionRoute
   '/saved': typeof SavedRoute
   '/settings': typeof SettingsRoute
@@ -301,6 +308,7 @@ export interface FileRoutesByTo {
   '/progress': typeof ProgressRoute
   '/reels': typeof ReelsRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/resources': typeof ResourcesRoute
   '/revision': typeof RevisionRoute
   '/saved': typeof SavedRoute
   '/settings': typeof SettingsRoute
@@ -340,6 +348,7 @@ export interface FileRoutesById {
   '/progress': typeof ProgressRoute
   '/reels': typeof ReelsRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/resources': typeof ResourcesRoute
   '/revision': typeof RevisionRoute
   '/saved': typeof SavedRoute
   '/settings': typeof SettingsRoute
@@ -381,6 +390,7 @@ export interface FileRouteTypes {
     | '/progress'
     | '/reels'
     | '/reset-password'
+    | '/resources'
     | '/revision'
     | '/saved'
     | '/settings'
@@ -420,6 +430,7 @@ export interface FileRouteTypes {
     | '/progress'
     | '/reels'
     | '/reset-password'
+    | '/resources'
     | '/revision'
     | '/saved'
     | '/settings'
@@ -458,6 +469,7 @@ export interface FileRouteTypes {
     | '/progress'
     | '/reels'
     | '/reset-password'
+    | '/resources'
     | '/revision'
     | '/saved'
     | '/settings'
@@ -498,6 +510,7 @@ export interface RootRouteChildren {
   ProgressRoute: typeof ProgressRoute
   ReelsRoute: typeof ReelsRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  ResourcesRoute: typeof ResourcesRoute
   RevisionRoute: typeof RevisionRoute
   SavedRoute: typeof SavedRoute
   SettingsRoute: typeof SettingsRoute
@@ -705,6 +718,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/resources': {
+      id: '/resources'
+      path: '/resources'
+      fullPath: '/resources'
+      preLoaderRoute: typeof ResourcesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/revision': {
       id: '/revision'
       path: '/revision'
@@ -814,6 +834,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProgressRoute: ProgressRoute,
   ReelsRoute: ReelsRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  ResourcesRoute: ResourcesRoute,
   RevisionRoute: RevisionRoute,
   SavedRoute: SavedRoute,
   SettingsRoute: SettingsRoute,

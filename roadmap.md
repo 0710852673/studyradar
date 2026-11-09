@@ -2,6 +2,16 @@
 
 Rules: additive migrations only, no data resets, privacy-by-default, no outbound sending, no AI credits, no publish without owner approval.
 
+## Study Radar 1.0 polish (current owner request)
+- [ ] Audit routes, schema, unfinished flows and current build state
+- [ ] Separate polished admin command centre; mobile navigation; real management and audit views
+- [ ] Database-backed Resource Hub with four owner-supplied external resources and admin CRUD
+- [ ] Student resource suggestions with owner-only status, admin review, URL checks and abuse controls
+- [ ] Idempotent achievement awards and safe admin visibility; no member notifications
+- [ ] Working native share/copy-link invite flow without referral-attribution claims
+- [ ] Fix high-impact countdown, accessibility, loading/empty/error and data-saving bugs
+- [ ] Focused tests, typecheck/build verification, and safe launch-readiness checkpoint
+
 ## Now (standalone value for one student)
 - [x] Phase 1a: real Contact form, Saved, Feedback, Help, Guidelines, admin Inbox
 - [ ] Phase 0: end-to-end checks — study + wasted entries save and survive refresh; two students can't see each other's data
