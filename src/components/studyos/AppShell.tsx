@@ -8,6 +8,7 @@ import {
   Bookmark,
   MessageSquare,
   ListChecks,
+  Menu,
   Plus,
   Shield,
   Sparkles,
@@ -19,11 +20,11 @@ import { useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { LogForm, QuickLogButton } from "./QuickLog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useStudyOS } from "@/lib/studyos/store";
 import { NotificationBell } from "./Notifications";
 import { AssistantWidget } from "./AssistantWidget";
 import { ProfileNudge } from "./ProfileNudge";
-
 
 const PRIMARY = [
   { to: "/dashboard", label: "Home", icon: Home },
@@ -59,12 +60,19 @@ export function AppShell({
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { isAdmin, isAdminPreviewData } = useStudyOS();
   const [logOpen, setLogOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
 
   const desktopNav = [
     ...PRIMARY,
     ...SECONDARY,
     ...(isAdmin ? ([{ to: "/admin", label: "Admin", icon: Shield }] as const) : []),
   ];
+  const mobileMoreNav = [
+    ...SECONDARY,
+    PRIMARY[3],
+    ...(isAdmin ? ([{ to: "/admin", label: "Admin", icon: Shield }] as const) : []),
+  ];
+  const moreIsActive = mobileMoreNav.some((item) => isActive(pathname, item.to));
 
   return (
     <div className="min-h-screen w-full bg-background">
@@ -116,7 +124,6 @@ export function AppShell({
               <QuickLogButton />
             </div>
           </div>
-
         </header>
 
         <main className="px-4 pb-28 pt-5 sm:px-6 lg:pb-10">
@@ -133,7 +140,7 @@ export function AppShell({
         </footer>
       </div>
 
-      {/* Mobile: Home · Subjects · Log · Progress · Profile */}
+      {/* Mobile navigation keeps core destinations visible and puts every other route in More. */}
       <nav className="fixed inset-x-0 bottom-0 z-30 flex items-end justify-around border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden">
         {PRIMARY.slice(0, 2).map((item) => (
           <NavItem key={item.to} item={item} pathname={pathname} />
@@ -148,10 +155,56 @@ export function AppShell({
           </span>
           <span className="-mt-2">Log</span>
         </button>
-        {PRIMARY.slice(2).map((item) => (
-          <NavItem key={item.to} item={item} pathname={pathname} />
-        ))}
+        <NavItem item={PRIMARY[2]} pathname={pathname} />
+        <button
+          type="button"
+          onClick={() => setMoreOpen(true)}
+          aria-label="Open more navigation"
+          aria-haspopup="dialog"
+          aria-expanded={moreOpen}
+          className={cn(
+            "flex flex-1 flex-col items-center gap-1 py-2.5 text-[10px] transition-colors",
+            moreIsActive || moreOpen ? "text-primary" : "text-muted-foreground",
+          )}
+        >
+          <Menu className="h-5 w-5" />
+          More
+        </button>
       </nav>
+
+      <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
+        <SheetContent
+          side="bottom"
+          className="max-h-[85dvh] overflow-y-auto rounded-t-2xl border-border px-4 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] pt-6 lg:hidden"
+        >
+          <SheetHeader className="mb-5 pr-8 text-left">
+            <SheetTitle>All features</SheetTitle>
+            <SheetDescription>Every Study Radar destination, in one place.</SheetDescription>
+          </SheetHeader>
+          <nav aria-label="All Study Radar features" className="grid grid-cols-2 gap-2">
+            {mobileMoreNav.map((item) => {
+              const active = isActive(pathname, item.to);
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  onClick={() => setMoreOpen(false)}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "flex min-h-14 items-center gap-3 rounded-xl border px-3 py-3 text-sm transition-colors",
+                    active
+                      ? "border-primary/40 bg-primary/10 text-primary"
+                      : "border-border bg-card text-foreground hover:bg-accent",
+                  )}
+                >
+                  <item.icon className="h-5 w-5 shrink-0" />
+                  <span className="min-w-0">{item.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
+        </SheetContent>
+      </Sheet>
 
       <Dialog open={logOpen} onOpenChange={setLogOpen}>
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
@@ -179,6 +232,7 @@ function NavItem({
   return (
     <Link
       to={item.to}
+      aria-current={active ? "page" : undefined}
       className={cn(
         "flex flex-1 flex-col items-center gap-1 py-2.5 text-[10px] transition-colors",
         active ? "text-primary" : "text-muted-foreground",
