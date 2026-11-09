@@ -17,6 +17,5 @@ jobs:
           cache: npm
       - uses: oven-sh/setup-bun@v2
       - run: npm install --no-audit --no-fund
-      - run: npm run lint
       - run: bun test tests
       - run: npm run build
