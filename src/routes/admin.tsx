@@ -970,7 +970,7 @@ function AchievementsPanel({
       .includes(term),
   );
   const sent = awards.filter((award) => award.email_status === "sent").length;
-  const pending = awards.filter((award) => ["pending", "sending", "failed"].includes(award.email_status)).length;
+  const pending = awards.filter((award) => ["pending", "sending", "failed", "skipped"].includes(award.email_status)).length;
 
   return (
     <div className="space-y-4">
@@ -1002,9 +1002,9 @@ function AchievementsPanel({
               <Tag tone={award.email_status === "sent" ? "good" : award.email_status === "failed" ? "bad" : undefined}>
                 Email {award.email_status}
               </Tag>
-              {(award.email_status === "pending" || award.email_status === "failed") ? (
+              {(award.email_status === "pending" || award.email_status === "failed" || award.email_status === "skipped") ? (
                 <Button size="sm" variant="outline" onClick={() => onRetry(award.id)}>
-                  Retry email
+                  {award.email_status === "skipped" ? "Send email" : "Retry email"}
                 </Button>
               ) : null}
             </div>
