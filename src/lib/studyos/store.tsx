@@ -14,6 +14,7 @@ import { syncConsent } from "./security";
 import { recordActivity } from "./telemetry";
 import { allowWrite, retryInSeconds, setWriteLimit } from "./ratelimit";
 import { defaultExamDate } from "./subjects";
+import { isAdminPreviewId, loadAdminPersonalPreview, saveAdminPersonalPreview } from "./admin-personal-preview";
 import {
   DEFAULT_SETTINGS,
   EMPTY_DATA,
@@ -224,8 +225,9 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
       setAvatarSrc(signed?.signedUrl ?? null);
     }
 
-    setIsAdmin((roles.data ?? []).some((r: { role: string }) => r.role === "admin"));
-    setData({
+    const admin = (roles.data ?? []).some((r: { role: string }) => r.role === "admin");
+    setIsAdmin(admin);
+    const accountData: StudyOSData = {
       wasted: ((wasted as any).data ?? []).map((w: any) => ({
         id: w.id,
         date: w.date,
@@ -254,7 +256,18 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
         title: c.title,
         status: c.status as ChapterStatus,
       })),
-    });
+    };
+    if (admin && prof) {
+      const preview = loadAdminPersonalPreview(uid, prof);
+      setData({
+        sessions: [...accountData.sessions, ...preview.sessions],
+        marks: [...accountData.marks, ...preview.marks],
+        chapters: [...accountData.chapters, ...preview.chapters],
+        wasted: [...accountData.wasted, ...preview.wasted],
+      });
+    } else {
+      setData(accountData);
+    }
   }, []);
 
   useEffect(() => {
