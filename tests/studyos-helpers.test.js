@@ -6,6 +6,7 @@ import {
   splitSubjects,
 } from "../src/lib/studyos/resources";
 import { buildInviteUrl, shareLink } from "../src/lib/studyos/share";
+import { sanitizeSecurityEvent } from "../src/lib/studyos/security";
 
 describe("resource URL helpers", () => {
   test("accepts public HTTP and HTTPS URLs and removes fragments", () => {
@@ -89,5 +90,26 @@ describe("invite sharing helpers", () => {
       },
     });
     expect(result).toBe("cancelled");
+  });
+});
+
+
+describe("security event validation", () => {
+  test("accepts only known authentication failure events and bounds fields", () => {
+    expect(sanitizeSecurityEvent({
+      kind: "sign_in_failed",
+      severity: "warning",
+      email: " STUDENT@EXAMPLE.COM ",
+      detail: "x".repeat(300),
+    })).toEqual({
+      kind: "sign_in_failed",
+      severity: "warning",
+      email: "student@example.com",
+      detail: "x".repeat(160),
+    });
+  });
+
+  test("rejects arbitrary event names", () => {
+    expect(sanitizeSecurityEvent({ kind: "admin_role_granted", severity: "critical" })).toBeNull();
   });
 });
