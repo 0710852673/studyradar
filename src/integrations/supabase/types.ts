@@ -47,6 +47,36 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_audit_events: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          detail: string | null
+          entity_id: string | null
+          entity_type: string
+          id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          detail?: string | null
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          detail?: string | null
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+        }
+        Relationships: []
+      }
       chapters: {
         Row: {
           created_at: string
@@ -359,6 +389,114 @@ export type Database = {
         }
         Relationships: []
       }
+      resource_suggestions: {
+        Row: {
+          admin_response: string | null
+          category: string
+          created_at: string
+          description: string
+          exams: string[]
+          id: string
+          name: string
+          normalized_url: string
+          reason: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          subjects: string[]
+          updated_at: string
+          url: string
+          user_id: string
+        }
+        Insert: {
+          admin_response?: string | null
+          category: string
+          created_at?: string
+          description: string
+          exams?: string[]
+          id?: string
+          name: string
+          normalized_url: string
+          reason: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          subjects?: string[]
+          updated_at?: string
+          url: string
+          user_id: string
+        }
+        Update: {
+          admin_response?: string | null
+          category?: string
+          created_at?: string
+          description?: string
+          exams?: string[]
+          id?: string
+          name?: string
+          normalized_url?: string
+          reason?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          subjects?: string[]
+          updated_at?: string
+          url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      resources: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string | null
+          description: string
+          exams: string[]
+          featured: boolean
+          id: string
+          name: string
+          normalized_url: string
+          publisher: string
+          status: string
+          subjects: string[]
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          exams?: string[]
+          featured?: boolean
+          id?: string
+          name: string
+          normalized_url: string
+          publisher: string
+          status?: string
+          subjects?: string[]
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          exams?: string[]
+          featured?: boolean
+          id?: string
+          name?: string
+          normalized_url?: string
+          publisher?: string
+          status?: string
+          subjects?: string[]
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
       saved_items: {
         Row: {
           created_at: string
@@ -562,6 +700,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      normalize_resource_url: { Args: { input: string }; Returns: string }
       record_my_referral: { Args: { p_code: string }; Returns: boolean }
     }
     Enums: {
