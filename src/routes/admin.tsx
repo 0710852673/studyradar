@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { InboxPanel } from "@/components/studyos/AdminInbox";
+import { AdminResourceRequests } from "@/components/studyos/AdminResourceRequests";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Activity,
@@ -12,6 +13,7 @@ import {
   Globe,
   Inbox,
   LayoutGrid,
+  Link2,
   Radar,
   RefreshCw,
   Search,
@@ -67,6 +69,7 @@ const SECTIONS = [
   { id: "security", label: "Security", icon: ShieldAlert },
   { id: "settings", label: "Site settings", icon: Sliders },
   { id: "inbox", label: "Inbox & feedback", icon: Inbox },
+  { id: "resources", label: "Resource requests", icon: Link2 },
   { id: "data", label: "Data & backups", icon: Database },
 ] as const;
 type SectionId = (typeof SECTIONS)[number]["id"];
@@ -392,6 +395,7 @@ function AdminPage() {
             ) : null}
 
             {section === "inbox" ? <InboxPanel /> : null}
+            {section === "resources" ? <AdminResourceRequests /> : null}
             {section === "data" ? <DataPanel snap={snap} /> : null}
           </>
         )}
