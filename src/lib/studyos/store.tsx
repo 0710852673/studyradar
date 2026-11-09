@@ -110,6 +110,7 @@ interface Store {
   user: User | null;
   session: Session | null;
   isAdmin: boolean;
+  isAdminPreviewData: boolean;
   profile: Profile | null;
   avatarSrc: string | null;
   data: StudyOSData;
@@ -138,6 +139,7 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdminPreviewData, setIsAdminPreviewData] = useState(false);
   const [data, setData] = useState<StudyOSData>(EMPTY_DATA);
   const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
 
@@ -258,6 +260,7 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
       })),
     };
     if (admin && prof) {
+      setIsAdminPreviewData(true);
       const preview = loadAdminPersonalPreview(uid, prof);
       setData({
         sessions: [...accountData.sessions, ...preview.sessions],
@@ -266,6 +269,7 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
         wasted: [...accountData.wasted, ...preview.wasted],
       });
     } else {
+      setIsAdminPreviewData(false);
       setData(accountData);
     }
   }, []);
@@ -284,6 +288,7 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
         setProfile(null);
         setAvatarSrc(null);
         setIsAdmin(false);
+        setIsAdminPreviewData(false);
         setData(EMPTY_DATA);
         setReady(true);
       }
@@ -316,6 +321,7 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
       session,
       user: session?.user ?? null,
       isAdmin,
+      isAdminPreviewData,
       profile,
       avatarSrc,
       data,
@@ -460,6 +466,7 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
       ready,
       session,
       isAdmin,
+      isAdminPreviewData,
       profile,
       avatarSrc,
       data,
