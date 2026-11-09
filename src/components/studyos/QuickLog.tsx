@@ -61,7 +61,9 @@ export function LogForm({
   const [kind, setKind] = useState<"study" | "waste">("study");
   const subjects = profile?.subjects ?? [];
   const [subject, setSubject] = useState(initialSubject ?? subjects[0] ?? "");
-  const [minutes, setMinutes] = useState(initialMinutes ?? 0);
+  const [studyMinutes, setStudyMinutes] = useState(initialMinutes ?? 0);
+  const [wasteMinutes, setWasteMinutes] = useState(0);
+  const minutes = kind === "study" ? studyMinutes : wasteMinutes;
   const [noteOpen, setNoteOpen] = useState(false);
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
@@ -69,6 +71,16 @@ export function LogForm({
   useEffect(() => {
     if (!subject && subjects[0]) setSubject(subjects[0]);
   }, [subject, subjects]);
+
+  const addMinutes = (amount: number) => {
+    if (kind === "study") setStudyMinutes((current) => current + amount);
+    else setWasteMinutes((current) => current + amount);
+  };
+
+  const clearMinutes = () => {
+    if (kind === "study") setStudyMinutes(0);
+    else setWasteMinutes(0);
+  };
 
   const save = async () => {
     if (minutes <= 0 || saving) return;
@@ -136,7 +148,7 @@ export function LogForm({
         </p>
         <div className="flex flex-wrap gap-2">
           {ADD.map((a) => (
-            <Chip key={a.label} onClick={() => setMinutes((m) => m + a.minutes)}>
+            <Chip key={a.label} onClick={() => addMinutes(a.minutes)}>
               {a.label}
             </Chip>
           ))}
@@ -148,7 +160,7 @@ export function LogForm({
           {minutes > 0 ? (
             <button
               type="button"
-              onClick={() => setMinutes(0)}
+              onClick={clearMinutes}
               className="text-xs text-muted-foreground hover:text-foreground"
             >
               Clear
