@@ -76,7 +76,6 @@ export type AdminDevice = {
   user_id: string | null;
   kind: string;
   path: string | null;
-  user_agent: string | null;
   platform: string | null;
   created_at: string;
 };
@@ -133,7 +132,7 @@ export const EMPTY_SNAPSHOT: AdminSnapshot = {
 };
 
 const PROFILE_COLUMNS = "id,name,email,track,exam_year,exam_date,stream,subjects,daily_target_hours,onboarded,avatar_url,city,district,school,grade,bio,suspended,suspended_reason,suspended_at,is_demo,terms_accepted_at,last_seen_at,created_at";
-const DEVICE_COLUMNS = "id,user_id,kind,path,user_agent,platform,created_at";
+const DEVICE_COLUMNS = "id,user_id,kind,path,platform,created_at";
 
 /** All admin reads are checked together; partial data is never presented as a complete platform snapshot. */
 export async function loadSnapshot(): Promise<AdminSnapshot> {
@@ -214,7 +213,6 @@ export function summarizeActivity(rows: AdminDevice[]) {
     logins: rows.filter((row) => row.kind === "login").length,
     byPage: countBy(rows, (row) => row.path),
     byDevice: countBy(rows, (row) => row.platform),
-    byBrowser: countBy(rows, (row) => row.user_agent),
     uniqueVisitors: null,
   };
 }
