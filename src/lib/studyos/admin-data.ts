@@ -77,6 +77,7 @@ export type AdminDevice = {
   kind: string;
   path: string | null;
   platform: string | null;
+  user_agent?: string | null;
   created_at: string;
 };
 export type AdminRole = { user_id: string; role: string };
@@ -238,7 +239,7 @@ export function activeWithin(sessions: AdminSession[], days: number) {
   const since = dayKey(new Date(Date.now() - (days - 1) * 864e5));
   return new Set(sessions.filter((s) => s.date >= since).map((s) => s.user_id)).size;
 }
-export function dailyMinutes(sessions: AdminSession[], days: number) {
+export function dailyMinutes<T extends { date: string; minutes: number }>(sessions: T[], days: number) {
   const map = new Map<string, number>();
   for (const s of sessions) map.set(s.date, (map.get(s.date) ?? 0) + s.minutes);
   return Array.from({ length: days }, (_, i) => {
