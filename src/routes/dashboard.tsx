@@ -78,7 +78,7 @@ function ChartTip({ active, payload, label }: any) {
 }
 
 function Dashboard() {
-  const { data, profile } = useStudyOS();
+  const { data, profile, isAdminPreviewData } = useStudyOS();
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [referralCount, setReferralCount] = useState(0);
   const [referralLoading, setReferralLoading] = useState(true);
@@ -86,7 +86,12 @@ function Dashboard() {
   const profileId = profile?.id;
 
   useEffect(() => {
-    if (!profileId) return;
+    if (!profileId || isAdminPreviewData) {
+      setReferralCode(null);
+      setReferralCount(0);
+      setReferralLoading(false);
+      return;
+    }
     let active = true;
     const loadReferrals = async () => {
       setReferralLoading(true);
@@ -114,7 +119,7 @@ function Dashboard() {
     return () => {
       active = false;
     };
-  }, [profileId]);
+  }, [profileId, isAdminPreviewData]);
 
   const inviteFriends = async () => {
     if (!referralCode) {
@@ -198,7 +203,7 @@ function Dashboard() {
             Ready to make a little progress today?
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        {!isAdminPreviewData ? <div className="flex items-center gap-3">
           <p className="text-xs text-muted-foreground">
             {referralCount} {referralCount === 1 ? "friend" : "friends"} joined
           </p>
@@ -206,7 +211,7 @@ function Dashboard() {
             <Share2 className="mr-1.5 h-3.5 w-3.5" />
             {referralLoading ? "Loading invite…" : "Invite friends"}
           </Button>
-        </div>
+        </div> : <span className="rounded-full border border-primary/20 bg-primary/5 px-3 py-2 text-[10px] font-medium text-primary">Sample student preview</span>}
       </section>
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
