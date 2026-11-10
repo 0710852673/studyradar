@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   Activity, ArrowLeft, BarChart3, Database, Eye, Globe, GraduationCap, Inbox,
-  LayoutGrid, Link2, Menu, Radar, RefreshCw, ShieldAlert, Sliders, Trophy, Users, Search,
+  LayoutGrid, Link2, Menu, Radar, RefreshCw, ShieldAlert, Sliders, Trophy, Users,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
