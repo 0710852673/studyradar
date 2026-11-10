@@ -18,4 +18,6 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: npm install --no-audit --no-fund
       - run: bun test tests
+      - run: npm run lint
+      - run: npx tsc --noEmit
       - run: npm run build
