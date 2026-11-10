@@ -190,9 +190,9 @@ const FEATURES = [
 ];
 
 const STEPS = [
-  { n: "01", t: "Continue with Google", d: "One tap. No forms, no password to forget." },
-  { n: "02", t: "Choose exam & subjects", d: "A/L stream subjects, or O/L compulsory plus optional buckets." },
-  { n: "03", t: "Log study daily", d: "Your dashboard, streak and readiness update instantly." },
+  { n: "01", t: "Create your account", d: "Sign up with Google or email, then complete your student profile." },
+  { n: "02", t: "Choose your exam path", d: "Set up your O/L subjects or A/L stream and subjects." },
+  { n: "03", t: "Track your preparation", d: "Log study and wasted time separately, then follow your progress." },
 ];
 
 const SUBJECT_PREVIEW = [
@@ -328,7 +328,7 @@ function Landing() {
                     size="lg"
                     className="w-full transition-transform hover:scale-[1.03] sm:w-auto"
                   >
-                    <Link to={session ? "/dashboard" : "/auth?mode=signup"}>
+                    <Link to={session ? "/dashboard" : "/auth"} search={session ? {} : { mode: "signup" }}>
                       {session ? "Open your dashboard" : "Get Started"}
                     </Link>
                   </Button>
@@ -614,7 +614,7 @@ function Landing() {
                 Your next exam starts today. Log your first session in under a minute.
               </p>
               <Button asChild size="lg" className="relative transition-transform hover:scale-[1.03]">
-                <Link to={session ? "/dashboard" : "/auth"}>
+                <Link to={session ? "/dashboard" : "/auth"} search={session ? {} : { mode: "signup" }}>
                   {session ? "Open dashboard" : "Get Started"}
                 </Link>
               </Button>
