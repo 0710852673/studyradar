@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { differenceInCalendarDays, parseISO, startOfMonth, startOfWeek } from "date-fns";
+import { startOfMonth, startOfWeek } from "date-fns";
 import {
   CalendarClock,
   Clock,
@@ -79,7 +79,12 @@ function ChartTip({ active, payload, label }: any) {
 
 function Dashboard() {
   const { data, profile, isAdminPreviewData } = useStudyOS();
-  const [, setCountdownMinute] = useState(0);\n  useEffect(() => {\n    const timer = window.setInterval(() => setCountdownMinute((minute) => minute + 1), 60_000);\n    return () => window.clearInterval(timer);\n  }, []);\n  const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [, setCountdownMinute] = useState(0);
+  useEffect(() => {
+    const timer = window.setInterval(() => setCountdownMinute((minute) => minute + 1), 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
+  const [referralCode, setReferralCode] = useState<string | null>(null);
   const [referralCount, setReferralCount] = useState(0);
   const [referralLoading, setReferralLoading] = useState(true);
   const [referralError, setReferralError] = useState<string | null>(null);
