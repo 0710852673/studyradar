@@ -65,7 +65,7 @@ export function rowToProfile(r: ProfileRow): Profile {
     name: r.name,
     track,
     examYear: r.exam_year,
-    examDate: defaultExamDate(track, r.exam_year),
+    examDate: r.exam_date ?? defaultExamDate(track, r.exam_year),
     stream: r.stream ?? undefined,
     subjects: r.subjects ?? [],
     dailyGoalHours: Number(r.daily_target_hours),

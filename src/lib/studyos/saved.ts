@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-export type SavedKind = "Guide" | "Video" | "Reel" | "Opportunity" | "Answer";
+export type SavedKind = "Guide" | "Video" | "Reel" | "Opportunity" | "Answer" | "Resource";
 
 export type SavedItem = {
   id: string;
