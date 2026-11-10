@@ -8,7 +8,8 @@ import {
   startOfWeek,
   subDays,
 } from "date-fns";
-import type { MarkEntry, Profile, StudySession } from "./types";\nimport { daysUntilExamDate } from "./subjects";
+import type { MarkEntry, Profile, StudySession } from "./types";
+import { daysUntilExamDate } from "./subjects";
 
 export const toKey = (d: Date) => format(d, "yyyy-MM-dd");
 export const hrs = (minutes: number) => minutes / 60;
