@@ -109,9 +109,26 @@ export function Analytics({ people, sessions, wasted, marks, chapters, devices, 
 function SubjectBars({ rows }: { rows: [string, number][] }) { const max = Math.max(1, ...rows.map((row) => row[1])); return <div className="space-y-3">{rows.slice(0, 12).map(([subject, minutes]) => <div key={subject}><div className="mb-1 flex justify-between gap-2 text-xs"><span>{subject}</span><span className="num text-muted-foreground">{fmtHours(minutes)}</span></div><div className="h-2 rounded-full bg-background"><div className="h-full rounded-full bg-primary" style={{ width: `${minutes / max * 100}%` }} /></div></div>)}{!rows.length ? <Empty text="No study data in this range." /> : null}</div>; }
 function MarkAverages({ marks }: { marks: AdminMark[] }) { const values = new Map<string, { sum: number; count: number }>(); for (const mark of marks) { if (!mark.total) continue; const value = values.get(mark.subject) ?? { sum: 0, count: 0 }; values.set(mark.subject, { sum: value.sum + mark.marks / mark.total * 100, count: value.count + 1 }); } return <div className="space-y-2">{[...values.entries()].map(([subject, value]) => <KV key={subject} label={subject} value={`${Math.round(value.sum / value.count)}% · ${value.count} records`} />)}{!values.size ? <Empty text="No marks in this range." /> : null}</div>; }
 
-export function VisitorPanel({ devices }: { devices: AdminDevice[] }) {
-  const summary = useMemo(() => summarizeActivity(devices), [devices]);
-  return <div className="space-y-4"><div className="rounded-xl border border-primary/25 bg-primary/5 p-4"><div className="flex gap-3"><Globe className="mt-0.5 h-5 w-5 shrink-0 text-primary" /><div><h2 className="text-sm font-semibold">Privacy-respecting activity, not visitor surveillance</h2><p className="mt-1 text-xs leading-relaxed text-muted-foreground">These are optional, consented first-party events. Study Radar does not store an anonymous visitor ID, referrer, IP address or precise location for this view, so unique anonymous visitors and a source funnel are truthfully unavailable.</p></div></div></div><div className="grid gap-3 sm:grid-cols-3"><Card label="Consented activity events" value={String(summary.events)} icon={Activity} /><Card label="Page-category visits" value={String(summary.visits)} icon={Globe} /><Card label="Consented login events" value={String(summary.logins)} icon={Users} /></div><div className="grid gap-4 lg:grid-cols-3"><AggregateBlock title="Page categories" rows={summary.byPage} /><AggregateBlock title="Device classes" rows={summary.byDevice} /><AggregateBlock title="Browser families" rows={summary.byBrowser} /></div><Empty text="Unique visitors: unavailable — no anonymous identifier is collected. Registered-student totals are shown separately in Overview." /></div>;
+export function VisitorPanel() {
+  return <div className="space-y-4">
+    <div className="rounded-2xl border border-primary/25 bg-primary/[0.06] p-5">
+      <div className="flex items-start gap-3"><Globe className="mt-0.5 h-5 w-5 shrink-0 text-primary" /><div><h2 className="text-sm font-semibold">Anonymous visitor analytics are not connected to this admin dataset</h2><p className="mt-1 max-w-3xl text-xs leading-relaxed text-muted-foreground">The current first-party app telemetry records consented activity for signed-in accounts. It does not create anonymous visitor IDs, source attribution or an anonymous conversion funnel. We keep those metrics unavailable rather than presenting registered-user activity as website visitors.</p></div></div>
+    </div>
+    <div className="grid gap-3 sm:grid-cols-3">
+      <Card label="Anonymous unique visitors" value="Unavailable" icon={Globe} hint="No anonymous visitor identifier is collected." />
+      <Card label="Referral source attribution" value="Unavailable" icon={Link2} hint="Source and campaign parameters are not retained as visitor analytics." />
+      <Card label="Registration funnel" value="Not instrumented" icon={Activity} hint="No complete, verified visitor-to-registration event chain exists." />
+    </div>
+    <Block title="What is available today">
+      <div className="space-y-3 text-xs leading-relaxed text-muted-foreground">
+        <KV label="Registered student activity" value="Available in Activity & devices" />
+        <KV label="Consented page-category events" value="Available in Activity & devices" />
+        <KV label="Real account registrations" value="Available in Overview and Analytics" />
+        <KV label="Anonymous visitor and acquisition metrics" value="Not collected" />
+      </div>
+    </Block>
+    <div className="rounded-xl border border-border bg-elevated p-4"><p className="text-xs font-semibold">Privacy-first next step</p><p className="mt-1 text-xs leading-relaxed text-muted-foreground">If visitor analytics are needed, connect a privacy-respecting aggregate analytics source and disclose it in the privacy policy before enabling collection. Until then, do not infer unique visitors from device events or account activity.</p></div>
+  </div>;
 }
 function AggregateBlock({ title, rows }: { title: string; rows: [string, number][] }) { return <Block title={title}><div className="space-y-2">{rows.slice(0, 10).map(([label, count]) => <KV key={label} label={label} value={String(count)} />)}{!rows.length ? <p className="text-xs text-muted-foreground">No consented events.</p> : null}</div></Block>; }
 
