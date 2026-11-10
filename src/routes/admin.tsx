@@ -38,8 +38,8 @@ export const Route = createFileRoute("/admin")({
 const GROUPS = [
   { label: "Command", items: [
     { id: "overview", label: "Overview", icon: LayoutGrid },
-    { id: "students", label: "Students", icon: Users },
-    { id: "analytics", label: "Analytics", icon: BarChart3 },
+    { id: "students", label: "Student intelligence", icon: Users },
+    { id: "analytics", label: "Analytics & reports", icon: BarChart3 },
     { id: "visitors", label: "Visitor intelligence", icon: Globe },
   ] },
   { label: "Operations", items: [
@@ -51,8 +51,8 @@ const GROUPS = [
   ] },
   { label: "System", items: [
     { id: "data", label: "Data & backups", icon: Database },
-    { id: "settings", label: "Site settings", icon: Sliders },
-    { id: "previews", label: "O/L & A/L previews", icon: Eye },
+    { id: "settings", label: "Platform settings", icon: Sliders },
+    { id: "previews", label: "Preview laboratory", icon: Eye },
   ] },
 ] as const;
 const SECTIONS = GROUPS.flatMap((group) => group.items);
@@ -167,7 +167,7 @@ function AdminPage() {
           </div>
           <div className="mt-5 flex flex-col gap-3 rounded-2xl border border-white/[0.08] bg-[#101923] p-3 sm:flex-row sm:items-center">
             <div className="relative min-w-0 flex-1">
-              <SearchBar value={query} onChange={setQuery} placeholder="Search students, records and activity…" />
+              <SearchBar value={query} onChange={setQuery} placeholder="Search within this section…" />
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <label className="flex h-9 items-center gap-2 rounded-lg border border-white/10 bg-black/10 px-3 text-[10px] font-medium text-white/45">DATE RANGE
