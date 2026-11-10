@@ -60,7 +60,7 @@ type SectionId = (typeof SECTIONS)[number]["id"];
 type Range = "7" | "30" | "90" | "all";
 
 function AdminPage() {
-  const { isAdmin, ready, settings, refreshSettings, setAdminPreviewTrack } = useStudyOS();
+  const { isAdmin, isAdminPreviewData, ready, settings, refreshSettings, setAdminPreviewTrack } = useStudyOS();
   const navigate = useNavigate();
   const [snap, setSnap] = useState<AdminSnapshot>(EMPTY_SNAPSHOT);
   const [loading, setLoading] = useState(true);
@@ -78,6 +78,7 @@ function AdminPage() {
     finally { setLoading(false); }
   }, []);
   useEffect(() => { if (isAdmin) void reload(); else setLoading(false); }, [isAdmin, reload]);
+  useEffect(() => { if (ready && isAdmin && isAdminPreviewData) void setAdminPreviewTrack(null); }, [ready, isAdmin, isAdminPreviewData, setAdminPreviewTrack]);
 
   const people = useMemo(() => snap.profiles.filter(isPlatformProfile), [snap.profiles]);
   const realIds = useMemo(() => new Set(people.map((person) => person.id)), [people]);
@@ -101,7 +102,7 @@ function AdminPage() {
   if (!isAdmin) return <div className="flex min-h-screen items-center justify-center px-5"><div className="panel max-w-sm p-7 text-center"><ShieldAlert className="mx-auto h-6 w-6 text-primary" /><h1 className="mt-3 font-display text-lg font-semibold">Restricted</h1><p className="mt-2 text-sm text-muted-foreground">This area requires an administrator account. Database permissions also block direct data access.</p><Button asChild className="mt-5"><Link to="/dashboard">Back to dashboard</Link></Button></div></div>;
 
   const chooseSection = (next: SectionId) => { setSection(next); setFocusId(null); setQuery(""); setMenuOpen(false); };
-  const openPreview = (track: "OL" | "AL") => { setAdminPreviewTrack(track); void navigate({ to: "/dashboard" }); };
+  const openPreview = async (track: "OL" | "AL") => { await setAdminPreviewTrack(track); await navigate({ to: "/dashboard" }); };
   const currentLabel = focus ? "Student details" : SECTIONS.find((item) => item.id === section)?.label;
 
   const sectionMeta: Record<SectionId, { eyebrow: string; description: string }> = {
