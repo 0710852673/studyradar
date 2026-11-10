@@ -81,7 +81,7 @@ export function defaultExamDate(track: "AL" | "OL", year: number): string {
  * Exam dates are date-only values (yyyy-MM-dd), not UTC instants.
  */
 export function daysUntilExamDate(examDate: string, now: Date = new Date()): number {
-  const match = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(examDate);
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(examDate);
   if (!match) return 0;
 
   const [, yearText, monthText, dayText] = match;
