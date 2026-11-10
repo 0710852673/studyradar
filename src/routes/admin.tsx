@@ -79,7 +79,6 @@ function AdminPage() {
     finally { setLoading(false); }
   }, []);
   useEffect(() => { if (isAdmin) void reload(); else setLoading(false); }, [isAdmin, reload]);
-  useEffect(() => { if (ready && isAdmin && isAdminPreviewData) void setAdminPreviewTrack(null); }, [ready, isAdmin, isAdminPreviewData, setAdminPreviewTrack]);
 
   const people = useMemo(() => snap.profiles.filter(isPlatformProfile), [snap.profiles]);
   const realIds = useMemo(() => new Set(people.map((person) => person.id)), [people]);
