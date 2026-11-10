@@ -28,13 +28,13 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Turn your study hours into measurable progress. Track time, subjects, marks, streaks and syllabus for GCE O/L and A/L — free and built for Sri Lankan students.",
+          "A study tracker for Sri Lankan GCE O/L and A/L students. Track study and wasted time separately, manage subjects and syllabus, record marks and understand your progress.",
       },
-      { property: "og:title", content: "Study Radar — Turn study hours into real progress" },
+      { property: "og:title", content: "Study Radar — Track study. Understand your progress." },
       {
         property: "og:description",
         content:
-          "Log study in seconds, watch your streak grow and see exactly where you stand before the exam does.",
+          "One place for study sessions, wasted time, subjects, syllabus, marks, planning and progress.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -149,33 +149,43 @@ function Counter({ to, suffix = "", decimals = 0 }: { to: number; suffix?: strin
 const FEATURES = [
   {
     icon: Flame,
-    title: "Smart study tracking",
-    text: "Pick a subject, tap 1h, done. Even a five-hour day is two taps at the end of the night.",
+    title: "Track study time",
+    text: "Log each session by subject and see your daily, weekly and monthly study patterns.",
   },
   {
-    icon: BarChart3,
-    title: "Progress analytics",
-    text: "Daily, weekly and monthly trends with subject distribution, best day and consistency.",
+    icon: Timer,
+    title: "Track wasted time separately",
+    text: "Record time lost for a clearer picture. Study time and wasted time stay independent.",
   },
   {
     icon: BookOpenCheck,
-    title: "Subject tracking",
-    text: "Every subject gets its own page: hours, marks, syllabus and trend in one view.",
+    title: "Subjects & syllabus",
+    text: "Keep subject hours and syllabus chapters together, so you can see what is covered and what remains.",
   },
   {
     icon: GraduationCap,
-    title: "Marks tracking",
-    text: "Add every term test and model paper. Percentage, average and improvement, calculated for you.",
+    title: "Marks & exam progress",
+    text: "Record term-test and model-paper marks, then follow your performance over time.",
   },
   {
-    icon: Target,
-    title: "Study goals",
-    text: "Set a daily and weekly target. See how close you are at any moment of the day.",
+    icon: CalendarDays,
+    title: "Plan your study",
+    text: "Use your calendar and study timer to organise sessions and keep your routine visible.",
   },
   {
     icon: Trophy,
     title: "Streaks & achievements",
-    text: "100 study hours. 30 day streak. Small wins that keep the habit alive.",
+    text: "See your consistency grow and recognise meaningful study milestones.",
+  },
+  {
+    icon: Target,
+    title: "Resources & saved items",
+    text: "Explore the Resource Hub and keep useful links saved for when you need them.",
+  },
+  {
+    icon: Lock,
+    title: "Your own private workspace",
+    text: "Your study records belong to your account, with privacy controls and a place to send feedback.",
   },
 ];
 
@@ -209,7 +219,7 @@ function DashboardPreview() {
           <span className="text-sm font-medium">Today</span>
         </div>
         <span className="rounded-full bg-brand-soft px-2.5 py-1 text-[11px] text-primary">
-          A/L 2027 · 245 days
+          Example dashboard
         </span>
       </div>
 
@@ -229,8 +239,8 @@ function DashboardPreview() {
 
       <div className="relative mt-4 rounded-xl border border-border bg-elevated p-4">
         <div className="flex items-center justify-between">
-          <p className="text-xs text-muted-foreground">Last 7 days</p>
-          <p className="text-xs text-primary">+18%</p>
+          <p className="text-xs text-muted-foreground">Example weekly activity</p>
+          <p className="text-xs text-primary">Study trend</p>
         </div>
         <div className="mt-3 flex h-24 items-end gap-2">
           {bars.map((b, i) => (
@@ -296,17 +306,17 @@ function Landing() {
 
               <Reveal delay={90}>
                 <h1 className="mt-6 font-display text-4xl font-semibold leading-[1.05] tracking-tight sm:text-6xl">
-                  Turn your study hours into
+                  See where your study time goes.
                   <span className="block bg-gradient-to-r from-primary to-chart-2 bg-clip-text text-transparent">
-                    measurable progress.
+                    Make progress visible.
                   </span>
                 </h1>
               </Reveal>
 
               <Reveal delay={170}>
                 <p className="mx-auto mt-5 max-w-xl text-base text-muted-foreground sm:text-lg lg:mx-0">
-                  Study Radar tracks your study time, subjects, marks and goals — then shows you
-                  exactly where you stand. Track your study. Understand your progress. Own your
+                  Study Radar brings your study sessions, wasted time, subjects, syllabus, marks and
+                  progress into one clear workspace, built around Sri Lankan GCE O/L and A/L
                   preparation.
                 </p>
               </Reveal>
@@ -318,7 +328,7 @@ function Landing() {
                     size="lg"
                     className="w-full transition-transform hover:scale-[1.03] sm:w-auto"
                   >
-                    <Link to={session ? "/dashboard" : "/auth"}>
+                    <Link to={session ? "/dashboard" : "/auth?mode=signup"}>
                       {session ? "Open your dashboard" : "Get Started"}
                     </Link>
                   </Button>
@@ -459,9 +469,9 @@ function Landing() {
             <Reveal delay={120}>
               <div className="panel mt-8 grid gap-4 p-6 sm:grid-cols-3 sm:p-8">
                 {[
-                  { l: "Quick-log options", v: <Counter to={9} /> },
-                  { l: "Seconds to log a session", v: <Counter to={5} /> },
-                  { l: "Trackers in one place", v: <Counter to={6} /> },
+                  { l: "Study & wasted time", v: "Separate" },
+                  { l: "Exam pathways", v: "O/L + A/L" },
+                  { l: "Your preparation", v: "One view" },
                 ].map((s) => (
                   <div key={s.l} className="text-center">
                     <p className="font-display text-3xl font-semibold text-primary">{s.v}</p>
