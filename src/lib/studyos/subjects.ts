@@ -74,3 +74,35 @@ export function defaultExamDate(track: "AL" | "OL", year: number): string {
   // Keep the established month/day defaults for other exam years.
   return track === "AL" ? `${year}-08-03` : `${year}-12-08`;
 }
+
+
+/**
+ * Calendar-day difference for exam dates, always using Sri Lanka's calendar.
+ * Exam dates are date-only values (yyyy-MM-dd), not UTC instants.
+ */
+export function daysUntilExamDate(examDate: string, now: Date = new Date()): number {
+  const match = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(examDate);
+  if (!match) return 0;
+
+  const [, yearText, monthText, dayText] = match;
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+  const target = Date.UTC(year, month - 1, day);
+  const targetDate = new Date(target);
+  if (
+    targetDate.getUTCFullYear() !== year ||
+    targetDate.getUTCMonth() !== month - 1 ||
+    targetDate.getUTCDate() !== day
+  ) return 0;
+
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Colombo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+  const part = (type: string) => parts.find((item) => item.type === type)?.value ?? "";
+  const today = Date.UTC(Number(part("year")), Number(part("month")) - 1, Number(part("day")));
+  return Math.round((target - today) / 86_400_000);
+}
