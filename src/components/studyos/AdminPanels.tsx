@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import {
-  Activity, AlertTriangle, BarChart3, BookOpenCheck, Clock, Database, Download,
-  Globe, Inbox, LayoutGrid, Link2, Mail, Radar, ShieldAlert, Trophy, Users,
+  Activity, AlertTriangle, BarChart3, BookOpenCheck, Clock, Download,
+  Globe, Link2, Mail, Radar, ShieldAlert, Trophy, Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

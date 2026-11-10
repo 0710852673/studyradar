@@ -28,6 +28,7 @@ export function AdminResourceRequests() {
   const [rows, setRows] = useState<Suggestion[]>([]);
   const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [tab, setTab] = useState<"directory" | "requests">("directory");
   const [filter, setFilter] = useState<"all" | "published" | "draft" | "archived">("all");
@@ -42,6 +43,7 @@ export function AdminResourceRequests() {
       supabase.from("resource_suggestions").select("*").order("created_at", { ascending: false }).limit(200),
     ]);
     const error = resourceResult.error ?? suggestionResult.error;
+    setLoadError(error?.message ?? "");
     if (error) toast.error("Could not load resource data", { description: error.message });
     setResources((resourceResult.data ?? []) as Resource[]);
     setRows((suggestionResult.data ?? []) as Suggestion[]);
@@ -91,6 +93,7 @@ export function AdminResourceRequests() {
   };
 
   const setResourceStatus = async (resource: Resource, status: "published" | "draft" | "archived") => {
+    if (status !== "published" && !window.confirm(`${status === "archived" ? "Archive" : "Unpublish"} ${resource.name}? Students will no longer see it in the directory.`)) return;
     setBusy(resource.id);
     const { error } = await supabase.from("resources").update({ status }).eq("id", resource.id);
     if (error) toast.error("Could not update resource", { description: error.message });
@@ -124,6 +127,7 @@ export function AdminResourceRequests() {
   };
 
   return <div className="space-y-4">
+    {loadError ? <div role="alert" className="rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">{loadError}</div> : null}
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div><h2 className="text-sm font-semibold">Resource Hub management</h2>
         <p className="text-xs text-muted-foreground">Create and manage the public directory here. Student suggestions are reviewed separately.</p></div>
