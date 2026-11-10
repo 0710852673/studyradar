@@ -50,10 +50,10 @@ export function PublicHeader() {
           ) : (
             <>
               <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
-                <Link to="/auth">Sign in</Link>
+                <Link to="/auth" search={{ mode: "signin" }}>Sign in</Link>
               </Button>
               <Button asChild size="sm" className="transition-transform hover:scale-[1.03]">
-                <Link to="/auth">Get Started</Link>
+                <Link to="/auth" search={{ mode: "signup" }}>Get Started</Link>
               </Button>
             </>
           )}
@@ -83,6 +83,7 @@ export function PublicHeader() {
           {!session ? (
             <Link
               to="/auth"
+              search={{ mode: "signin" }}
               onClick={() => setOpen(false)}
               className="block rounded-lg px-2 py-2.5 text-sm text-primary"
             >
