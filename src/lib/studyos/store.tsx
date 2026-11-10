@@ -14,7 +14,7 @@ import { syncConsent } from "./security";
 import { recordActivity } from "./telemetry";
 import { allowWrite, retryInSeconds, setWriteLimit } from "./ratelimit";
 import { defaultExamDate } from "./subjects";
-import { isAdminPreviewId, loadAdminPersonalPreview, saveAdminPersonalPreview } from "./admin-personal-preview";
+import { loadAdminPersonalPreview, saveAdminPersonalPreview } from "./admin-personal-preview";
 import {
   DEFAULT_SETTINGS,
   EMPTY_DATA,
