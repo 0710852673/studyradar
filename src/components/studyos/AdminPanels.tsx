@@ -10,7 +10,7 @@ import { fmtHours } from "@/lib/studyos/analytics";
 import {
   activeWithin, countBy, dailyMinutes, dailySignups, download, sumMinutes,
   summarizeActivity, toCsv, withinDays,
-  type AdminAchievement, type AdminAudit, type AdminDevice, type AdminEvent,
+  type AdminAchievement, type AdminAudit, type AdminChapter, type AdminDevice, type AdminEvent,
   type AdminMark, type AdminProfile, type AdminReferral, type AdminSession,
   type AdminSnapshot, type AdminWaste,
 } from "@/lib/studyos/admin-data";
@@ -25,7 +25,7 @@ export function Empty({ text }: { text: string }) {
 export function Tag({ children, tone }: { children: React.ReactNode; tone?: "good" | "bad" | undefined }) {
   return <span className={cn("inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-medium tracking-wide", tone === "bad" ? "border-destructive/35 bg-destructive/[0.07] text-destructive" : tone === "good" ? "border-primary/30 bg-primary/[0.07] text-primary" : "border-border bg-background/50 text-muted-foreground")}>{children}</span>;
 }
-export function Card({ label, value, icon: Icon, hint }: { label: string; value: string; icon: typeof Users; hint?: string }) {
+export function Card({ label, value, icon: Icon, hint }: { label: string; value: string; icon: typeof Users; hint?: string | undefined }) {
   return <div className="group relative min-w-0 overflow-hidden rounded-2xl border border-white/[0.075] bg-gradient-to-br from-[#17222e] to-[#101923] p-4 shadow-[0_12px_35px_-28px_rgba(0,0,0,.8)] transition-all hover:-translate-y-0.5 hover:border-primary/25 sm:p-5">
     <div className="absolute right-0 top-0 h-24 w-24 rounded-full bg-primary/[0.055] blur-2xl transition-opacity group-hover:opacity-100" />
     <div className="relative flex items-start justify-between gap-3"><div className="min-w-0"><p className="truncate text-[10px] font-semibold uppercase tracking-[.14em] text-white/45">{label}</p><p className="num mt-3 break-words font-display text-2xl font-bold tracking-tight text-white sm:text-[28px]">{value}</p></div><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/[0.09] text-primary"><Icon className="h-4 w-4" /></span></div>
