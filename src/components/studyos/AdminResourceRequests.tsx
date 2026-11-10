@@ -60,7 +60,7 @@ export function AdminResourceRequests() {
   const openNew = () => { setDraft(blankDraft); setEditorOpen(true); };
   const openEdit = (r: Resource) => {
     setDraft({ id: r.id, name: r.name, url: r.url, description: r.description, category: r.category,
-      subjects: r.subjects.join(", "), exams: r.exams, publisher: r.publisher, status: r.status, featured: r.featured });
+      subjects: r.subjects.join(", "), exams: r.exams, publisher: r.publisher, status: r.status as ResourceDraft["status"], featured: r.featured });
     setEditorOpen(true);
   };
 
