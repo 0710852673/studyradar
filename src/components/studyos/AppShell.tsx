@@ -1,4 +1,4 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   BarChart3,
   BookOpen,
@@ -23,6 +23,7 @@ import { LogForm, QuickLogButton } from "./QuickLog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useStudyOS } from "@/lib/studyos/store";
+import { Button } from "@/components/ui/button";
 import { NotificationBell } from "./Notifications";
 import { AssistantWidget } from "./AssistantWidget";
 import { ProfileNudge } from "./ProfileNudge";
@@ -60,7 +61,8 @@ export function AppShell({
   children: ReactNode;
 }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { isAdmin, isAdminPreviewData } = useStudyOS();
+  const { isAdmin, isAdminPreviewData, adminPreviewTrack, setAdminPreviewTrack } = useStudyOS();
+  const navigate = useNavigate();
   const [logOpen, setLogOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
 
@@ -130,8 +132,9 @@ export function AppShell({
 
         <main className="px-4 pb-28 pt-5 sm:px-6 lg:pb-10">
           {isAdminPreviewData ? (
-            <div className="mb-4 rounded-xl border border-primary/25 bg-primary/5 px-3 py-2 text-xs text-muted-foreground">
-              Personal preview data is active. These sample study records are stored only in this browser for your admin account and are excluded from platform/admin analytics.
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/25 bg-primary/5 px-3 py-3 text-xs text-muted-foreground">
+              <div><p className="font-semibold text-primary">{adminPreviewTrack === "OL" ? "O/L" : "A/L"} sample preview is active</p><p className="mt-1">Changes are saved only in this browser and never enter member or platform data.</p></div>
+              <Button size="sm" variant="outline" onClick={async () => { await setAdminPreviewTrack(null); await navigate({ to: "/admin" }); }}>Exit preview</Button>
             </div>
           ) : null}
           {children}
@@ -217,7 +220,7 @@ export function AppShell({
         </DialogContent>
       </Dialog>
 
-      <ProfileNudge />
+      {!isAdminPreviewData ? <ProfileNudge /> : null}
       <AssistantWidget />
     </div>
   );

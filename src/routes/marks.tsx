@@ -179,7 +179,7 @@ function MarksPage() {
                         {Math.round((m.marks / m.total) * 100)}%
                       </span>
                       <button
-                        onClick={() => removeMark(m.id)}
+                        onClick={() => { if (window.confirm(`Delete the ${m.examName} result for ${m.subject}? This cannot be undone.`)) void removeMark(m.id); }}
                         className="text-muted-foreground transition-colors hover:text-destructive"
                       >
                         <Trash2 className="h-4 w-4" />

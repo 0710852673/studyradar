@@ -21,7 +21,7 @@ import {
   type AdminProfile, type AdminSnapshot,
 } from "@/lib/studyos/admin-data";
 import { fmtHours } from "@/lib/studyos/analytics";
-import { download, sumMinutes, toCsv } from "@/lib/studyos/admin-data";
+import { download, openPdfReport, sumMinutes, toCsv } from "@/lib/studyos/admin-data";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin")({
@@ -61,7 +61,7 @@ const SECTIONS: AdminNavItem[] = GROUPS.flatMap((group) => group.items);
 type Range = "7" | "30" | "90" | "all";
 
 function AdminPage() {
-  const { isAdmin, isAdminPreviewData, ready, settings, refreshSettings, setAdminPreviewTrack } = useStudyOS();
+  const { isAdmin, ready, settings, refreshSettings, setAdminPreviewTrack } = useStudyOS();
   const navigate = useNavigate();
   const [snap, setSnap] = useState<AdminSnapshot>(EMPTY_SNAPSHOT);
   const [loading, setLoading] = useState(true);
@@ -79,7 +79,6 @@ function AdminPage() {
     finally { setLoading(false); }
   }, []);
   useEffect(() => { if (isAdmin) void reload(); else setLoading(false); }, [isAdmin, reload]);
-  useEffect(() => { if (ready && isAdmin && isAdminPreviewData) void setAdminPreviewTrack(null); }, [ready, isAdmin, isAdminPreviewData, setAdminPreviewTrack]);
 
   const people = useMemo(() => snap.profiles.filter(isPlatformProfile), [snap.profiles]);
   const realIds = useMemo(() => new Set(people.map((person) => person.id)), [people]);
@@ -163,6 +162,7 @@ function AdminPage() {
             </div>
             <div className="flex items-center gap-2">
               <div className="hidden items-center gap-2 rounded-xl border border-white/10 bg-white/[0.035] px-3 py-2 text-[10px] text-white/55 xl:flex"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Secure admin session</div>
+              <Button size="sm" variant="outline" onClick={() => { const activeIds = new Set(rangedSessions.map((row) => row.user_id)); const subjects = [...new Set(rangedSessions.map((row) => row.subject))].map((subject) => [subject, fmtHours(sumMinutes(rangedSessions.filter((row) => row.subject === subject)))]); const sections = [{ heading: "Platform overview", rows: [["Registered accounts", String(people.length)], ["O/L accounts", String(people.filter((p) => p.track === "OL").length)], ["A/L accounts", String(people.filter((p) => p.track === "AL").length)], ["Active students", String(activeIds.size)], ["Study time", fmtHours(sumMinutes(rangedSessions))], ["Wasted time", fmtHours(sumMinutes(rangedWasted))], ["Marks recorded", String(rangedMarks.length)], ["Date range", range === "all" ? "All time" : "Last " + range + " days"]] }, { heading: "Subject activity", rows: subjects }]; if (!openPdfReport("Platform analytics report", "Study Radar · verified platform data", sections)) toast.error("PDF window blocked. Allow pop-ups and retry."); }} className="h-10 border-white/10 bg-primary/10 text-primary hover:bg-primary/15"><Database className="mr-2 h-3.5 w-3.5" />Export PDF</Button>
               <Button size="sm" variant="outline" onClick={() => void reload()} disabled={loading} className="h-10 border-white/10 bg-white/[0.035] text-white/80 hover:bg-white/[0.08]"><RefreshCw className={cn("mr-2 h-3.5 w-3.5", loading && "animate-spin")} />Refresh data</Button>
             </div>
           </div>
@@ -187,7 +187,7 @@ function AdminPage() {
           {section === "analytics" ? <Analytics people={people} sessions={rangedSessions} wasted={rangedWasted} marks={rangedMarks} chapters={chapters} devices={devices} referrals={referrals} rangeDays={rangeDays} /> : null}
           {section === "visitors" ? <VisitorPanel /> : null}
           {section === "activity" ? <ActivityPanel devices={devices} people={people} query={query} onQuery={setQuery} /> : null}
-          {section === "security" ? <SecurityPanel events={snap.events} audit={snap.audit} query={query} onQuery={setQuery} /> : null}
+          {section === "security" ? <SecurityPanel events={snap.events} audit={snap.audit} ipEvents={snap.ipEvents} ipEventError={snap.ipEventError} query={query} onQuery={setQuery} /> : null}
           {section === "inbox" ? <InboxPanel /> : null}
           {section === "resources" ? <AdminResourceRequests /> : null}
           {section === "achievements" ? <AchievementsPanel awards={rangedAchievements} people={people} query={query} onQuery={setQuery} /> : null}

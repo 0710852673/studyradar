@@ -128,7 +128,7 @@ function SyllabusPage() {
                   {CHAPTER_LABEL[c.status]}
                 </span>
                 <button
-                  onClick={() => removeChapter(c.id)}
+                  onClick={() => { if (window.confirm(`Delete the syllabus entry ${c.title}?`)) void removeChapter(c.id); }}
                   className="text-muted-foreground transition-colors hover:text-destructive"
                   aria-label={`Delete ${c.title}`}
                 >

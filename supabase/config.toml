@@ -1,1 +1,3 @@
 project_id = "gjhhkgwdaacqfjeinnoe"
+[functions.log-security-ip]
+verify_jwt = false

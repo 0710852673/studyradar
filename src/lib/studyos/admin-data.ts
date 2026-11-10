@@ -81,6 +81,7 @@ export type AdminDevice = {
   created_at: string;
 };
 export type AdminRole = { user_id: string; role: string };
+export type AdminIpEvent = { id: string; user_id: string | null; event_kind: string; ip_address: string; created_at: string };
 export type AdminAchievement = {
   id: string;
   user_id: string;
@@ -116,6 +117,8 @@ export interface AdminSnapshot {
   chapters: AdminChapter[];
   events: AdminEvent[];
   devices: AdminDevice[];
+  ipEvents: AdminIpEvent[];
+  ipEventError?: string | null;
   roles: AdminRole[];
   achievements: AdminAchievement[];
   audit: AdminAudit[];
@@ -127,8 +130,8 @@ export interface AdminSnapshot {
 }
 
 export const EMPTY_SNAPSHOT: AdminSnapshot = {
-  profiles: [], sessions: [], wasted: [], marks: [], chapters: [], events: [], devices: [],
-  roles: [], achievements: [], audit: [], contacts: [], feedback: [], suggestions: [],
+  profiles: [], sessions: [], wasted: [], marks: [], chapters: [], events: [], devices: [], ipEvents: [],
+  ipEventError: null, roles: [], achievements: [], audit: [], contacts: [], feedback: [], suggestions: [],
   resources: [], referrals: [],
 };
 
@@ -137,7 +140,7 @@ const DEVICE_COLUMNS = "id,user_id,kind,path,platform,created_at";
 
 /** All admin reads are checked together; partial data is never presented as a complete platform snapshot. */
 export async function loadSnapshot(): Promise<AdminSnapshot> {
-  const [p, s, w, m, c, e, d, r, a, audit, contacts, feedback, suggestions, resources, referrals] = await Promise.all([
+  const [p, s, w, m, c, e, d, ip, r, a, audit, contacts, feedback, suggestions, resources, referrals] = await Promise.all([
     supabase.from("profiles").select(PROFILE_COLUMNS).order("created_at", { ascending: false }),
     supabase.from("study_sessions").select("*"),
     supabase.from("wasted_time").select("*"),
@@ -145,6 +148,7 @@ export async function loadSnapshot(): Promise<AdminSnapshot> {
     supabase.from("chapters").select("id,user_id,subject,title,status"),
     supabase.from("security_events").select("id,user_id,kind,severity,email,detail,path,created_at").order("created_at", { ascending: false }).limit(1000),
     supabase.from("device_events").select(DEVICE_COLUMNS).order("created_at", { ascending: false }).limit(1000),
+    (supabase as any).from("security_ip_events").select("id,user_id,event_kind,ip_address,created_at").order("created_at", { ascending: false }).limit(1000),
     supabase.from("user_roles").select("user_id,role"),
     supabase.from("achievement_awards").select("*").order("awarded_at", { ascending: false }).limit(1000),
     supabase.from("admin_audit_events").select("*").order("created_at", { ascending: false }).limit(1000),
@@ -154,8 +158,8 @@ export async function loadSnapshot(): Promise<AdminSnapshot> {
     supabase.from("resources").select("id,status,created_at"),
     supabase.from("referral_signups").select("id,referrer_id,referred_user_id,created_at"),
   ]);
-  const results = { profiles: p, sessions: s, wasted: w, marks: m, chapters: c, security: e, activity: d, roles: r, achievements: a, audit, contacts, feedback, suggestions, resources, referrals };
-  const failures = Object.entries(results).filter(([, result]) => result.error).map(([name, result]) => `${name}: ${result.error?.message ?? "unknown error"}`);
+  const results = { profiles: p, sessions: s, wasted: w, marks: m, chapters: c, security: e, activity: d, ipEvents: ip, roles: r, achievements: a, audit, contacts, feedback, suggestions, resources, referrals };
+  const failures = Object.entries(results).filter(([name, result]) => name !== "ipEvents" && result.error).map(([name, result]) => `${name}: ${result.error?.message ?? "unknown error"}`);
   if (failures.length) throw new Error(`Some admin data could not be loaded. ${failures.join(" · ")}`);
   return {
     profiles: (p.data ?? []) as AdminProfile[],
@@ -165,6 +169,8 @@ export async function loadSnapshot(): Promise<AdminSnapshot> {
     chapters: (c.data ?? []) as AdminChapter[],
     events: (e.data ?? []) as AdminEvent[],
     devices: (d.data ?? []) as AdminDevice[],
+    ipEvents: (ip.data ?? []) as AdminIpEvent[],
+    ipEventError: ip.error?.message ?? null,
     roles: (r.data ?? []) as AdminRole[],
     achievements: (a.data ?? []) as AdminAchievement[],
     audit: (audit.data ?? []) as AdminAudit[],
@@ -180,7 +186,8 @@ export async function loadSnapshot(): Promise<AdminSnapshot> {
 export async function createFullBackup(snap: AdminSnapshot) {
   const { data, error } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
   if (error) throw new Error(`Backup could not read profiles: ${error.message}`);
-  return { exportedAt: new Date().toISOString(), ...snap, profiles: data ?? [] };
+  const { ipEvents: _securityOnlyIpEvents, ...exportable } = snap;
+  return { exportedAt: new Date().toISOString(), ...exportable, profiles: data ?? [] };
 }
 
 export function isPlatformProfile(profile: Pick<AdminProfile, "is_demo">) {
@@ -263,4 +270,28 @@ export function countBy<T>(rows: T[], pick: (row: T) => string | null | undefine
     map.set(key, (map.get(key) ?? 0) + 1);
   }
   return [...map.entries()].sort((a, b) => b[1] - a[1]);
+}
+
+export type PdfReportSection = { heading: string; rows: string[][] };
+const escapePdfHtml = (value: unknown) => String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]!);
+
+/** Browser-native print flow produces a real PDF via Save as PDF and works without a server upload. */
+export function openPdfReport(title: string, subtitle: string, sections: PdfReportSection[]) {
+  const popup = window.open("", "_blank");
+  if (!popup) return false;
+  const body = sections.map((section) => `
+    <section><h2>${escapePdfHtml(section.heading)}</h2>
+    <table><tbody>${section.rows.map((row) => `<tr><th>${escapePdfHtml(row[0])}</th><td>${escapePdfHtml(row[1])}</td></tr>`).join("")}</tbody></table></section>
+  `).join("");
+  popup.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${escapePdfHtml(title)}</title>
+  <style>
+    @page{size:A4;margin:16mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#17212b;margin:0;font-size:11px;line-height:1.5}
+    header{border-bottom:3px solid #22c997;padding-bottom:14px;margin-bottom:20px}header p{margin:0;color:#64748b;font-size:10px;letter-spacing:1.5px;text-transform:uppercase}
+    h1{font-size:24px;margin:8px 0 3px}header small{color:#64748b}section{margin:0 0 20px;break-inside:avoid}h2{font-size:13px;text-transform:uppercase;letter-spacing:1px;color:#0b8060;border-bottom:1px solid #dbe4e8;padding-bottom:7px}
+    table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:7px 9px;border-bottom:1px solid #e7edf0;vertical-align:top}th{width:38%;color:#52616b;font-weight:600}td{color:#17212b}
+    footer{margin-top:28px;border-top:1px solid #dbe4e8;padding-top:9px;color:#71808a;font-size:9px}
+    @media print{section{break-inside:avoid}a{color:inherit;text-decoration:none}}
+  </style></head><body><header><p>Study Radar · Control Centre</p><h1>${escapePdfHtml(title)}</h1><small>${escapePdfHtml(subtitle)} · Generated ${escapePdfHtml(new Date().toLocaleString())}</small></header>${body}<footer>Confidential operational report. Contains student learning data. Handle and store securely.</footer><script>window.onload=()=>setTimeout(()=>window.print(),250);window.onafterprint=()=>window.close();</script></body></html>`);
+  popup.document.close();
+  return true;
 }
