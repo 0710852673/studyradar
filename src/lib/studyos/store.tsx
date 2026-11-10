@@ -356,6 +356,10 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
       refresh,
       refreshSettings,
       updateProfile: async (p) => {
+        if (isAdminPreviewData) {
+          setProfile((current) => current ? { ...current, ...p } : current);
+          return;
+        }
         if (throttled()) return;
         if (!userId) return;
         const patch: Record<string, unknown> = {};
@@ -386,6 +390,10 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
         await load(userId);
       },
       uploadAvatar: async (file) => {
+        if (isAdminPreviewData) {
+          toast.info("Profile image uploads are disabled in sample preview mode.");
+          return;
+        }
         if (throttled()) return;
         if (!userId) return;
         const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
@@ -405,6 +413,12 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
       addSession: async (s) => {
         if (throttled()) return;
         if (!userId) return;
+        if (isAdminPreviewData && adminPreviewTrack) {
+          const next = { ...data, sessions: [...data.sessions, { ...s, id: `admin-preview:session:${Date.now()}`, createdAt: Date.now() }] };
+          setData(next);
+          saveAdminPersonalPreview(userId, adminPreviewTrack, next);
+          return;
+        }
         const { error } = await supabase.from("study_sessions").insert({
           user_id: userId,
           date: s.date,
@@ -418,6 +432,12 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
       removeSession: async (id) => {
         if (throttled()) return;
         if (!userId) return;
+        if (isAdminPreviewData && adminPreviewTrack) {
+          const next = { ...data, sessions: data.sessions.filter((row) => row.id !== id) };
+          setData(next);
+          saveAdminPersonalPreview(userId, adminPreviewTrack, next);
+          return;
+        }
         const { error } = await supabase.from("study_sessions").delete().eq("id", id);
         if (!check(error, "delete that session")) return;
         await load(userId);
@@ -425,6 +445,12 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
       addWaste: async (w) => {
         if (throttled()) return;
         if (!userId) return;
+        if (isAdminPreviewData && adminPreviewTrack) {
+          const next = { ...data, wasted: [...data.wasted, { ...w, id: `admin-preview:waste:${Date.now()}` }] };
+          setData(next);
+          saveAdminPersonalPreview(userId, adminPreviewTrack, next);
+          return;
+        }
         const { error } = await (supabase as any).from("wasted_time").insert({
           user_id: userId,
           date: w.date,
@@ -437,6 +463,12 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
       removeWaste: async (id) => {
         if (throttled()) return;
         if (!userId) return;
+        if (isAdminPreviewData && adminPreviewTrack) {
+          const next = { ...data, wasted: data.wasted.filter((row) => row.id !== id) };
+          setData(next);
+          saveAdminPersonalPreview(userId, adminPreviewTrack, next);
+          return;
+        }
         const { error } = await (supabase as any).from("wasted_time").delete().eq("id", id);
         if (!check(error, "delete that entry")) return;
         await load(userId);
@@ -444,6 +476,12 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
       addMark: async (m) => {
         if (throttled()) return;
         if (!userId) return;
+        if (isAdminPreviewData && adminPreviewTrack) {
+          const next = { ...data, marks: [...data.marks, { ...m, id: `admin-preview:mark:${Date.now()}` }] };
+          setData(next);
+          saveAdminPersonalPreview(userId, adminPreviewTrack, next);
+          return;
+        }
         const { error } = await supabase.from("marks").insert({
           user_id: userId,
           subject: m.subject,
@@ -458,6 +496,12 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
       removeMark: async (id) => {
         if (throttled()) return;
         if (!userId) return;
+        if (isAdminPreviewData && adminPreviewTrack) {
+          const next = { ...data, marks: data.marks.filter((row) => row.id !== id) };
+          setData(next);
+          saveAdminPersonalPreview(userId, adminPreviewTrack, next);
+          return;
+        }
         const { error } = await supabase.from("marks").delete().eq("id", id);
         if (!check(error, "delete that result")) return;
         await load(userId);
@@ -465,6 +509,12 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
       addChapter: async (subject, title) => {
         if (throttled()) return;
         if (!userId) return;
+        if (isAdminPreviewData && adminPreviewTrack) {
+          const next = { ...data, chapters: [...data.chapters, { id: `admin-preview:chapter:${Date.now()}`, subject, title, status: "todo" as ChapterStatus }] };
+          setData(next);
+          saveAdminPersonalPreview(userId, adminPreviewTrack, next);
+          return;
+        }
         const { error } = await supabase
           .from("chapters")
           .insert({ user_id: userId, subject, title });
@@ -474,6 +524,12 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
       setChapterStatus: async (id, status) => {
         if (throttled()) return;
         if (!userId) return;
+        if (isAdminPreviewData && adminPreviewTrack) {
+          const next = { ...data, chapters: data.chapters.map((row) => row.id === id ? { ...row, status } : row) };
+          setData(next);
+          saveAdminPersonalPreview(userId, adminPreviewTrack, next);
+          return;
+        }
         const { error } = await supabase.from("chapters").update({ status }).eq("id", id);
         if (!check(error, "update that chapter")) return;
         await load(userId);
@@ -481,6 +537,12 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
       removeChapter: async (id) => {
         if (throttled()) return;
         if (!userId) return;
+        if (isAdminPreviewData && adminPreviewTrack) {
+          const next = { ...data, chapters: data.chapters.filter((row) => row.id !== id) };
+          setData(next);
+          saveAdminPersonalPreview(userId, adminPreviewTrack, next);
+          return;
+        }
         const { error } = await supabase.from("chapters").delete().eq("id", id);
         if (!check(error, "delete that chapter")) return;
         await load(userId);
