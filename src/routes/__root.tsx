@@ -176,6 +176,7 @@ function Gate() {
   const navigate = useNavigate();
   const isPublic = PUBLIC_PATHS.includes(pathname);
   const onAuth = pathname === "/auth";
+  const onAdmin = pathname === "/admin";
 
   useEffect(() => {
     if (!ready) return;
@@ -217,18 +218,18 @@ function Gate() {
     return <Interstitial title="Back in a moment" body={settings.maintenanceMessage} />;
   }
 
-  const showOnboarding = authedArea && (!profile || !profile.onboarded);
+  const showOnboarding = authedArea && !onAdmin && (!profile || !profile.onboarded);
 
   return (
     <>
-      {ready && settings.announcementActive && settings.announcement ? (
+      {ready && !onAdmin && settings.announcementActive && settings.announcement ? (
         <div className="bg-primary px-4 py-2 text-center text-xs font-medium text-primary-foreground">
           {settings.announcement}
         </div>
       ) : null}
       <Outlet />
       {showOnboarding ? <Onboarding /> : null}
-      {authedArea && !showOnboarding ? <ProfileNudge /> : null}
+      {authedArea && !onAdmin && !showOnboarding ? <ProfileNudge /> : null}
     </>
   );
 }
