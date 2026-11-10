@@ -31,3 +31,8 @@ jobs:
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: supabase functions deploy notify-achievement --project-ref gjhhkgwdaacqfjeinnoe
+
+      - name: Deploy log-security-ip
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: supabase functions deploy log-security-ip --project-ref gjhhkgwdaacqfjeinnoe
