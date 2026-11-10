@@ -184,7 +184,7 @@ function AdminPage() {
           {section === "overview" ? <Overview people={people} allSessions={sessions} sessions={rangedSessions} wasted={rangedWasted} marks={rangedMarks} chapters={chapters} snap={snap} rangeDays={rangeDays} /> : null}
           {section === "students" ? <StudentDirectory people={people} sessions={rangedSessions} wasted={rangedWasted} adminIds={adminIds} query={query} onQuery={setQuery} onFocus={setFocusId} /> : null}
           {section === "analytics" ? <Analytics people={people} sessions={rangedSessions} wasted={rangedWasted} marks={rangedMarks} chapters={chapters} devices={devices} referrals={referrals} rangeDays={rangeDays} /> : null}
-          {section === "visitors" ? <VisitorPanel devices={devices.filter((row) => withinDays(row.created_at, rangeDays))} /> : null}
+          {section === "visitors" ? <VisitorPanel /> : null}
           {section === "activity" ? <ActivityPanel devices={devices} people={people} query={query} onQuery={setQuery} /> : null}
           {section === "security" ? <SecurityPanel events={snap.events} audit={snap.audit} query={query} onQuery={setQuery} /> : null}
           {section === "inbox" ? <InboxPanel /> : null}
