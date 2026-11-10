@@ -269,6 +269,7 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
     if (admin && prof && previewTrack) {
       const previewProfile: Profile = {
         ...prof,
+        id: `admin-preview:${uid}:${previewTrack}`,
         name: previewTrack === "OL" ? "Sample O/L Student" : "Sample A/L Student",
         email: undefined,
         avatarUrl: undefined,
