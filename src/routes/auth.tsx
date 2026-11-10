@@ -68,7 +68,11 @@ function GoogleIcon() {
 
 function AuthPage() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"in" | "up" | "forgot">("in");
+  const [mode, setMode] = useState<"in" | "up" | "forgot">(() =>
+    typeof window !== "undefined" && new URLSearchParams(window.location.search).get("mode") === "signup"
+      ? "up"
+      : "in",
+  );
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
