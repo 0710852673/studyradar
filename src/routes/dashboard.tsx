@@ -44,7 +44,7 @@ import {
   totalMinutes,
   toKey,
 } from "@/lib/studyos/analytics";
-import { subjectColor } from "@/lib/studyos/subjects";
+import { daysUntilExamDate, subjectColor } from "@/lib/studyos/subjects";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -79,7 +79,7 @@ function ChartTip({ active, payload, label }: any) {
 
 function Dashboard() {
   const { data, profile, isAdminPreviewData } = useStudyOS();
-  const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [, setCountdownMinute] = useState(0);\n  useEffect(() => {\n    const timer = window.setInterval(() => setCountdownMinute((minute) => minute + 1), 60_000);\n    return () => window.clearInterval(timer);\n  }, []);\n  const [referralCode, setReferralCode] = useState<string | null>(null);
   const [referralCount, setReferralCount] = useState(0);
   const [referralLoading, setReferralLoading] = useState(true);
   const [referralError, setReferralError] = useState<string | null>(null);
@@ -169,10 +169,7 @@ function Dashboard() {
   const wasteToday = data.wasted.filter((w) => w.date === todayKey).reduce((a, w) => a + w.minutes, 0);
   const wasteWeek = data.wasted.filter((w) => w.date >= weekStart).reduce((a, w) => a + w.minutes, 0);
   const score = studyScore(sessions, profile);
-  const daysLeft = Math.max(
-    0,
-    differenceInCalendarDays(parseISO(profile.examDate), new Date()),
-  );
+  const daysLeft = Math.max(0, daysUntilExamDate(profile.examDate));
   const goalPct = Math.min(100, Math.round((today / (profile.dailyGoalHours * 60)) * 100));
   const weekSeries = dailySeries(sessions, 7);
   const monthSeries = monthlySeries(sessions, 6);
