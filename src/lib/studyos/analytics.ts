@@ -8,7 +8,7 @@ import {
   startOfWeek,
   subDays,
 } from "date-fns";
-import type { MarkEntry, Profile, StudySession } from "./types";
+import type { MarkEntry, Profile, StudySession } from "./types";\nimport { daysUntilExamDate } from "./subjects";
 
 export const toKey = (d: Date) => format(d, "yyyy-MM-dd");
 export const hrs = (minutes: number) => minutes / 60;
@@ -128,7 +128,7 @@ export function bySubject(sessions: StudySession[], subjects: string[]) {
 export function forecast(sessions: StudySession[], profile: Profile) {
   const last30 = sessionsBetween(sessions, subDays(new Date(), 29), new Date());
   const avgPerDay = hrs(totalMinutes(last30)) / 30;
-  const daysLeft = Math.max(0, differenceInCalendarDays(parseISO(profile.examDate), new Date()));
+  const daysLeft = Math.max(0, daysUntilExamDate(profile.examDate));
   const done = hrs(totalMinutes(sessions));
   const projected = done + avgPerDay * daysLeft;
   const target = profile.dailyGoalHours * daysLeft + done;
