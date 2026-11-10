@@ -35,7 +35,9 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-const GROUPS = [
+type SectionId = "overview" | "students" | "analytics" | "visitors" | "activity" | "security" | "inbox" | "resources" | "achievements" | "data" | "settings" | "previews";
+type AdminNavItem = { id: SectionId; label: string; icon: typeof LayoutGrid };
+const GROUPS: { label: string; items: AdminNavItem[] }[] = [
   { label: "Command", items: [
     { id: "overview", label: "Overview", icon: LayoutGrid },
     { id: "students", label: "Student intelligence", icon: Users },
@@ -54,9 +56,8 @@ const GROUPS = [
     { id: "settings", label: "Platform settings", icon: Sliders },
     { id: "previews", label: "Preview laboratory", icon: Eye },
   ] },
-] as const;
-const SECTIONS = GROUPS.flatMap((group) => group.items);
-type SectionId = (typeof SECTIONS)[number]["id"];
+];
+const SECTIONS: AdminNavItem[] = GROUPS.flatMap((group) => group.items);
 type Range = "7" | "30" | "90" | "all";
 
 function AdminPage() {
