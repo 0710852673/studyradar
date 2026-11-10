@@ -58,7 +58,7 @@ const SECTIONS: { h: string; p: string[]; list?: string[] }[] = [
       "Our infrastructure providers process technical data that is necessary to deliver and secure the Service:",
     ],
     list: [
-      "IP address and approximate network origin",
+      "Source IP address recorded by the server for authentication security events only; it is not used for product analytics or location enrichment",
       "Browser and device type",
       "Login, session and token-refresh timestamps",
       "Authentication and security logs, including failed sign-in attempts",
@@ -106,7 +106,7 @@ const SECTIONS: { h: string; p: string[]; list?: string[] }[] = [
   {
     h: "11. Retention",
     p: [
-      "Account and study data are retained while your account exists. Historical activity, security and audit records currently have no app-enforced automatic expiry. This pass does not delete or change historical records, which may include IP/location and email collected under the earlier implementation. Fixed retention periods, backup expiry, and a safe deletion process still need to be established and reviewed; no automatic deletion schedule is promised.",
+      "Account and study data are retained while your account exists. New server-observed authentication IP security events are restricted to administrators and have a 30-day retention target, with scheduled and write-triggered cleanup. This does not retroactively remove historical activity or security records, which may include IP/location and email collected under earlier implementations. Provider backups and legacy records may follow separate retention periods and require review.",
     ],
   },
   {
@@ -159,7 +159,7 @@ function PrivacyPage() {
           Privacy Policy
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Updated 7 November 2026 · Study Radar, Sri Lanka
+          Updated 10 November 2026 · Study Radar, Sri Lanka
         </p>
 
         <div className="mt-10 space-y-8">
