@@ -269,12 +269,26 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
     if (admin && prof && previewTrack) {
       const previewProfile: Profile = {
         ...prof,
+        name: previewTrack === "OL" ? "Sample O/L Student" : "Sample A/L Student",
+        email: undefined,
+        avatarUrl: undefined,
+        city: undefined,
+        district: undefined,
+        mobile: undefined,
+        school: "Sample College",
+        grade: previewTrack === "OL" ? "11" : "13",
+        guardianName: undefined,
+        guardianPhone: undefined,
+        bio: "Illustrative browser-only preview profile.",
         track: previewTrack,
         stream: previewTrack === "AL" ? "Physical Science" : undefined,
         subjects: previewTrack === "OL"
           ? ["Mathematics", "Science", "English", "Sinhala", "History", "Buddhism", "ICT", "Commerce"]
           : ["Combined Mathematics", "Physics", "Chemistry"],
-        examDate: defaultExamDate(previewTrack, prof.examYear),
+        dailyGoalHours: 6,
+        weeklyGoalHours: 42,
+        examYear: previewTrack === "OL" ? 2027 : 2027,
+        examDate: defaultExamDate(previewTrack, 2027),
       };
       setProfile(previewProfile);
       setIsAdminPreviewData(true);
