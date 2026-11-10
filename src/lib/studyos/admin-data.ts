@@ -118,6 +118,7 @@ export interface AdminSnapshot {
   events: AdminEvent[];
   devices: AdminDevice[];
   ipEvents: AdminIpEvent[];
+  ipEventError?: string | null;
   roles: AdminRole[];
   achievements: AdminAchievement[];
   audit: AdminAudit[];
@@ -130,7 +131,7 @@ export interface AdminSnapshot {
 
 export const EMPTY_SNAPSHOT: AdminSnapshot = {
   profiles: [], sessions: [], wasted: [], marks: [], chapters: [], events: [], devices: [], ipEvents: [],
-  roles: [], achievements: [], audit: [], contacts: [], feedback: [], suggestions: [],
+  ipEventError: null, roles: [], achievements: [], audit: [], contacts: [], feedback: [], suggestions: [],
   resources: [], referrals: [],
 };
 
@@ -158,7 +159,7 @@ export async function loadSnapshot(): Promise<AdminSnapshot> {
     supabase.from("referral_signups").select("id,referrer_id,referred_user_id,created_at"),
   ]);
   const results = { profiles: p, sessions: s, wasted: w, marks: m, chapters: c, security: e, activity: d, ipEvents: ip, roles: r, achievements: a, audit, contacts, feedback, suggestions, resources, referrals };
-  const failures = Object.entries(results).filter(([, result]) => result.error).map(([name, result]) => `${name}: ${result.error?.message ?? "unknown error"}`);
+  const failures = Object.entries(results).filter(([name, result]) => name !== "ipEvents" && result.error).map(([name, result]) => `${name}: ${result.error?.message ?? "unknown error"}`);
   if (failures.length) throw new Error(`Some admin data could not be loaded. ${failures.join(" · ")}`);
   return {
     profiles: (p.data ?? []) as AdminProfile[],
@@ -169,6 +170,7 @@ export async function loadSnapshot(): Promise<AdminSnapshot> {
     events: (e.data ?? []) as AdminEvent[],
     devices: (d.data ?? []) as AdminDevice[],
     ipEvents: (ip.data ?? []) as AdminIpEvent[],
+    ipEventError: ip.error?.message ?? null,
     roles: (r.data ?? []) as AdminRole[],
     achievements: (a.data ?? []) as AdminAchievement[],
     audit: (audit.data ?? []) as AdminAudit[],
