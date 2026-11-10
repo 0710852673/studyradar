@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
-import { logSecurityEvent, rememberConsent } from "@/lib/studyos/security";
+import { logSecurityEvent, logSecurityIpEvent, rememberConsent } from "@/lib/studyos/security";
 import { googleConsentAction } from "@/lib/studyos/privacy-preferences";
 
 export const Route = createFileRoute("/auth")({
@@ -118,12 +118,15 @@ function AuthPage() {
           data: { name: name.trim() || email.split("@")[0], referred_by: referralCode ?? undefined },
         },
       });
-      if (err) fail(err.message);
-      else if (!data.session) {
+      if (err) { fail(err.message); void logSecurityIpEvent("sign_up_failed"); }
+      else {
+        void logSecurityIpEvent("sign_up_success");
+        if (!data.session) {
         setSent(true);
         toast.success("Account created — confirm your email to continue.");
-      } else {
-        void navigate({ to: "/dashboard", replace: true });
+        } else {
+          void navigate({ to: "/dashboard", replace: true });
+        }
       }
     } else {
       const { error: err } = await supabase.auth.signInWithPassword({
