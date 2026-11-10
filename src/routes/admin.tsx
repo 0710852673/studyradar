@@ -21,7 +21,7 @@ import {
   type AdminProfile, type AdminSnapshot,
 } from "@/lib/studyos/admin-data";
 import { fmtHours } from "@/lib/studyos/analytics";
-import { sumMinutes } from "@/lib/studyos/admin-data";
+import { download, sumMinutes, toCsv } from "@/lib/studyos/admin-data";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin")({
@@ -205,7 +205,60 @@ function AdminNav({ section, onChoose }: { section: SectionId; onChoose: (sectio
 
 function StudentDirectory({ people, sessions, wasted, adminIds, query, onQuery, onFocus }: { people: AdminProfile[]; sessions: AdminSnapshot["sessions"]; wasted: AdminSnapshot["wasted"]; adminIds: Set<string>; query: string; onQuery: (value: string) => void; onFocus: (id: string) => void }) {
   const [track, setTrack] = useState("all");
+  const [stream, setStream] = useState("all");
+  const [grade, setGrade] = useState("all");
+  const [status, setStatus] = useState("all");
+  const grades = [...new Set(people.map((person) => person.grade).filter((value): value is string => Boolean(value)))].sort();
   const term = query.trim().toLowerCase();
-  const rows = people.filter((person) => (track === "all" || person.track === track) && (!term || `${person.name} ${person.email ?? ""} ${person.school ?? ""} ${person.city ?? ""} ${person.district ?? ""} ${person.grade ?? ""} ${person.stream ?? ""} ${(person.subjects ?? []).join(" ")}`.toLowerCase().includes(term)));
-  return <div className="space-y-4"><div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_160px]"><SearchBar value={query} onChange={onQuery} placeholder="Search name, email, school, town or subject…" /><select aria-label="Filter student exam track" value={track} onChange={(event) => setTrack(event.target.value)} className="h-9 rounded-md border border-input bg-background px-3 text-sm"><option value="all">O/L + A/L</option><option value="OL">O/L only</option><option value="AL">A/L only</option></select></div><div className="hidden grid-cols-[minmax(0,2fr)_100px_110px_110px_100px] gap-3 px-3 text-[10px] font-medium uppercase tracking-wide text-muted-foreground md:grid"><span>Student</span><span>Track</span><span>Study</span><span>Wasted</span><span>Status</span></div><div className="space-y-2">{rows.map((person) => { const study = sumMinutes(sessions.filter((row) => row.user_id === person.id)); const waste = sumMinutes(wasted.filter((row) => row.user_id === person.id)); return <button key={person.id} onClick={() => onFocus(person.id)} className="grid w-full gap-2 rounded-xl border border-border bg-elevated p-3 text-left transition-colors hover:border-primary/40 md:grid-cols-[minmax(0,2fr)_100px_110px_110px_100px] md:items-center"><div className="min-w-0"><p className="truncate text-sm font-medium">{person.name}{adminIds.has(person.id) ? <span className="ml-2 text-[10px] text-primary">admin</span> : null}</p><p className="truncate text-xs text-muted-foreground">{person.email ?? "No email"} · {person.school ?? "No school"}{person.grade ? ` · ${person.grade}` : ""}</p></div><span className="text-xs">{person.track} {person.exam_year}</span><span className="num text-xs"><span className="mr-1 text-muted-foreground md:hidden">Study </span>{fmtHours(study)}</span><span className="num text-xs"><span className="mr-1 text-muted-foreground md:hidden">Wasted </span>{fmtHours(waste)}</span><span className={cn("text-xs", person.suspended ? "text-destructive" : "text-muted-foreground")}>{person.suspended ? "Suspended" : person.onboarded ? "Active account" : "Onboarding"}</span></button>; })}{!rows.length ? <Empty text="No students match these filters." /> : null}</div><p className="text-[10px] text-muted-foreground">Study and wasted columns use the selected global range (default 30 days). Open a student for all-time details.</p></div>;
+  const rows = people.filter((person) => {
+    const matchesTrack = track === "all" || person.track === track;
+    const matchesStream = stream === "all" || person.stream === stream;
+    const matchesGrade = grade === "all" || person.grade === grade;
+    const matchesStatus = status === "all" || (status === "suspended" ? person.suspended : status === "onboarding" ? !person.onboarded : status === "onboarded" ? person.onboarded && !person.suspended : !person.suspended);
+    const matchesTerm = !term || `${person.name} ${person.email ?? ""} ${person.school ?? ""} ${person.city ?? ""} ${person.district ?? ""} ${person.grade ?? ""} ${person.stream ?? ""} ${(person.subjects ?? []).join(" ")}`.toLowerCase().includes(term);
+    return matchesTrack && matchesStream && matchesGrade && matchesStatus && matchesTerm;
+  });
+  const streams = [...new Set(people.map((person) => person.stream).filter((value): value is string => Boolean(value)))].sort();
+  const exportRows = rows.map((person) => ({
+    id: person.id, name: person.name, email: person.email ?? "", track: person.track,
+    stream: person.stream ?? "", grade: person.grade ?? "", school: person.school ?? "",
+    joined: person.created_at, last_active: person.last_seen_at ?? "",
+    study_minutes: sumMinutes(sessions.filter((row) => row.user_id === person.id)),
+    wasted_minutes: sumMinutes(wasted.filter((row) => row.user_id === person.id)),
+    account_status: person.suspended ? "Suspended" : person.onboarded ? "Onboarded" : "Onboarding",
+  }));
+  return <div className="space-y-4">
+    <div className="rounded-2xl border border-white/[0.07] bg-[#101923] p-4">
+      <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-[minmax(220px,1fr)_120px_150px_120px_145px_auto]">
+        <SearchBar value={query} onChange={onQuery} placeholder="Search name, email, school, town or subject…" />
+        <select aria-label="Filter student exam track" value={track} onChange={(event) => setTrack(event.target.value)} className="h-9 rounded-lg border border-white/10 bg-[#0b1118] px-3 text-xs text-white/80"><option value="all">All tracks</option><option value="OL">O/L only</option><option value="AL">A/L only</option></select>
+        <select aria-label="Filter student stream" value={stream} onChange={(event) => setStream(event.target.value)} className="h-9 rounded-lg border border-white/10 bg-[#0b1118] px-3 text-xs text-white/80"><option value="all">All streams</option>{streams.map((value) => <option key={value} value={value}>{value}</option>)}</select>
+        <select aria-label="Filter student grade" value={grade} onChange={(event) => setGrade(event.target.value)} className="h-9 rounded-lg border border-white/10 bg-[#0b1118] px-3 text-xs text-white/80"><option value="all">All grades</option>{grades.map((value) => <option key={value} value={value}>{value}</option>)}</select>
+        <select aria-label="Filter student status" value={status} onChange={(event) => setStatus(event.target.value)} className="h-9 rounded-lg border border-white/10 bg-[#0b1118] px-3 text-xs text-white/80"><option value="all">All statuses</option><option value="onboarded">Onboarded</option><option value="onboarding">Onboarding</option><option value="suspended">Suspended</option></select>
+        <Button size="sm" variant="outline" className="h-9 border-white/10 bg-white/[0.035] text-white/75" disabled={!rows.length} onClick={() => download("study-radar-students.csv", toCsv(exportRows), "text/csv;charset=utf-8")}><Database className="mr-2 h-3.5 w-3.5" />Export</Button>
+      </div>
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-[10px] text-white/40"><span>{rows.length.toLocaleString()} matching student accounts</span><span>Study and wasted time are independent metrics · {rangeLabelForDirectory(sessions, wasted)}</span></div>
+    </div>
+    <div className="hidden grid-cols-[minmax(0,2fr)_90px_110px_110px_105px_105px_110px] gap-3 px-4 text-[9px] font-semibold uppercase tracking-[.15em] text-white/35 xl:grid"><span>Student</span><span>Track</span><span>Joined</span><span>Last active</span><span>Study</span><span>Wasted</span><span>Status</span></div>
+    <div className="space-y-2">
+      {rows.map((person) => {
+        const study = sumMinutes(sessions.filter((row) => row.user_id === person.id));
+        const waste = sumMinutes(wasted.filter((row) => row.user_id === person.id));
+        return <button key={person.id} onClick={() => onFocus(person.id)} className="grid w-full gap-2 rounded-2xl border border-white/[0.07] bg-[#101923] p-4 text-left transition-all hover:border-primary/25 hover:bg-[#14202b] xl:grid-cols-[minmax(0,2fr)_90px_110px_110px_105px_105px_110px] xl:items-center">
+          <div className="flex min-w-0 items-center gap-3"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-xs font-semibold text-primary">{person.name.slice(0,1).toUpperCase()}</span><div className="min-w-0"><p className="truncate text-xs font-semibold text-white">{person.name}{adminIds.has(person.id) ? <span className="ml-2 rounded-md bg-primary/10 px-1.5 py-0.5 text-[9px] text-primary">ADMIN</span> : null}</p><p className="truncate text-[10px] text-white/40">{person.email ?? "No email"} · {person.school ?? "School not provided"}</p></div></div>
+          <span className="text-[11px] text-white/70">{person.track} {person.exam_year}</span>
+          <span className="text-[10px] text-white/50 xl:truncate">Joined {new Date(person.created_at).toLocaleDateString()}</span>
+          <span className="text-[10px] text-white/50 xl:truncate">Seen {person.last_seen_at ? new Date(person.last_seen_at).toLocaleDateString() : "—"}</span>
+          <span className="num text-[11px] text-white/80"><span className="mr-1 text-white/35 xl:hidden">Study</span>{fmtHours(study)}</span>
+          <span className="num text-[11px] text-white/80"><span className="mr-1 text-white/35 xl:hidden">Wasted</span>{fmtHours(waste)}</span>
+          <span className={cn("text-[10px] font-medium", person.suspended ? "text-destructive" : person.onboarded ? "text-emerald-400" : "text-amber-300")}>{person.suspended ? "Suspended" : person.onboarded ? "Onboarded" : "Onboarding"}</span>
+        </button>;
+      })}
+      {!rows.length ? <Empty text="No students match these filters." /> : null}
+    </div>
+    <p className="text-[10px] leading-relaxed text-white/35">Study and wasted-time columns use the selected global date range. Student details show the available all-time profile and academic records. Anonymous visitors are not included in this directory.</p>
+  </div>;
+}
+function rangeLabelForDirectory(sessions: AdminSnapshot["sessions"], wasted: AdminSnapshot["wasted"]) {
+  return `${sessions.length + wasted.length} study and wasted-time entries in this range`;
 }
