@@ -61,7 +61,7 @@ const SECTIONS: AdminNavItem[] = GROUPS.flatMap((group) => group.items);
 type Range = "7" | "30" | "90" | "all";
 
 function AdminPage() {
-  const { isAdmin, isAdminPreviewData, ready, settings, refreshSettings, setAdminPreviewTrack } = useStudyOS();
+  const { isAdmin, ready, settings, refreshSettings, setAdminPreviewTrack } = useStudyOS();
   const navigate = useNavigate();
   const [snap, setSnap] = useState<AdminSnapshot>(EMPTY_SNAPSHOT);
   const [loading, setLoading] = useState(true);
