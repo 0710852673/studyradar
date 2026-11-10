@@ -23,13 +23,18 @@ export function Empty({ text }: { text: string }) {
   return <div className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">{text}</div>;
 }
 export function Tag({ children, tone }: { children: React.ReactNode; tone?: "good" | "bad" | undefined }) {
-  return <span className={cn("inline-flex rounded-full border px-2 py-0.5 text-[10px] font-normal", tone === "bad" ? "border-destructive/40 text-destructive" : tone === "good" ? "border-primary/40 text-primary" : "border-border text-muted-foreground")}>{children}</span>;
+  return <span className={cn("inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-medium tracking-wide", tone === "bad" ? "border-destructive/35 bg-destructive/[0.07] text-destructive" : tone === "good" ? "border-primary/30 bg-primary/[0.07] text-primary" : "border-border bg-background/50 text-muted-foreground")}>{children}</span>;
 }
 export function Card({ label, value, icon: Icon, hint }: { label: string; value: string; icon: typeof Users; hint?: string }) {
-  return <div className="rounded-xl border border-border bg-elevated p-4"><div className="flex items-center gap-2 text-xs text-muted-foreground"><Icon className="h-3.5 w-3.5 shrink-0" /><span>{label}</span></div><p className="num mt-2 font-display text-2xl font-semibold">{value}</p>{hint ? <p className="mt-1 text-[10px] leading-relaxed text-muted-foreground">{hint}</p> : null}</div>;
+  return <div className="group relative min-w-0 overflow-hidden rounded-2xl border border-white/[0.075] bg-gradient-to-br from-[#17222e] to-[#101923] p-4 shadow-[0_12px_35px_-28px_rgba(0,0,0,.8)] transition-all hover:-translate-y-0.5 hover:border-primary/25 sm:p-5">
+    <div className="absolute right-0 top-0 h-24 w-24 rounded-full bg-primary/[0.055] blur-2xl transition-opacity group-hover:opacity-100" />
+    <div className="relative flex items-start justify-between gap-3"><div className="min-w-0"><p className="truncate text-[10px] font-semibold uppercase tracking-[.14em] text-white/45">{label}</p><p className="num mt-3 break-words font-display text-2xl font-bold tracking-tight text-white sm:text-[28px]">{value}</p></div><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/[0.09] text-primary"><Icon className="h-4 w-4" /></span></div>
+    {hint ? <p className="relative mt-2 text-[10px] leading-relaxed text-white/40">{hint}</p> : null}
+    <div className="absolute inset-x-4 bottom-0 h-px bg-gradient-to-r from-primary/35 via-primary/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+  </div>;
 }
 export function Block({ title, children, action }: { title: string; children: React.ReactNode; action?: React.ReactNode }) {
-  return <section className="min-w-0 rounded-xl border border-border bg-elevated p-4"><div className="mb-3 flex items-center justify-between gap-3"><h2 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{title}</h2>{action}</div>{children}</section>;
+  return <section className="min-w-0 rounded-2xl border border-white/[0.075] bg-[#101923] p-4 shadow-[0_12px_35px_-30px_rgba(0,0,0,.8)] sm:p-5"><div className="mb-4 flex items-center justify-between gap-3 border-b border-white/[0.06] pb-3"><h2 className="text-[10px] font-semibold uppercase tracking-[.16em] text-white/45">{title}</h2>{action}</div>{children}</section>;
 }
 export function Bars({ data, format, tone = "primary" }: { data: { label: string; value: number }[]; format: (value: number) => string; tone?: "primary" | "muted" }) {
   const max = Math.max(1, ...data.map((item) => item.value));
