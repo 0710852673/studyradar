@@ -136,7 +136,7 @@ function useNotificationWatchers() {
         .gte("awarded_at", since)
         .order("awarded_at", { ascending: false })
         .limit(30);
-      const awardUserIds = [...new Set((awards ?? []).map((a: any) => a.user_id))];
+      const awardUserIds: string[] = [...new Set<string>((awards ?? []).map((a: any) => String(a.user_id)))];
       const { data: studentProfiles } = awardUserIds.length
         ? await supabase.from("profiles").select("id, name").in("id", awardUserIds)
         : { data: [] as { id: string; name: string }[] };

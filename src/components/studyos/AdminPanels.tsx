@@ -10,7 +10,7 @@ import { fmtHours } from "@/lib/studyos/analytics";
 import {
   activeWithin, countBy, dailyMinutes, dailySignups, download, sumMinutes,
   summarizeActivity, toCsv, withinDays,
-  type AdminAchievement, type AdminAudit, type AdminDevice, type AdminEvent,
+  type AdminAchievement, type AdminAudit, type AdminChapter, type AdminDevice, type AdminEvent,
   type AdminMark, type AdminProfile, type AdminReferral, type AdminSession,
   type AdminSnapshot, type AdminWaste,
 } from "@/lib/studyos/admin-data";
@@ -23,13 +23,18 @@ export function Empty({ text }: { text: string }) {
   return <div className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">{text}</div>;
 }
 export function Tag({ children, tone }: { children: React.ReactNode; tone?: "good" | "bad" | undefined }) {
-  return <span className={cn("inline-flex rounded-full border px-2 py-0.5 text-[10px] font-normal", tone === "bad" ? "border-destructive/40 text-destructive" : tone === "good" ? "border-primary/40 text-primary" : "border-border text-muted-foreground")}>{children}</span>;
+  return <span className={cn("inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-medium tracking-wide", tone === "bad" ? "border-destructive/35 bg-destructive/[0.07] text-destructive" : tone === "good" ? "border-primary/30 bg-primary/[0.07] text-primary" : "border-border bg-background/50 text-muted-foreground")}>{children}</span>;
 }
-export function Card({ label, value, icon: Icon, hint }: { label: string; value: string; icon: typeof Users; hint?: string }) {
-  return <div className="rounded-xl border border-border bg-elevated p-4"><div className="flex items-center gap-2 text-xs text-muted-foreground"><Icon className="h-3.5 w-3.5 shrink-0" /><span>{label}</span></div><p className="num mt-2 font-display text-2xl font-semibold">{value}</p>{hint ? <p className="mt-1 text-[10px] leading-relaxed text-muted-foreground">{hint}</p> : null}</div>;
+export function Card({ label, value, icon: Icon, hint }: { label: string; value: string; icon: typeof Users; hint?: string | undefined }) {
+  return <div className="group relative min-w-0 overflow-hidden rounded-2xl border border-white/[0.075] bg-gradient-to-br from-[#17222e] to-[#101923] p-4 shadow-[0_12px_35px_-28px_rgba(0,0,0,.8)] transition-all hover:-translate-y-0.5 hover:border-primary/25 sm:p-5">
+    <div className="absolute right-0 top-0 h-24 w-24 rounded-full bg-primary/[0.055] blur-2xl transition-opacity group-hover:opacity-100" />
+    <div className="relative flex items-start justify-between gap-3"><div className="min-w-0"><p className="truncate text-[10px] font-semibold uppercase tracking-[.14em] text-white/45">{label}</p><p className="num mt-3 break-words font-display text-2xl font-bold tracking-tight text-white sm:text-[28px]">{value}</p></div><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/[0.09] text-primary"><Icon className="h-4 w-4" /></span></div>
+    {hint ? <p className="relative mt-2 text-[10px] leading-relaxed text-white/40">{hint}</p> : null}
+    <div className="absolute inset-x-4 bottom-0 h-px bg-gradient-to-r from-primary/35 via-primary/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+  </div>;
 }
 export function Block({ title, children, action }: { title: string; children: React.ReactNode; action?: React.ReactNode }) {
-  return <section className="min-w-0 rounded-xl border border-border bg-elevated p-4"><div className="mb-3 flex items-center justify-between gap-3"><h2 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{title}</h2>{action}</div>{children}</section>;
+  return <section className="min-w-0 rounded-2xl border border-white/[0.075] bg-[#101923] p-4 shadow-[0_12px_35px_-30px_rgba(0,0,0,.8)] sm:p-5"><div className="mb-4 flex items-center justify-between gap-3 border-b border-white/[0.06] pb-3"><h2 className="text-[10px] font-semibold uppercase tracking-[.16em] text-white/45">{title}</h2>{action}</div>{children}</section>;
 }
 export function Bars({ data, format, tone = "primary" }: { data: { label: string; value: number }[]; format: (value: number) => string; tone?: "primary" | "muted" }) {
   const max = Math.max(1, ...data.map((item) => item.value));
@@ -109,17 +114,34 @@ export function Analytics({ people, sessions, wasted, marks, chapters, devices, 
 function SubjectBars({ rows }: { rows: [string, number][] }) { const max = Math.max(1, ...rows.map((row) => row[1])); return <div className="space-y-3">{rows.slice(0, 12).map(([subject, minutes]) => <div key={subject}><div className="mb-1 flex justify-between gap-2 text-xs"><span>{subject}</span><span className="num text-muted-foreground">{fmtHours(minutes)}</span></div><div className="h-2 rounded-full bg-background"><div className="h-full rounded-full bg-primary" style={{ width: `${minutes / max * 100}%` }} /></div></div>)}{!rows.length ? <Empty text="No study data in this range." /> : null}</div>; }
 function MarkAverages({ marks }: { marks: AdminMark[] }) { const values = new Map<string, { sum: number; count: number }>(); for (const mark of marks) { if (!mark.total) continue; const value = values.get(mark.subject) ?? { sum: 0, count: 0 }; values.set(mark.subject, { sum: value.sum + mark.marks / mark.total * 100, count: value.count + 1 }); } return <div className="space-y-2">{[...values.entries()].map(([subject, value]) => <KV key={subject} label={subject} value={`${Math.round(value.sum / value.count)}% · ${value.count} records`} />)}{!values.size ? <Empty text="No marks in this range." /> : null}</div>; }
 
-export function VisitorPanel({ devices }: { devices: AdminDevice[] }) {
-  const summary = useMemo(() => summarizeActivity(devices), [devices]);
-  return <div className="space-y-4"><div className="rounded-xl border border-primary/25 bg-primary/5 p-4"><div className="flex gap-3"><Globe className="mt-0.5 h-5 w-5 shrink-0 text-primary" /><div><h2 className="text-sm font-semibold">Privacy-respecting activity, not visitor surveillance</h2><p className="mt-1 text-xs leading-relaxed text-muted-foreground">These are optional, consented first-party events. Study Radar does not store an anonymous visitor ID, referrer, IP address or precise location for this view, so unique anonymous visitors and a source funnel are truthfully unavailable.</p></div></div></div><div className="grid gap-3 sm:grid-cols-3"><Card label="Consented activity events" value={String(summary.events)} icon={Activity} /><Card label="Page-category visits" value={String(summary.visits)} icon={Globe} /><Card label="Consented login events" value={String(summary.logins)} icon={Users} /></div><div className="grid gap-4 lg:grid-cols-3"><AggregateBlock title="Page categories" rows={summary.byPage} /><AggregateBlock title="Device classes" rows={summary.byDevice} /><AggregateBlock title="Browser families" rows={summary.byBrowser} /></div><Empty text="Unique visitors: unavailable — no anonymous identifier is collected. Registered-student totals are shown separately in Overview." /></div>;
+export function VisitorPanel() {
+  return <div className="space-y-4">
+    <div className="rounded-2xl border border-primary/25 bg-primary/[0.06] p-5">
+      <div className="flex items-start gap-3"><Globe className="mt-0.5 h-5 w-5 shrink-0 text-primary" /><div><h2 className="text-sm font-semibold">Anonymous visitor analytics are not connected to this admin dataset</h2><p className="mt-1 max-w-3xl text-xs leading-relaxed text-muted-foreground">The current first-party app telemetry records consented activity for signed-in accounts. It does not create anonymous visitor IDs, source attribution or an anonymous conversion funnel. We keep those metrics unavailable rather than presenting registered-user activity as website visitors.</p></div></div>
+    </div>
+    <div className="grid gap-3 sm:grid-cols-3">
+      <Card label="Anonymous unique visitors" value="Unavailable" icon={Globe} hint="No anonymous visitor identifier is collected." />
+      <Card label="Referral source attribution" value="Unavailable" icon={Link2} hint="Source and campaign parameters are not retained as visitor analytics." />
+      <Card label="Registration funnel" value="Not instrumented" icon={Activity} hint="No complete, verified visitor-to-registration event chain exists." />
+    </div>
+    <Block title="What is available today">
+      <div className="space-y-3 text-xs leading-relaxed text-muted-foreground">
+        <KV label="Registered student activity" value="Available in Activity & devices" />
+        <KV label="Consented page-category events" value="Available in Activity & devices" />
+        <KV label="Real account registrations" value="Available in Overview and Analytics" />
+        <KV label="Anonymous visitor and acquisition metrics" value="Not collected" />
+      </div>
+    </Block>
+    <div className="rounded-xl border border-border bg-elevated p-4"><p className="text-xs font-semibold">Privacy-first next step</p><p className="mt-1 text-xs leading-relaxed text-muted-foreground">If visitor analytics are needed, connect a privacy-respecting aggregate analytics source and disclose it in the privacy policy before enabling collection. Until then, do not infer unique visitors from device events or account activity.</p></div>
+  </div>;
 }
 function AggregateBlock({ title, rows }: { title: string; rows: [string, number][] }) { return <Block title={title}><div className="space-y-2">{rows.slice(0, 10).map(([label, count]) => <KV key={label} label={label} value={String(count)} />)}{!rows.length ? <p className="text-xs text-muted-foreground">No consented events.</p> : null}</div></Block>; }
 
 export function ActivityPanel({ devices, people, query, onQuery }: { devices: AdminDevice[]; people: AdminProfile[]; query: string; onQuery: (value: string) => void }) {
   const names = new Map(people.map((person) => [person.id, person.name]));
   const term = query.trim().toLowerCase();
-  const rows = devices.filter((row) => `${row.kind} ${row.path ?? ""} ${row.platform ?? ""} ${row.user_agent ?? ""} ${row.user_id ? names.get(row.user_id) ?? "registered" : "account not stored"}`.toLowerCase().includes(term));
-  return <div className="space-y-4"><div className="rounded-xl border border-border bg-elevated p-4 text-xs leading-relaxed text-muted-foreground">Minimal activity records only. “Account not stored” means the event cannot be classified as anonymous or registered; it is not counted as a unique visitor. No IP, city, screen size, timezone or raw user agent is queried.</div><SearchBar value={query} onChange={onQuery} placeholder="Event, student, page, browser or device…" /><div className="space-y-1.5">{rows.slice(0, 400).map((row) => <div key={row.id} className="rounded-lg border border-border bg-elevated px-3 py-2 text-xs"><div className="flex flex-wrap items-center justify-between gap-2"><span>{row.kind} · {row.user_id ? names.get(row.user_id) ?? "Registered student" : "Account not stored"} · {row.path ?? "other"}</span><span className="num text-muted-foreground">{new Date(row.created_at).toLocaleString()}</span></div><p className="mt-1 text-muted-foreground">{[row.platform, row.user_agent].filter(Boolean).join(" · ") || "No coarse device label"}</p></div>)}{!rows.length ? <Empty text="No matching consented activity." /> : null}</div></div>;
+  const rows = devices.filter((row) => `${row.kind} ${row.path ?? ""} ${row.platform ?? ""} ${row.user_id ? names.get(row.user_id) ?? "registered" : "account not stored"}`.toLowerCase().includes(term));
+  return <div className="space-y-4"><div className="rounded-xl border border-border bg-elevated p-4 text-xs leading-relaxed text-muted-foreground">Minimal activity records only. “Account not stored” means the event cannot be classified as anonymous or registered; it is not counted as a unique visitor. No IP, city, screen size, timezone or raw user agent is queried.</div><SearchBar value={query} onChange={onQuery} placeholder="Event, student, page or device class…" /><div className="space-y-1.5">{rows.slice(0, 400).map((row) => <div key={row.id} className="rounded-lg border border-border bg-elevated px-3 py-2 text-xs"><div className="flex flex-wrap items-center justify-between gap-2"><span>{row.kind} · {row.user_id ? names.get(row.user_id) ?? "Registered student" : "Account not stored"} · {row.path ?? "other"}</span><span className="num text-muted-foreground">{new Date(row.created_at).toLocaleString()}</span></div><p className="mt-1 text-muted-foreground">{row.platform || "No coarse device label"}</p></div>)}{!rows.length ? <Empty text="No matching consented activity." /> : null}</div></div>;
 }
 
 export function SecurityPanel({ events, audit, query, onQuery }: { events: AdminEvent[]; audit: AdminAudit[]; query: string; onQuery: (value: string) => void }) {

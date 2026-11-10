@@ -171,11 +171,12 @@ function Interstitial({
 }
 
 function Gate() {
-  const { ready, session, profile, isAdmin, settings, signOut } = useStudyOS();
+  const { ready, session, profile, isAdmin, isAdminPreviewData, settings, signOut } = useStudyOS();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const isPublic = PUBLIC_PATHS.includes(pathname);
   const onAuth = pathname === "/auth";
+  const onAdmin = pathname === "/admin";
 
   useEffect(() => {
     if (!ready) return;
@@ -186,9 +187,9 @@ function Gate() {
 
   // Disclosed activity logging — see the Privacy Policy.
   useEffect(() => {
-    if (!ready) return;
+    if (!ready || isAdminPreviewData) return;
     recordVisitOnce(pathname, session?.user?.id ?? null, session?.user?.email ?? null);
-  }, [ready, pathname, session]);
+  }, [ready, pathname, session, isAdminPreviewData]);
 
   // Always render <Outlet /> so the SSR tree matches the first client render;
   // the session only exists in the browser and arrives after hydration.
@@ -217,18 +218,18 @@ function Gate() {
     return <Interstitial title="Back in a moment" body={settings.maintenanceMessage} />;
   }
 
-  const showOnboarding = authedArea && (!profile || !profile.onboarded);
+  const showOnboarding = authedArea && !onAdmin && (!profile || !profile.onboarded);
 
   return (
     <>
-      {ready && settings.announcementActive && settings.announcement ? (
+      {ready && !onAdmin && settings.announcementActive && settings.announcement ? (
         <div className="bg-primary px-4 py-2 text-center text-xs font-medium text-primary-foreground">
           {settings.announcement}
         </div>
       ) : null}
       <Outlet />
       {showOnboarding ? <Onboarding /> : null}
-      {authedArea && !showOnboarding ? <ProfileNudge /> : null}
+      {authedArea && !onAdmin && !showOnboarding ? <ProfileNudge /> : null}
     </>
   );
 }

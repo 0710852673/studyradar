@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Database, Download, GraduationCap, LoaderCircle } from "lucide-react";
+import { Database, Download, GraduationCap, LoaderCircle, RotateCcw, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { useStudyOS } from "@/lib/studyos/store";
 import { createFullBackup, download, toCsv, type AdminSnapshot } from "@/lib/studyos/admin-data";
+import { resetAdminPersonalPreview } from "@/lib/studyos/admin-personal-preview";
 import { restoreBackup, type RestoreReport } from "@/lib/studyos/restore.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { Block } from "./AdminPanels";
@@ -68,5 +69,42 @@ function RestoreBlock() {
 }
 
 export function PreviewPanel({ onPreview }: { onPreview: (track: "OL" | "AL") => void }) {
-  return <div className="max-w-4xl space-y-4"><Block title="Isolated student experience previews"><p className="text-sm leading-relaxed text-muted-foreground">Choose an exam track to open the student dashboard with illustrative browser-only records. These are not student accounts or database rows. Preview edits stay in this browser and never enter platform metrics, referrals, emails, backups or student lists.</p><div className="mt-5 grid gap-3 sm:grid-cols-2"><Button size="lg" variant="outline" className="h-auto justify-start p-5" onClick={() => onPreview("OL")}><GraduationCap className="mr-3 h-5 w-5 text-primary" /><span className="text-left"><span className="block font-semibold">Preview O/L dashboard</span><span className="mt-1 block text-xs font-normal text-muted-foreground">Compulsory and optional-subject experience</span></span></Button><Button size="lg" variant="outline" className="h-auto justify-start p-5" onClick={() => onPreview("AL")}><GraduationCap className="mr-3 h-5 w-5 text-primary" /><span className="text-left"><span className="block font-semibold">Preview A/L dashboard</span><span className="mt-1 block text-xs font-normal text-muted-foreground">Stream and three-subject experience</span></span></Button></div></Block><Block title="Isolation guarantee"><ul className="list-disc space-y-2 pl-5 text-xs leading-relaxed text-muted-foreground"><li>Preview record IDs are browser-only and cannot be written to student tables.</li><li>The main admin dashboard starts with preview off.</li><li>Use “Exit preview” in the student app to return to your real account data.</li><li>No fictional student appears in the directory or any platform count.</li></ul></Block></div>;
+  const { user } = useStudyOS();
+  const reset = (track: "OL" | "AL") => {
+    if (!user?.id || !window.confirm(`Reset only the local ${track === "OL" ? "O/L" : "A/L"} sample preview? This does not affect real student records.`)) return;
+    resetAdminPersonalPreview(user.id, track);
+    toast.success(`${track === "OL" ? "O/L" : "A/L"} sample preview reset`);
+  };
+  const previews = [
+    { track: "OL" as const, title: "GCE Ordinary Level", short: "O/L", description: "Compulsory and optional subjects, grade-level syllabus and term assessments.", subjects: "Mathematics · Science · English · Sinhala · History + options" },
+    { track: "AL" as const, title: "GCE Advanced Level", short: "A/L", description: "Stream-based subject setup, deeper syllabus tracking and model-paper marks.", subjects: "Combined Mathematics · Physics · Chemistry (Physical Science example)" },
+  ];
+  return <div className="space-y-5">
+    <div className="rounded-2xl border border-primary/20 bg-primary/[0.06] p-5 sm:p-6">
+      <div className="flex items-start gap-3"><ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary" /><div><p className="text-sm font-semibold">Isolated preview laboratory</p><p className="mt-1 max-w-3xl text-xs leading-relaxed text-muted-foreground">Each track has its own browser-local sample dataset. It includes a rolling 180-day study history, separate wasted-time entries, marks and syllabus progress. Preview edits remain local to this browser and are never written to the production database.</p></div></div>
+    </div>
+    <div className="grid gap-4 xl:grid-cols-2">
+      {previews.map((item) => <section key={item.track} className="overflow-hidden rounded-2xl border border-border bg-elevated">
+        <div className="border-b border-border bg-gradient-to-br from-primary/[0.10] to-transparent p-5">
+          <div className="flex items-center justify-between gap-3"><span className="rounded-lg border border-primary/25 bg-primary/10 px-2.5 py-1 text-[10px] font-bold tracking-wider text-primary">{item.short} PREVIEW</span><span className="inline-flex items-center gap-1.5 text-[10px] text-emerald-400"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />LOCAL ONLY</span></div>
+          <h2 className="mt-4 font-display text-xl font-semibold">{item.title}</h2>
+          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{item.description}</p>
+        </div>
+        <div className="p-5">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Sample subject setup</p>
+          <p className="mt-2 text-xs leading-relaxed">{item.subjects}</p>
+          <div className="mt-5 grid grid-cols-3 gap-2">
+            <div className="rounded-xl border border-border bg-background/60 p-3"><p className="font-display text-lg font-semibold">180d</p><p className="mt-1 text-[9px] text-muted-foreground">Study history</p></div>
+            <div className="rounded-xl border border-border bg-background/60 p-3"><p className="font-display text-lg font-semibold">Separate</p><p className="mt-1 text-[9px] text-muted-foreground">Wasted time</p></div>
+            <div className="rounded-xl border border-border bg-background/60 p-3"><p className="font-display text-lg font-semibold">Sample</p><p className="mt-1 text-[9px] text-muted-foreground">Marks & syllabus</p></div>
+          </div>
+          <div className="mt-5 flex flex-wrap gap-2">
+            <Button className="flex-1" onClick={() => onPreview(item.track)}><GraduationCap className="mr-2 h-4 w-4" />Launch {item.short} experience</Button>
+            <Button variant="outline" onClick={() => reset(item.track)} disabled={!user?.id}><RotateCcw className="mr-2 h-3.5 w-3.5" />Reset</Button>
+          </div>
+        </div>
+      </section>)}
+    </div>
+    <Block title="Data isolation rules"><ul className="space-y-2 text-xs leading-relaxed text-muted-foreground"><li>• O/L and A/L previews use separate local-storage keys and independent reset controls.</li><li>• Preview data replaces the admin's real student data only while preview mode is active; it is never merged with real account records.</li><li>• Study, wasted time, marks and syllabus edits inside preview mode are saved locally only.</li><li>• Preview data is excluded from admin analytics, student directory, referrals, email, exports and backups.</li><li>• Returning to Control Centre restores the real admin account view.</li></ul></Block>
+  </div>;
 }

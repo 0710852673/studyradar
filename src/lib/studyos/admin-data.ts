@@ -76,8 +76,8 @@ export type AdminDevice = {
   user_id: string | null;
   kind: string;
   path: string | null;
-  user_agent: string | null;
   platform: string | null;
+  user_agent?: string | null;
   created_at: string;
 };
 export type AdminRole = { user_id: string; role: string };
@@ -133,7 +133,7 @@ export const EMPTY_SNAPSHOT: AdminSnapshot = {
 };
 
 const PROFILE_COLUMNS = "id,name,email,track,exam_year,exam_date,stream,subjects,daily_target_hours,onboarded,avatar_url,city,district,school,grade,bio,suspended,suspended_reason,suspended_at,is_demo,terms_accepted_at,last_seen_at,created_at";
-const DEVICE_COLUMNS = "id,user_id,kind,path,user_agent,platform,created_at";
+const DEVICE_COLUMNS = "id,user_id,kind,path,platform,created_at";
 
 /** All admin reads are checked together; partial data is never presented as a complete platform snapshot. */
 export async function loadSnapshot(): Promise<AdminSnapshot> {
@@ -214,7 +214,6 @@ export function summarizeActivity(rows: AdminDevice[]) {
     logins: rows.filter((row) => row.kind === "login").length,
     byPage: countBy(rows, (row) => row.path),
     byDevice: countBy(rows, (row) => row.platform),
-    byBrowser: countBy(rows, (row) => row.user_agent),
     uniqueVisitors: null,
   };
 }
@@ -240,7 +239,7 @@ export function activeWithin(sessions: AdminSession[], days: number) {
   const since = dayKey(new Date(Date.now() - (days - 1) * 864e5));
   return new Set(sessions.filter((s) => s.date >= since).map((s) => s.user_id)).size;
 }
-export function dailyMinutes(sessions: AdminSession[], days: number) {
+export function dailyMinutes<T extends { date: string; minutes: number }>(sessions: T[], days: number) {
   const map = new Map<string, number>();
   for (const s of sessions) map.set(s.date, (map.get(s.date) ?? 0) + s.minutes);
   return Array.from({ length: days }, (_, i) => {

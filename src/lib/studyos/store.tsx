@@ -14,7 +14,7 @@ import { syncConsent } from "./security";
 import { recordActivity } from "./telemetry";
 import { allowWrite, retryInSeconds, setWriteLimit } from "./ratelimit";
 import { defaultExamDate } from "./subjects";
-import { isAdminPreviewId, loadAdminPersonalPreview, saveAdminPersonalPreview } from "./admin-personal-preview";
+import { loadAdminPersonalPreview, saveAdminPersonalPreview } from "./admin-personal-preview";
 import {
   DEFAULT_SETTINGS,
   EMPTY_DATA,
@@ -111,6 +111,8 @@ interface Store {
   session: Session | null;
   isAdmin: boolean;
   isAdminPreviewData: boolean;
+  adminPreviewTrack: "OL" | "AL" | null;
+  setAdminPreviewTrack: (track: "OL" | "AL" | null) => Promise<void>;
   profile: Profile | null;
   avatarSrc: string | null;
   data: StudyOSData;
@@ -140,6 +142,7 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
   const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isAdminPreviewData, setIsAdminPreviewData] = useState(false);
+  const [adminPreviewTrack, setAdminPreviewTrackState] = useState<"OL" | "AL" | null>(null);
   const [data, setData] = useState<StudyOSData>(EMPTY_DATA);
   const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
 
@@ -191,7 +194,6 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
     check(p.error, "load your profile");
 
     const prof = p.data ? rowToProfile(p.data as ProfileRow) : null;
-    setProfile(prof);
 
     // OAuth redirects return to the app root, so finish referral attribution
     // from the short-lived tab value after the new session is available.
@@ -259,16 +261,41 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
         status: c.status as ChapterStatus,
       })),
     };
-    if (admin && prof) {
+    const requestedPreview = admin && typeof sessionStorage !== "undefined"
+      ? sessionStorage.getItem("sr_admin_preview_track")
+      : null;
+    const previewTrack = requestedPreview === "OL" || requestedPreview === "AL" ? requestedPreview : null;
+    setAdminPreviewTrackState(previewTrack);
+    if (admin && prof && previewTrack) {
+      const previewProfile: Profile = {
+        ...prof,
+        id: `admin-preview:${uid}:${previewTrack}`,
+        name: previewTrack === "OL" ? "Sample O/L Student" : "Sample A/L Student",
+        email: undefined,
+        avatarUrl: undefined,
+        city: undefined,
+        district: undefined,
+        mobile: undefined,
+        school: "Sample College",
+        grade: previewTrack === "OL" ? "11" : "13",
+        guardianName: undefined,
+        guardianPhone: undefined,
+        bio: "Illustrative browser-only preview profile.",
+        track: previewTrack,
+        stream: previewTrack === "AL" ? "Physical Science" : undefined,
+        subjects: previewTrack === "OL"
+          ? ["Mathematics", "Science", "English", "Sinhala", "History", "Buddhism", "ICT", "Commerce"]
+          : ["Combined Mathematics", "Physics", "Chemistry"],
+        dailyGoalHours: 6,
+        weeklyGoalHours: 42,
+        examYear: previewTrack === "OL" ? 2027 : 2027,
+        examDate: defaultExamDate(previewTrack, 2027),
+      };
+      setProfile(previewProfile);
       setIsAdminPreviewData(true);
-      const preview = loadAdminPersonalPreview(uid, prof);
-      setData({
-        sessions: [...accountData.sessions, ...preview.sessions],
-        marks: [...accountData.marks, ...preview.marks],
-        chapters: [...accountData.chapters, ...preview.chapters],
-        wasted: [...accountData.wasted, ...preview.wasted],
-      });
+      setData(loadAdminPersonalPreview(uid, previewProfile));
     } else {
+      setProfile(prof);
       setIsAdminPreviewData(false);
       setData(accountData);
     }
@@ -322,6 +349,21 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
       user: session?.user ?? null,
       isAdmin,
       isAdminPreviewData,
+      adminPreviewTrack,
+      setAdminPreviewTrack: async (track) => {
+        if (!userId || !isAdmin) return;
+        try {
+          if (typeof sessionStorage !== "undefined") {
+            if (track) sessionStorage.setItem("sr_admin_preview_track", track);
+            else sessionStorage.removeItem("sr_admin_preview_track");
+          }
+        } catch {
+          toast.error("Preview mode could not be saved in this browser.");
+          return;
+        }
+        setAdminPreviewTrackState(track);
+        await load(userId);
+      },
       profile,
       avatarSrc,
       data,
@@ -329,6 +371,10 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
       refresh,
       refreshSettings,
       updateProfile: async (p) => {
+        if (isAdminPreviewData) {
+          setProfile((current) => current ? { ...current, ...p } : current);
+          return;
+        }
         if (throttled()) return;
         if (!userId) return;
         const patch: Record<string, unknown> = {};
@@ -359,6 +405,10 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
         await load(userId);
       },
       uploadAvatar: async (file) => {
+        if (isAdminPreviewData) {
+          toast.info("Profile image uploads are disabled in sample preview mode.");
+          return;
+        }
         if (throttled()) return;
         if (!userId) return;
         const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
@@ -378,6 +428,12 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
       addSession: async (s) => {
         if (throttled()) return;
         if (!userId) return;
+        if (isAdminPreviewData && adminPreviewTrack) {
+          const next = { ...data, sessions: [...data.sessions, { ...s, id: `admin-preview:session:${Date.now()}`, createdAt: Date.now() }] };
+          setData(next);
+          saveAdminPersonalPreview(userId, adminPreviewTrack, next);
+          return;
+        }
         const { error } = await supabase.from("study_sessions").insert({
           user_id: userId,
           date: s.date,
@@ -391,6 +447,12 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
       removeSession: async (id) => {
         if (throttled()) return;
         if (!userId) return;
+        if (isAdminPreviewData && adminPreviewTrack) {
+          const next = { ...data, sessions: data.sessions.filter((row) => row.id !== id) };
+          setData(next);
+          saveAdminPersonalPreview(userId, adminPreviewTrack, next);
+          return;
+        }
         const { error } = await supabase.from("study_sessions").delete().eq("id", id);
         if (!check(error, "delete that session")) return;
         await load(userId);
@@ -398,6 +460,12 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
       addWaste: async (w) => {
         if (throttled()) return;
         if (!userId) return;
+        if (isAdminPreviewData && adminPreviewTrack) {
+          const next = { ...data, wasted: [...data.wasted, { ...w, id: `admin-preview:waste:${Date.now()}` }] };
+          setData(next);
+          saveAdminPersonalPreview(userId, adminPreviewTrack, next);
+          return;
+        }
         const { error } = await (supabase as any).from("wasted_time").insert({
           user_id: userId,
           date: w.date,
@@ -410,6 +478,12 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
       removeWaste: async (id) => {
         if (throttled()) return;
         if (!userId) return;
+        if (isAdminPreviewData && adminPreviewTrack) {
+          const next = { ...data, wasted: data.wasted.filter((row) => row.id !== id) };
+          setData(next);
+          saveAdminPersonalPreview(userId, adminPreviewTrack, next);
+          return;
+        }
         const { error } = await (supabase as any).from("wasted_time").delete().eq("id", id);
         if (!check(error, "delete that entry")) return;
         await load(userId);
@@ -417,6 +491,12 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
       addMark: async (m) => {
         if (throttled()) return;
         if (!userId) return;
+        if (isAdminPreviewData && adminPreviewTrack) {
+          const next = { ...data, marks: [...data.marks, { ...m, id: `admin-preview:mark:${Date.now()}` }] };
+          setData(next);
+          saveAdminPersonalPreview(userId, adminPreviewTrack, next);
+          return;
+        }
         const { error } = await supabase.from("marks").insert({
           user_id: userId,
           subject: m.subject,
@@ -431,6 +511,12 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
       removeMark: async (id) => {
         if (throttled()) return;
         if (!userId) return;
+        if (isAdminPreviewData && adminPreviewTrack) {
+          const next = { ...data, marks: data.marks.filter((row) => row.id !== id) };
+          setData(next);
+          saveAdminPersonalPreview(userId, adminPreviewTrack, next);
+          return;
+        }
         const { error } = await supabase.from("marks").delete().eq("id", id);
         if (!check(error, "delete that result")) return;
         await load(userId);
@@ -438,6 +524,12 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
       addChapter: async (subject, title) => {
         if (throttled()) return;
         if (!userId) return;
+        if (isAdminPreviewData && adminPreviewTrack) {
+          const next = { ...data, chapters: [...data.chapters, { id: `admin-preview:chapter:${Date.now()}`, subject, title, status: "todo" as ChapterStatus }] };
+          setData(next);
+          saveAdminPersonalPreview(userId, adminPreviewTrack, next);
+          return;
+        }
         const { error } = await supabase
           .from("chapters")
           .insert({ user_id: userId, subject, title });
@@ -447,6 +539,12 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
       setChapterStatus: async (id, status) => {
         if (throttled()) return;
         if (!userId) return;
+        if (isAdminPreviewData && adminPreviewTrack) {
+          const next = { ...data, chapters: data.chapters.map((row) => row.id === id ? { ...row, status } : row) };
+          setData(next);
+          saveAdminPersonalPreview(userId, adminPreviewTrack, next);
+          return;
+        }
         const { error } = await supabase.from("chapters").update({ status }).eq("id", id);
         if (!check(error, "update that chapter")) return;
         await load(userId);
@@ -454,6 +552,12 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
       removeChapter: async (id) => {
         if (throttled()) return;
         if (!userId) return;
+        if (isAdminPreviewData && adminPreviewTrack) {
+          const next = { ...data, chapters: data.chapters.filter((row) => row.id !== id) };
+          setData(next);
+          saveAdminPersonalPreview(userId, adminPreviewTrack, next);
+          return;
+        }
         const { error } = await supabase.from("chapters").delete().eq("id", id);
         if (!check(error, "delete that chapter")) return;
         await load(userId);
@@ -467,6 +571,7 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
       session,
       isAdmin,
       isAdminPreviewData,
+      adminPreviewTrack,
       profile,
       avatarSrc,
       data,
