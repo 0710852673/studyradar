@@ -111,6 +111,8 @@ interface Store {
   session: Session | null;
   isAdmin: boolean;
   isAdminPreviewData: boolean;
+  adminPreviewTrack: "OL" | "AL" | null;
+  setAdminPreviewTrack: (track: "OL" | "AL" | null) => Promise<void>;
   profile: Profile | null;
   avatarSrc: string | null;
   data: StudyOSData;
@@ -140,6 +142,7 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
   const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isAdminPreviewData, setIsAdminPreviewData] = useState(false);
+  const [adminPreviewTrack, setAdminPreviewTrackState] = useState<"OL" | "AL" | null>(null);
   const [data, setData] = useState<StudyOSData>(EMPTY_DATA);
   const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
 
@@ -191,7 +194,6 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
     check(p.error, "load your profile");
 
     const prof = p.data ? rowToProfile(p.data as ProfileRow) : null;
-    setProfile(prof);
 
     // OAuth redirects return to the app root, so finish referral attribution
     // from the short-lived tab value after the new session is available.
@@ -259,16 +261,26 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
         status: c.status as ChapterStatus,
       })),
     };
-    if (admin && prof) {
+    const requestedPreview = admin && typeof sessionStorage !== "undefined"
+      ? sessionStorage.getItem("sr_admin_preview_track")
+      : null;
+    const previewTrack = requestedPreview === "OL" || requestedPreview === "AL" ? requestedPreview : null;
+    setAdminPreviewTrackState(previewTrack);
+    if (admin && prof && previewTrack) {
+      const previewProfile: Profile = {
+        ...prof,
+        track: previewTrack,
+        stream: previewTrack === "AL" ? "Physical Science" : undefined,
+        subjects: previewTrack === "OL"
+          ? ["Mathematics", "Science", "English", "Sinhala", "History", "Buddhism", "ICT", "Commerce"]
+          : ["Combined Mathematics", "Physics", "Chemistry"],
+        examDate: defaultExamDate(previewTrack, prof.examYear),
+      };
+      setProfile(previewProfile);
       setIsAdminPreviewData(true);
-      const preview = loadAdminPersonalPreview(uid, prof);
-      setData({
-        sessions: [...accountData.sessions, ...preview.sessions],
-        marks: [...accountData.marks, ...preview.marks],
-        chapters: [...accountData.chapters, ...preview.chapters],
-        wasted: [...accountData.wasted, ...preview.wasted],
-      });
+      setData(loadAdminPersonalPreview(uid, previewProfile));
     } else {
+      setProfile(prof);
       setIsAdminPreviewData(false);
       setData(accountData);
     }
@@ -322,6 +334,21 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
       user: session?.user ?? null,
       isAdmin,
       isAdminPreviewData,
+      adminPreviewTrack,
+      setAdminPreviewTrack: async (track) => {
+        if (!userId || !isAdmin) return;
+        try {
+          if (typeof sessionStorage !== "undefined") {
+            if (track) sessionStorage.setItem("sr_admin_preview_track", track);
+            else sessionStorage.removeItem("sr_admin_preview_track");
+          }
+        } catch {
+          toast.error("Preview mode could not be saved in this browser.");
+          return;
+        }
+        setAdminPreviewTrackState(track);
+        await load(userId);
+      },
       profile,
       avatarSrc,
       data,
@@ -467,6 +494,7 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
       session,
       isAdmin,
       isAdminPreviewData,
+      adminPreviewTrack,
       profile,
       avatarSrc,
       data,
