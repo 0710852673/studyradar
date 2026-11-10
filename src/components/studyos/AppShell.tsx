@@ -220,7 +220,7 @@ export function AppShell({
         </DialogContent>
       </Dialog>
 
-      <ProfileNudge />
+      {!isAdminPreviewData ? <ProfileNudge /> : null}
       <AssistantWidget />
     </div>
   );
