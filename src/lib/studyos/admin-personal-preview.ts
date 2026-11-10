@@ -128,3 +128,12 @@ export function saveAdminPersonalPreview(uid: string, track: Profile["track"], d
 export function isAdminPreviewId(id: string) {
   return id.startsWith("admin-preview:");
 }
+
+export function resetAdminPersonalPreview(uid: string, track: Profile["track"]) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(KEY_PREFIX + uid + ":" + track);
+  } catch {
+    // Reset is best-effort and never affects platform data.
+  }
+}
