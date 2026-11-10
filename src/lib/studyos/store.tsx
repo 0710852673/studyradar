@@ -65,7 +65,14 @@ export function rowToProfile(r: ProfileRow): Profile {
     name: r.name,
     track,
     examYear: r.exam_year,
-    examDate: r.exam_date ?? defaultExamDate(track, r.exam_year),
+    // Keep the published exam schedule authoritative for these cohorts.
+    // Older profile rows may still contain stale dates from before the schedule update.
+    examDate:
+      (track === "OL" && r.exam_year === 2026) ? "2026-12-08" :
+      (track === "AL" && r.exam_year === 2027) ? "2027-08-03" :
+      (track === "OL" && r.exam_year === 2028) ? "2028-12-01" :
+      (track === "AL" && r.exam_year === 2028) ? "2028-08-01" :
+      (r.exam_date ?? defaultExamDate(track, r.exam_year)),
     stream: r.stream ?? undefined,
     subjects: r.subjects ?? [],
     dailyGoalHours: Number(r.daily_target_hours),
