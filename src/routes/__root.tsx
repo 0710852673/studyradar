@@ -171,7 +171,7 @@ function Interstitial({
 }
 
 function Gate() {
-  const { ready, session, profile, isAdmin, settings, signOut } = useStudyOS();
+  const { ready, session, profile, isAdmin, isAdminPreviewData, settings, signOut } = useStudyOS();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const isPublic = PUBLIC_PATHS.includes(pathname);
@@ -187,9 +187,9 @@ function Gate() {
 
   // Disclosed activity logging — see the Privacy Policy.
   useEffect(() => {
-    if (!ready) return;
+    if (!ready || isAdminPreviewData) return;
     recordVisitOnce(pathname, session?.user?.id ?? null, session?.user?.email ?? null);
-  }, [ready, pathname, session]);
+  }, [ready, pathname, session, isAdminPreviewData]);
 
   // Always render <Outlet /> so the SSR tree matches the first client render;
   // the session only exists in the browser and arrives after hydration.
