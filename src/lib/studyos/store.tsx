@@ -453,7 +453,7 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
           saveAdminPersonalPreview(userId, adminPreviewTrack, next);
           return;
         }
-        const { error } = await supabase.from("study_sessions").delete().eq("id", id);
+        const { error } = await supabase.from("study_sessions").delete().eq("id", id).eq("user_id", userId);
         if (!check(error, "delete that session")) return;
         await load(userId);
       },
@@ -484,7 +484,7 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
           saveAdminPersonalPreview(userId, adminPreviewTrack, next);
           return;
         }
-        const { error } = await (supabase as any).from("wasted_time").delete().eq("id", id);
+        const { error } = await (supabase as any).from("wasted_time").delete().eq("id", id).eq("user_id", userId);
         if (!check(error, "delete that entry")) return;
         await load(userId);
       },
@@ -517,7 +517,7 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
           saveAdminPersonalPreview(userId, adminPreviewTrack, next);
           return;
         }
-        const { error } = await supabase.from("marks").delete().eq("id", id);
+        const { error } = await supabase.from("marks").delete().eq("id", id).eq("user_id", userId);
         if (!check(error, "delete that result")) return;
         await load(userId);
       },
@@ -558,7 +558,7 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
           saveAdminPersonalPreview(userId, adminPreviewTrack, next);
           return;
         }
-        const { error } = await supabase.from("chapters").delete().eq("id", id);
+        const { error } = await supabase.from("chapters").delete().eq("id", id).eq("user_id", userId);
         if (!check(error, "delete that chapter")) return;
         await load(userId);
       },
