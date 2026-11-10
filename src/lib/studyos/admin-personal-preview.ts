@@ -1,6 +1,6 @@
 import type { Profile, StudyOSData, StudySession } from "./types";
 
-const KEY_PREFIX = "study-radar:admin-personal-preview:v1:";
+const KEY_PREFIX = "study-radar:admin-personal-preview:v2:";
 const dateKey = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 
 const fallbackSubjects = (track: Profile["track"]) =>
@@ -104,7 +104,7 @@ function makePreviewData(profile: Profile): StudyOSData {
 
 export function loadAdminPersonalPreview(uid: string, profile: Profile): StudyOSData {
   if (typeof window === "undefined") return makePreviewData(profile);
-  const key = KEY_PREFIX + uid;
+  const key = KEY_PREFIX + uid + ":" + profile.track;
   try {
     const stored = window.localStorage.getItem(key);
     if (stored) return JSON.parse(stored) as StudyOSData;
@@ -116,10 +116,10 @@ export function loadAdminPersonalPreview(uid: string, profile: Profile): StudyOS
   }
 }
 
-export function saveAdminPersonalPreview(uid: string, data: StudyOSData) {
+export function saveAdminPersonalPreview(uid: string, track: Profile["track"], data: StudyOSData) {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(KEY_PREFIX + uid, JSON.stringify(data));
+    window.localStorage.setItem(KEY_PREFIX + uid + ":" + track, JSON.stringify(data));
   } catch {
     // The preview is optional; never block the real student account on storage errors.
   }
