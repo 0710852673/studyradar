@@ -10,7 +10,7 @@ import {
 import type { Session, User } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { syncConsent } from "./security";
+import { logSecurityIpEvent, syncConsent } from "./security";
 import { recordActivity } from "./telemetry";
 import { allowWrite, retryInSeconds, setWriteLimit } from "./ratelimit";
 import { defaultExamDate } from "./subjects";
@@ -305,6 +305,7 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
     const { data: sub } = supabase.auth.onAuthStateChange((e, s) => {
       setSession(s);
       if (e === "SIGNED_IN" && s?.user) {
+        void logSecurityIpEvent("sign_in_success");
         void recordActivity("login", { userId: s.user.id, email: s.user.email ?? null });
         void supabase
           .from("profiles")
