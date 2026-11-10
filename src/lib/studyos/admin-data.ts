@@ -264,3 +264,27 @@ export function countBy<T>(rows: T[], pick: (row: T) => string | null | undefine
   }
   return [...map.entries()].sort((a, b) => b[1] - a[1]);
 }
+
+export type PdfReportSection = { heading: string; rows: string[][] };
+const escapePdfHtml = (value: unknown) => String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]!);
+
+/** Browser-native print flow produces a real PDF via Save as PDF and works without a server upload. */
+export function openPdfReport(title: string, subtitle: string, sections: PdfReportSection[]) {
+  const popup = window.open("", "_blank");
+  if (!popup) return false;
+  const body = sections.map((section) => `
+    <section><h2>${escapePdfHtml(section.heading)}</h2>
+    <table><tbody>${section.rows.map((row) => `<tr><th>${escapePdfHtml(row[0])}</th><td>${escapePdfHtml(row[1])}</td></tr>`).join("")}</tbody></table></section>
+  `).join("");
+  popup.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${escapePdfHtml(title)}</title>
+  <style>
+    @page{size:A4;margin:16mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#17212b;margin:0;font-size:11px;line-height:1.5}
+    header{border-bottom:3px solid #22c997;padding-bottom:14px;margin-bottom:20px}header p{margin:0;color:#64748b;font-size:10px;letter-spacing:1.5px;text-transform:uppercase}
+    h1{font-size:24px;margin:8px 0 3px}header small{color:#64748b}section{margin:0 0 20px;break-inside:avoid}h2{font-size:13px;text-transform:uppercase;letter-spacing:1px;color:#0b8060;border-bottom:1px solid #dbe4e8;padding-bottom:7px}
+    table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:7px 9px;border-bottom:1px solid #e7edf0;vertical-align:top}th{width:38%;color:#52616b;font-weight:600}td{color:#17212b}
+    footer{margin-top:28px;border-top:1px solid #dbe4e8;padding-top:9px;color:#71808a;font-size:9px}
+    @media print{section{break-inside:avoid}a{color:inherit;text-decoration:none}}
+  </style></head><body><header><p>Study Radar · Control Centre</p><h1>${escapePdfHtml(title)}</h1><small>${escapePdfHtml(subtitle)} · Generated ${escapePdfHtml(new Date().toLocaleString())}</small></header>${body}<footer>Confidential operational report. Contains student learning data. Handle and store securely.</footer><script>window.onload=()=>setTimeout(()=>window.print(),250);window.onafterprint=()=>window.close();</script></body></html>`);
+  popup.document.close();
+  return true;
+}
