@@ -29,6 +29,13 @@
       "when": 1794222000000,
       "tag": "0003_enable_achievement_emails",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794281049842,
+      "tag": "0004_safe_resource_review_and_local_achievements",
+      "breakpoints": true
     }
   ]
 }

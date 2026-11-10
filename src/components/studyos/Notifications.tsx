@@ -72,12 +72,6 @@ function useNotificationWatchers() {
           toast.success(`Achievement unlocked: ${award.title}`, {
             description: award.description,
           });
-          const { error: emailError } = await supabase.functions.invoke("notify-achievement", {
-            body: { awardId: award.id },
-          });
-          if (emailError) {
-            console.warn("[StudyRadar] Achievement email is pending configuration or retry:", emailError.message);
-          }
         }
       }
 
@@ -145,7 +139,7 @@ function useNotificationWatchers() {
       const awardUserIds = [...new Set((awards ?? []).map((a: any) => a.user_id))];
       const { data: studentProfiles } = awardUserIds.length
         ? await supabase.from("profiles").select("id, name").in("id", awardUserIds)
-        : { data: [] };
+        : { data: [] as { id: string; name: string }[] };
       const studentNames = new Map<string, string>(
         (studentProfiles ?? []).map((p: any) => [p.id, p.name] as [string, string]),
       );

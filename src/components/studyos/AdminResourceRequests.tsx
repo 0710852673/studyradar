@@ -28,6 +28,7 @@ export function AdminResourceRequests() {
   const [rows, setRows] = useState<Suggestion[]>([]);
   const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [tab, setTab] = useState<"directory" | "requests">("directory");
   const [filter, setFilter] = useState<"all" | "published" | "draft" | "archived">("all");
@@ -42,6 +43,7 @@ export function AdminResourceRequests() {
       supabase.from("resource_suggestions").select("*").order("created_at", { ascending: false }).limit(200),
     ]);
     const error = resourceResult.error ?? suggestionResult.error;
+    setLoadError(error?.message ?? "");
     if (error) toast.error("Could not load resource data", { description: error.message });
     setResources((resourceResult.data ?? []) as Resource[]);
     setRows((suggestionResult.data ?? []) as Suggestion[]);
@@ -91,6 +93,7 @@ export function AdminResourceRequests() {
   };
 
   const setResourceStatus = async (resource: Resource, status: "published" | "draft" | "archived") => {
+    if (status !== "published" && !window.confirm(`${status === "archived" ? "Archive" : "Unpublish"} ${resource.name}? Students will no longer see it in the directory.`)) return;
     setBusy(resource.id);
     const { error } = await supabase.from("resources").update({ status }).eq("id", resource.id);
     if (error) toast.error("Could not update resource", { description: error.message });
@@ -111,19 +114,10 @@ export function AdminResourceRequests() {
     try {
       const { data: auth } = await supabase.auth.getUser();
       if (!auth.user) throw new Error("Admin session expired. Sign in again.");
-      if (decision === "approved") {
-        const { error: publishError } = await supabase.from("resources").insert({
-          name: row.name, url: row.url, normalized_url: row.normalized_url,
-          description: row.description, category: row.category, subjects: row.subjects,
-          exams: row.exams, publisher: "Community suggestion", status: "published",
-          created_by: auth.user.id,
-        });
-        if (publishError) throw publishError;
-      }
-      const { error } = await supabase.from("resource_suggestions").update({
-        status: decision, reviewed_by: auth.user.id, reviewed_at: new Date().toISOString(),
-        admin_response: decision === "approved" ? "Approved and published." : "Not approved.",
-      }).eq("id", row.id).eq("status", "pending");
+      const { error } = await supabase.rpc("review_resource_suggestion", {
+        p_id: row.id,
+        p_decision: decision,
+      });
       if (error) throw error;
       toast.success(decision === "approved" ? "Resource approved and published" : "Request rejected");
       await load();
@@ -133,6 +127,7 @@ export function AdminResourceRequests() {
   };
 
   return <div className="space-y-4">
+    {loadError ? <div role="alert" className="rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">{loadError}</div> : null}
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div><h2 className="text-sm font-semibold">Resource Hub management</h2>
         <p className="text-xs text-muted-foreground">Create and manage the public directory here. Student suggestions are reviewed separately.</p></div>

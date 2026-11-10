@@ -702,6 +702,10 @@ export type Database = {
       }
       normalize_resource_url: { Args: { input: string }; Returns: string }
       record_my_referral: { Args: { p_code: string }; Returns: boolean }
+      review_resource_suggestion: {
+        Args: { p_decision: string; p_id: string; p_response?: string }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "admin" | "student"
