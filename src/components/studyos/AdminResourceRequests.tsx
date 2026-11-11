@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { RESOURCE_CATEGORIES, normalizeWebUrl, resourceUrlKey, splitSubjects, type Resource } from "@/lib/studyos/resources";
+import { fetchAllPages } from "@/lib/studyos/pagination";
 
 type Suggestion = {
   id: string; user_id: string; name: string; url: string; normalized_url: string;
@@ -39,8 +40,8 @@ export function AdminResourceRequests() {
   const load = useCallback(async () => {
     setLoading(true);
     const [resourceResult, suggestionResult] = await Promise.all([
-      supabase.from("resources").select("*").order("created_at", { ascending: false }).limit(500),
-      supabase.from("resource_suggestions").select("*").order("created_at", { ascending: false }).limit(200),
+      fetchAllPages((from, to) => supabase.from("resources").select("*").order("created_at", { ascending: false }).order("id", { ascending: true }).range(from, to)),
+      fetchAllPages((from, to) => supabase.from("resource_suggestions").select("*").order("created_at", { ascending: false }).order("id", { ascending: true }).range(from, to)),
     ]);
     const error = resourceResult.error ?? suggestionResult.error;
     setLoadError(error?.message ?? "");
