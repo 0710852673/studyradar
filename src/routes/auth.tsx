@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { logSecurityEvent, logSecurityIpEvent, rememberConsent } from "@/lib/studyos/security";
-import { googleConsentAction } from "@/lib/studyos/privacy-preferences";
+import { googleAuthAvailable, googleConsentAction } from "@/lib/studyos/privacy-preferences";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -191,8 +191,8 @@ function AuthPage() {
       fail("Google sign-in is currently disabled.");
       return;
     }
-    if (!authSettings.signupsEnabled) {
-      fail("Google sign-in is temporarily unavailable while registration is closed.");
+    if (mode === "up" && !authSettings.signupsEnabled) {
+      fail("Registration is currently closed.");
       return;
     }
     const action = googleConsentAction(mode, agree);
@@ -203,11 +203,17 @@ function AuthPage() {
     setBusy(true);
     setError(null);
     if (action === "remember") rememberConsent();
-    if (referralCode) {
+    if (mode === "up" && referralCode) {
       try {
         sessionStorage.setItem("sr_pending_referral", referralCode);
       } catch {
         /* Referral tracking is optional if browser storage is unavailable. */
+      }
+    } else {
+      try {
+        sessionStorage.removeItem("sr_pending_referral");
+      } catch {
+        /* ignore */
       }
     }
     const result = await lovable.auth.signInWithOAuth("google", {
@@ -275,7 +281,7 @@ function AuthPage() {
                   <span>I accept the <Link to="/terms" className="underline">Terms</Link> and <Link to="/privacy" className="underline">Privacy Policy</Link>. Optional product analytics is a separate choice, off by default.</span>
                 </label>
               ) : null}
-              {authSettings.googleLoginEnabled && authSettings.signupsEnabled ? (
+              {googleAuthAvailable(mode, authSettings) ? (
                 <Button
                   type="button"
                   variant="secondary"
