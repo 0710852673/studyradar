@@ -13,8 +13,6 @@ import { AL_STREAMS, OL_COMPULSORY, OL_OPTIONAL, defaultExamDate } from "@/lib/s
 import { SubjectPicker } from "@/components/studyos/SubjectPicker";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
-import { Switch } from "@/components/ui/switch";
-import { analyticsAllowed, setAnalyticsAllowed } from "@/lib/studyos/privacy-preferences";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({
@@ -85,8 +83,6 @@ function ProfilePage() {
   const [pw, setPw] = useState("");
   const [pw2, setPw2] = useState("");
   const [pwBusy, setPwBusy] = useState(false);
-  const [analytics, setAnalytics] = useState(false);
-  useEffect(() => { setAnalytics(analyticsAllowed(user?.id)); }, [user?.id]);
 
   if (!profile) return null;
 
@@ -306,21 +302,6 @@ function ProfilePage() {
           </div>
         </Panel>
 
-
-        <Panel title="Privacy">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <label htmlFor="optional-analytics" className="text-sm font-medium">Optional product analytics</label>
-              <p id="analytics-explanation" className="mt-2 text-xs leading-relaxed text-muted-foreground">Off by default. Share page categories, visit/login counts, timestamps, and broad browser/device types to improve Study Radar. No email, account ID, IP or location is included in these events. This choice applies to this account on this browser; turn it off anytime. Your study tools work either way.</p>
-            </div>
-            <Switch id="optional-analytics" aria-describedby="analytics-explanation" checked={analytics} onCheckedChange={(enabled) => {
-              if (!user?.id) return;
-              if (setAnalyticsAllowed(user.id, enabled)) setAnalytics(enabled);
-              else toast.error("This browser could not save your privacy choice. Analytics remains off.");
-            }} />
-          </div>
-          <p className="mt-4 text-xs leading-relaxed text-muted-foreground">Authentication, account storage, and essential security logs are required to run and protect your account. They are separate from optional analytics and are not disabled by this switch.</p>
-        </Panel>
 
         <Panel title="Password">
           <form onSubmit={changePassword} className="space-y-3">
