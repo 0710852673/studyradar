@@ -5,6 +5,7 @@ import { AppShell } from "@/components/studyos/AppShell";
 import { EmptyState, Panel } from "@/components/studyos/Primitives";
 import { Button } from "@/components/ui/button";
 import { useSaved } from "@/lib/studyos/saved";
+import { useStudyOS } from "@/lib/studyos/store";
 
 export const Route = createFileRoute("/saved")({
   head: () => ({
@@ -21,11 +22,17 @@ export const Route = createFileRoute("/saved")({
 });
 
 function SavedPage() {
-  const { items, loading, remove } = useSaved();
+  const { session } = useStudyOS();
+  const { items, loading, error, remove, refresh } = useSaved(session?.user?.id);
   return (
     <AppShell title="Saved" subtitle="Only you can see this list.">
       <Panel title={`${items.length} saved`}>
-        {loading ? (
+        {error ? (
+          <div role="alert" className="space-y-2 text-sm text-destructive">
+            <p>Saved items could not be loaded: {error}</p>
+            <Button size="sm" variant="outline" onClick={() => void refresh()}>Retry</Button>
+          </div>
+        ) : loading ? (
           <p className="text-sm text-muted-foreground">Loading…</p>
         ) : items.length === 0 ? (
           <EmptyState text="Nothing saved yet. Items you save will appear here on every device." />

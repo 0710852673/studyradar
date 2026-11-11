@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Radar } from "lucide-react";
 import { toast } from "sonner";
@@ -80,7 +80,42 @@ function AuthPage() {
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
   const [agree, setAgree] = useState(false);
+  const [authSettings, setAuthSettings] = useState<{ signupsEnabled: boolean; googleLoginEnabled: boolean } | null>(null);
+  const [settingsError, setSettingsError] = useState<string | null>(null);
   const referralCode = typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("ref");
+
+  useEffect(() => {
+    let active = true;
+    const loadAuthSettings = async () => {
+      try {
+        const { data, error: settingsLoadError } = await supabase
+          .from("site_settings")
+          .select("signups_enabled,google_login_enabled")
+          .eq("id", true)
+          .maybeSingle();
+        if (!active) return;
+        if (settingsLoadError || !data) {
+          setAuthSettings({ signupsEnabled: false, googleLoginEnabled: false });
+          setSettingsError("Account settings could not be loaded. Registration and Google sign-in are temporarily disabled; password sign-in remains available.");
+          return;
+        }
+        setAuthSettings({
+          signupsEnabled: Boolean(data.signups_enabled),
+          googleLoginEnabled: Boolean(data.google_login_enabled),
+        });
+      } catch {
+        if (!active) return;
+        setAuthSettings({ signupsEnabled: false, googleLoginEnabled: false });
+        setSettingsError("Account settings could not be loaded. Registration and Google sign-in are temporarily disabled; password sign-in remains available.");
+      }
+    };
+    void loadAuthSettings();
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
+    if (authSettings && !authSettings.signupsEnabled && mode === "up") setMode("in");
+  }, [authSettings, mode]);
 
   const fail = (message: string) => {
     const text = friendly(message);
@@ -91,6 +126,11 @@ function AuthPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (busy) return;
+    if (mode === "up" && (!authSettings || !authSettings.signupsEnabled)) {
+      setMode("in");
+      fail("Registration is currently closed.");
+      return;
+    }
     setBusy(true);
     setError(null);
 
@@ -147,6 +187,14 @@ function AuthPage() {
 
   const google = async () => {
     if (busy) return;
+    if (!authSettings?.googleLoginEnabled) {
+      fail("Google sign-in is currently disabled.");
+      return;
+    }
+    if (!authSettings.signupsEnabled) {
+      fail("Google sign-in is temporarily unavailable while registration is closed.");
+      return;
+    }
     const action = googleConsentAction(mode, agree);
     if (action === "block") {
       fail("Please accept the Terms and Privacy Policy to create an account.");
@@ -211,7 +259,15 @@ function AuthPage() {
             </div>
           </div>
 
-          {mode !== "forgot" ? (
+          {settingsError ? (
+            <p role="status" className="mb-4 rounded-lg border border-primary/25 bg-primary/5 px-3 py-2 text-xs text-muted-foreground">{settingsError}</p>
+          ) : authSettings && !authSettings.signupsEnabled && mode !== "forgot" ? (
+            <p className="mb-4 rounded-lg border border-border bg-elevated px-3 py-2 text-xs text-muted-foreground">Registration is currently closed. You can still sign in to an existing account.</p>
+          ) : null}
+
+          {authSettings === null ? (
+            <p role="status" className="py-6 text-center text-sm text-muted-foreground">Checking account options…</p>
+          ) : mode !== "forgot" ? (
             <>
               {mode === "up" ? (
                 <label className="mb-4 flex items-start gap-2 text-sm text-muted-foreground">
@@ -219,16 +275,18 @@ function AuthPage() {
                   <span>I accept the <Link to="/terms" className="underline">Terms</Link> and <Link to="/privacy" className="underline">Privacy Policy</Link>. Optional product analytics is a separate choice, off by default.</span>
                 </label>
               ) : null}
-              <Button
-                type="button"
-                variant="secondary"
-                size="lg"
-                className="mb-4 w-full"
-                onClick={() => void google()}
-                disabled={busy}
-              >
-                <GoogleIcon /> Continue with Google
-              </Button>
+              {authSettings.googleLoginEnabled && authSettings.signupsEnabled ? (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="lg"
+                  className="mb-4 w-full"
+                  onClick={() => void google()}
+                  disabled={busy}
+                >
+                  <GoogleIcon /> Continue with Google
+                </Button>
+              ) : null}
 
               <div className="mb-4 flex items-center gap-3 text-xs text-muted-foreground">
                 <span className="h-px flex-1 bg-border" /> or use email{" "}
@@ -236,7 +294,7 @@ function AuthPage() {
               </div>
 
               <div className="mb-5 flex rounded-xl bg-elevated p-1">
-                {(["in", "up"] as const).map((m) => (
+                {(["in", ...(authSettings.signupsEnabled ? (["up"] as const) : [])] as const).map((m) => (
                   <button
                     key={m}
                     type="button"
@@ -322,7 +380,7 @@ function AuthPage() {
                 </p>
               ) : null}
 
-              <Button type="submit" size="lg" className="w-full" disabled={busy}>
+              <Button type="submit" size="lg" className="w-full" disabled={busy || authSettings === null || (mode === "up" && !authSettings.signupsEnabled)}>
                 {busy
                   ? "Please wait…"
                   : mode === "in"

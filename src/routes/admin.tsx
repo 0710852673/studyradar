@@ -187,7 +187,7 @@ function AdminPage() {
           {section === "analytics" ? <Analytics people={people} sessions={rangedSessions} wasted={rangedWasted} marks={rangedMarks} chapters={chapters} devices={devices} referrals={referrals} rangeDays={rangeDays} /> : null}
           {section === "visitors" ? <VisitorPanel /> : null}
           {section === "activity" ? <ActivityPanel devices={devices} people={people} query={query} onQuery={setQuery} /> : null}
-          {section === "security" ? <SecurityPanel events={snap.events} audit={snap.audit} ipEvents={snap.ipEvents} ipEventError={snap.ipEventError} query={query} onQuery={setQuery} /> : null}
+          {section === "security" ? <SecurityPanel events={snap.events} audit={snap.audit} query={query} onQuery={setQuery} /> : null}
           {section === "inbox" ? <InboxPanel /> : null}
           {section === "resources" ? <AdminResourceRequests /> : null}
           {section === "achievements" ? <AchievementsPanel awards={rangedAchievements} people={people} query={query} onQuery={setQuery} /> : null}

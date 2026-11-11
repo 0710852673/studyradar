@@ -1,11 +1,6 @@
 name: Deploy security IP logger
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "supabase/functions/log-security-ip/**"
-      - "supabase/config.toml"
   workflow_dispatch:
 
 permissions:

@@ -8,10 +8,11 @@ import { supabase } from "@/integrations/supabase/client";
 export type SecuritySeverity = "info" | "warning" | "critical";
 
 const IP_SECURITY_EVENTS = new Set(["sign_in_failed", "google_sign_in_failed", "sign_in_success", "sign_up_failed", "sign_up_success"]);
+const IP_SECURITY_LOGGING_ENABLED = false;
 
 /** The Edge Function records the network-observed source IP; the browser never supplies an IP value. */
 export async function logSecurityIpEvent(kind: string) {
-  if (!IP_SECURITY_EVENTS.has(kind)) return;
+  if (!IP_SECURITY_LOGGING_ENABLED || !IP_SECURITY_EVENTS.has(kind)) return;
   try {
     const { error } = await supabase.functions.invoke("log-security-ip", { body: { kind } });
     if (error) console.warn("[StudyRadar] Security IP event was not recorded:", error.message);

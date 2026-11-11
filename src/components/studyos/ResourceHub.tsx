@@ -27,7 +27,7 @@ const emptyForm = { name: "", url: "", description: "", category: "Notes", subje
 export function ResourceHub() {
   const { session } = useStudyOS();
   const userId = session?.user?.id;
-  const saved = useSaved();
+  const saved = useSaved(userId);
   const [resources, setResources] = useState<Resource[]>([]);
   const [suggestions, setSuggestions] = useState<ResourceSuggestion[]>([]);
   const [loading, setLoading] = useState(true);
@@ -128,6 +128,7 @@ export function ResourceHub() {
       </div>
 
       {error ? <Panel><p role="alert" className="text-sm text-destructive">{error}</p><Button className="mt-3" variant="outline" size="sm" onClick={() => void load()}>Try again</Button></Panel> : null}
+      {saved.error ? <Panel><p role="alert" className="text-sm text-destructive">Saved items could not be loaded: {saved.error}</p><Button className="mt-3" variant="outline" size="sm" onClick={() => void saved.refresh()}>Retry saved items</Button></Panel> : null}
       {loading ? <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{[1,2,3].map((n) => <Skeleton key={n} className="h-56 rounded-2xl" />)}</div> : null}
       {!loading && !error && visible.length === 0 ? <EmptyState text={resources.length ? "No resources match these filters." : "No resources have been published yet."} /> : null}
       {!loading ? <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{visible.map((resource) => {
@@ -139,7 +140,7 @@ export function ResourceHub() {
               {resource.featured ? <Chip tone="brand">Featured</Chip> : null}
               {isRecentlyAdded(resource.created_at) ? <Chip>Recently added</Chip> : null}
             </div>
-            <button aria-label={`${isSaved ? "Remove" : "Save"} ${resource.name}`} onClick={() => void saved.toggle({ id: `resource:${resource.id}`, title: resource.name, kind: "Resource", note: resource.publisher, href: resource.url }).then(() => toast.success(isSaved ? "Removed from Saved" : "Saved to your library")).catch((e) => toast.error(e.message))} className={cn("rounded-lg p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground", isSaved && "text-primary")}>
+            <button aria-label={`${isSaved ? "Remove" : "Save"} ${resource.name}`} disabled={saved.loading} onClick={() => void saved.toggle({ id: `resource:${resource.id}`, title: resource.name, kind: "Resource", note: resource.publisher, href: resource.url }).then(() => toast.success(isSaved ? "Removed from Saved" : "Saved to your library")).catch((e) => toast.error(e.message))} className={cn("rounded-lg p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground", isSaved && "text-primary")}>
               <Bookmark className="h-4 w-4" fill={isSaved ? "currentColor" : "none"} />
             </button>
           </div>
