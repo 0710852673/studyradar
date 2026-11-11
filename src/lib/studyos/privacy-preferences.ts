@@ -13,6 +13,10 @@ export function setAnalyticsAllowed(userId: string, enabled: boolean): boolean {
   } catch { return false; }
 }
 
+export function googleAuthAvailable(mode: "in" | "up" | "forgot", settings: { signupsEnabled: boolean; googleLoginEnabled: boolean } | null) {
+  return Boolean(settings?.googleLoginEnabled) && (mode === "in" || (mode === "up" && Boolean(settings?.signupsEnabled)));
+}
+
 export function googleConsentAction(mode: "in" | "up" | "forgot", agreed: boolean) {
   return mode === "up" ? (agreed ? "remember" : "block") : "sign_in";
 }
