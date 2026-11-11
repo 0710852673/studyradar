@@ -6,8 +6,9 @@ describe("defaultExamDate", () => {
     expect(defaultExamDate("OL", 2026)).toBe("2026-12-08");
   });
 
-  test("uses the confirmed 2027 A/L date", () => {
+  test("uses the announced 2027 A/L and O/L start dates", () => {
     expect(defaultExamDate("AL", 2027)).toBe("2027-08-03");
+    expect(defaultExamDate("OL", 2027)).toBe("2027-12-07");
   });
 
   test("uses provisional first-of-month dates for 2028", () => {

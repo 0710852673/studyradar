@@ -1,5 +1,5 @@
 const COLOMBO_TIME_ZONE = "Asia/Colombo";
-const DATE_ONLY = /^\\d{4}-\\d{2}-\\d{2}$/;
+const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
 
 function isValidDateKey(value: string): boolean {
   if (!DATE_ONLY.test(value)) return false;

@@ -3,7 +3,7 @@
  *
  * The local list is a lightweight UI cache. Achievement awards themselves are
  * persisted in Supabase so they sync across devices and are visible to admins.
- * Achievement emails are delivered by the notify-achievement Edge Function.
+ * Outbound achievement email is disabled in 1.0; awards feed in-app notices only.
  */
 
 export type NoticeKind = "achievement" | "security" | "system";

@@ -688,8 +688,13 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
           saveAdminPersonalPreview(userId, adminPreviewTrack, next);
           return;
         }
-        const { error } = await supabase.from("marks").delete().eq("id", id).eq("user_id", userId);
+        const { data: deleted, error } = await supabase.from("marks")
+          .delete().eq("id", id).eq("user_id", userId).select("id").maybeSingle();
         if (!check(error, "delete that result")) return;
+        if (!deleted) {
+          toast.error("That result was not found for your account.");
+          return;
+        }
         await load(userId);
       },
       addChapter: async (subject, title) => {

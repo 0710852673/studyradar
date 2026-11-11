@@ -69,6 +69,7 @@ export function subjectColor(subject: string): string {
 export function defaultExamDate(track: "AL" | "OL", year: number): string {
   if (year === 2026 && track === "OL") return "2026-12-08";
   if (year === 2027 && track === "AL") return "2027-08-03";
+  if (year === 2027 && track === "OL") return "2027-12-07";
   if (year === 2028) return track === "AL" ? "2028-08-01" : "2028-12-01";
 
   // Keep the established month/day defaults for other exam years.
