@@ -2,6 +2,9 @@
 
 Rules: preserve all member records, additive migrations only, privacy by default, no outbound member sending, no AI credits, and no publishing without owner approval. Deferred modules stay hidden.
 
+- [x] Focused preview pass at current head: check mobile/tablet/desktop layouts; repair reproduced dashboard overflow and signup hydration mismatch only.
+- [ ] Verify remaining live member writes, onboarding completion and invite attribution with owner-authorized test data; current preview pass blocks database mutations.
+
 - [ ] Repair current type/build errors and remove achievement-email triggers
 - [ ] Finish admin command centre: grouped desktop navigation, accessible mobile drawer, errors, loading and empty states
 - [ ] Add real date-range metrics, separate study/wasted-time reporting, student detail and audit visibility
