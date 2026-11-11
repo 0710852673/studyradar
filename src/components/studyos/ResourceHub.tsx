@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useStudyOS } from "@/lib/studyos/store";
 import { useSaved } from "@/lib/studyos/saved";
+import { fetchAllPages } from "@/lib/studyos/pagination";
 import {
   RESOURCE_CATEGORIES,
   examLabel,
@@ -46,8 +47,10 @@ export function ResourceHub() {
     setLoading(true);
     setError("");
     const [directory, own] = await Promise.all([
-      supabase.from("resources").select("*").eq("status", "published").order("featured", { ascending: false }).order("created_at", { ascending: false }),
-      supabase.from("resource_suggestions").select("*").eq("user_id", userId).order("created_at", { ascending: false }),
+      fetchAllPages((from, to) => supabase.from("resources").select("*").eq("status", "published")
+        .order("featured", { ascending: false }).order("created_at", { ascending: false }).order("id", { ascending: true }).range(from, to)),
+      fetchAllPages((from, to) => supabase.from("resource_suggestions").select("*").eq("user_id", userId)
+        .order("created_at", { ascending: false }).order("id", { ascending: true }).range(from, to)),
     ]);
     const failure = directory.error ?? own.error;
     if (failure) setError(failure.message);
