@@ -1,4 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllPages } from "./pagination";
+import { colomboDateKey, colomboDateKeyMinusDays } from "./date-range";
+export { withinDays } from "./date-range";
 
 /** Operational row shapes for the admin workspace. Broad reads intentionally omit guardian/contact details. */
 export type AdminProfile = {
@@ -138,68 +141,46 @@ const DEVICE_COLUMNS = "id,user_id,kind,path,platform,created_at";
 /** All admin reads are checked together; partial data is never presented as a complete platform snapshot. */
 export async function loadSnapshot(): Promise<AdminSnapshot> {
   const [p, s, w, m, c, e, d, r, a, audit, contacts, feedback, suggestions, resources, referrals] = await Promise.all([
-    supabase.from("profiles").select(PROFILE_COLUMNS).order("created_at", { ascending: false }),
-    supabase.from("study_sessions").select("*"),
-    supabase.from("wasted_time").select("*"),
-    supabase.from("marks").select("*"),
-    supabase.from("chapters").select("id,user_id,subject,title,status"),
-    supabase.from("security_events").select("id,user_id,kind,severity,email,detail,path,created_at").order("created_at", { ascending: false }).limit(1000),
-    supabase.from("device_events").select(DEVICE_COLUMNS).order("created_at", { ascending: false }).limit(1000),
-    supabase.from("user_roles").select("user_id,role"),
-    supabase.from("achievement_awards").select("*").order("awarded_at", { ascending: false }).limit(1000),
-    supabase.from("admin_audit_events").select("*").order("created_at", { ascending: false }).limit(1000),
-    supabase.from("contact_messages").select("id,status,created_at"),
-    supabase.from("feedback").select("id,status,created_at"),
-    supabase.from("resource_suggestions").select("id,status,created_at"),
-    supabase.from("resources").select("id,status,created_at"),
-    supabase.from("referral_signups").select("id,referrer_id,referred_user_id,created_at"),
+    fetchAllPages((from, to) => supabase.from("profiles").select(PROFILE_COLUMNS).order("created_at", { ascending: false }).order("id", { ascending: true }).range(from, to)),
+    fetchAllPages((from, to) => supabase.from("study_sessions").select("*").order("date", { ascending: false }).order("id", { ascending: true }).range(from, to)),
+    fetchAllPages((from, to) => supabase.from("wasted_time").select("*").order("date", { ascending: false }).order("id", { ascending: true }).range(from, to)),
+    fetchAllPages((from, to) => supabase.from("marks").select("*").order("date", { ascending: false }).order("id", { ascending: true }).range(from, to)),
+    fetchAllPages((from, to) => supabase.from("chapters").select("id,user_id,subject,title,status").order("user_id", { ascending: true }).order("id", { ascending: true }).range(from, to)),
+    fetchAllPages((from, to) => supabase.from("security_events").select("id,user_id,kind,severity,email,detail,path,created_at").order("created_at", { ascending: false }).order("id", { ascending: true }).range(from, to)),
+    fetchAllPages((from, to) => supabase.from("device_events").select(DEVICE_COLUMNS).order("created_at", { ascending: false }).order("id", { ascending: true }).range(from, to)),
+    fetchAllPages((from, to) => supabase.from("user_roles").select("user_id,role").order("user_id", { ascending: true }).order("role", { ascending: true }).range(from, to)),
+    fetchAllPages((from, to) => supabase.from("achievement_awards").select("*").order("awarded_at", { ascending: false }).order("id", { ascending: true }).range(from, to)),
+    fetchAllPages((from, to) => supabase.from("admin_audit_events").select("*").order("created_at", { ascending: false }).order("id", { ascending: true }).range(from, to)),
+    fetchAllPages((from, to) => supabase.from("contact_messages").select("id,status,created_at").order("created_at", { ascending: false }).order("id", { ascending: true }).range(from, to)),
+    fetchAllPages((from, to) => supabase.from("feedback").select("id,status,created_at").order("created_at", { ascending: false }).order("id", { ascending: true }).range(from, to)),
+    fetchAllPages((from, to) => supabase.from("resource_suggestions").select("id,status,created_at").order("created_at", { ascending: false }).order("id", { ascending: true }).range(from, to)),
+    fetchAllPages((from, to) => supabase.from("resources").select("id,status,created_at").order("created_at", { ascending: false }).order("id", { ascending: true }).range(from, to)),
+    fetchAllPages((from, to) => supabase.from("referral_signups").select("id,referrer_id,referred_user_id,created_at").order("created_at", { ascending: false }).order("id", { ascending: true }).range(from, to)),
   ]);
   const results = [
-    ["profiles", p],
-    ["sessions", s],
-    ["wasted time", w],
-    ["marks", m],
-    ["chapters", c],
-    ["security events", e],
-    ["activity", d],
-    ["roles", r],
-    ["achievements", a],
-    ["admin audit", audit],
-    ["contacts", contacts],
-    ["feedback", feedback],
-    ["suggestions", suggestions],
-    ["resources", resources],
-    ["referrals", referrals],
+    ["profiles", p], ["sessions", s], ["wasted time", w], ["marks", m], ["chapters", c],
+    ["security events", e], ["activity", d], ["roles", r], ["achievements", a], ["admin audit", audit],
+    ["contacts", contacts], ["feedback", feedback], ["suggestions", suggestions], ["resources", resources], ["referrals", referrals],
   ] as const;
-  const failures = results
-    .filter(([, result]) => result.error)
-    .map(([name, result]) => `${name}: ${result.error?.message ?? "unknown error"}`);
+  const failures = results.filter(([, result]) => result.error).map(([name, result]) => `${name}: ${result.error?.message ?? "unknown error"}`);
   if (failures.length) throw new Error(`Some admin data could not be loaded. ${failures.join(" · ")}`);
   return {
-    profiles: (p.data ?? []) as AdminProfile[],
-    sessions: (s.data ?? []) as AdminSession[],
-    wasted: (w.data ?? []) as AdminWaste[],
-    marks: (m.data ?? []) as AdminMark[],
-    chapters: (c.data ?? []) as AdminChapter[],
-    events: (e.data ?? []) as AdminEvent[],
-    devices: (d.data ?? []) as AdminDevice[],
-    roles: (r.data ?? []) as AdminRole[],
-    achievements: (a.data ?? []) as AdminAchievement[],
-    audit: (audit.data ?? []) as AdminAudit[],
-    contacts: (contacts.data ?? []) as AdminOperation[],
-    feedback: (feedback.data ?? []) as AdminOperation[],
-    suggestions: (suggestions.data ?? []) as AdminOperation[],
-    resources: (resources.data ?? []) as AdminOperation[],
+    profiles: (p.data ?? []) as AdminProfile[], sessions: (s.data ?? []) as AdminSession[],
+    wasted: (w.data ?? []) as AdminWaste[], marks: (m.data ?? []) as AdminMark[],
+    chapters: (c.data ?? []) as AdminChapter[], events: (e.data ?? []) as AdminEvent[],
+    devices: (d.data ?? []) as AdminDevice[], roles: (r.data ?? []) as AdminRole[],
+    achievements: (a.data ?? []) as AdminAchievement[], audit: (audit.data ?? []) as AdminAudit[],
+    contacts: (contacts.data ?? []) as AdminOperation[], feedback: (feedback.data ?? []) as AdminOperation[],
+    suggestions: (suggestions.data ?? []) as AdminOperation[], resources: (resources.data ?? []) as AdminOperation[],
     referrals: (referrals.data ?? []) as AdminReferral[],
   };
 }
 
-/** Explicit full-backup action fetches the complete profile rows only at download time. */
+/** Explicit full-backup action re-fetches every profile column at download time. */
 export async function createFullBackup(snap: AdminSnapshot) {
-  const { data, error } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
+  const { data, error } = await fetchAllPages((from, to) => supabase.from("profiles").select("*").order("created_at", { ascending: false }).order("id", { ascending: true }).range(from, to));
   if (error) throw new Error(`Backup could not read profiles: ${error.message}`);
-  const exportable = snap;
-  return { exportedAt: new Date().toISOString(), ...exportable, profiles: data ?? [] };
+  return { exportedAt: new Date().toISOString(), ...snap, profiles: data ?? [] };
 }
 
 export function isPlatformProfile(profile: Pick<AdminProfile, "is_demo">) {
@@ -210,16 +191,6 @@ export function isPlatformProfile(profile: Pick<AdminProfile, "is_demo">) {
 export function platformRows<T extends { user_id: string }>(rows: T[], profiles: AdminProfile[]) {
   const ids = new Set(profiles.filter(isPlatformProfile).map((p) => p.id));
   return rows.filter((row) => ids.has(row.user_id));
-}
-
-export function withinDays(value: string, days: number | null, now = new Date()) {
-  if (days === null) return true;
-  const time = new Date(value.length === 10 ? `${value}T00:00:00Z` : value).getTime();
-  if (!Number.isFinite(time)) return false;
-  const start = new Date(now);
-  start.setUTCHours(0, 0, 0, 0);
-  start.setUTCDate(start.getUTCDate() - (days - 1));
-  return time >= start.getTime() && time <= now.getTime() + 86400000;
 }
 
 export function sumMinutes(rows: { minutes: number }[]) {
@@ -253,10 +224,12 @@ export function download(name: string, content: string, type: string) {
   URL.revokeObjectURL(url);
 }
 
-const dayKey = (d: Date) => d.toISOString().slice(0, 10);
+const dayKey = colomboDateKey;
 export function activeWithin(sessions: AdminSession[], days: number) {
-  const since = dayKey(new Date(Date.now() - (days - 1) * 864e5));
-  return new Set(sessions.filter((s) => s.date >= since).map((s) => s.user_id)).size;
+  const now = new Date();
+  const since = colomboDateKeyMinusDays(now, Math.max(0, days - 1));
+  const today = colomboDateKey(now);
+  return new Set(sessions.filter((s) => s.date >= since && s.date <= today).map((s) => s.user_id)).size;
 }
 export function dailyMinutes<T extends { date: string; minutes: number }>(sessions: T[], days: number) {
   const map = new Map<string, number>();
