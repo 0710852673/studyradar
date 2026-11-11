@@ -16,6 +16,7 @@ import { recordActivity } from "./telemetry";
 import { allowWrite, retryInSeconds, setWriteLimit } from "./ratelimit";
 import { defaultExamDate } from "./subjects";
 import { loadAdminPersonalPreview, saveAdminPersonalPreview } from "./admin-personal-preview";
+import { fetchAllPages } from "./pagination";
 import {
   DEFAULT_SETTINGS,
   EMPTY_DATA,
@@ -187,22 +188,14 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
     const [p, roles, sessions, marks, chapters, wasted] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", uid).maybeSingle(),
       supabase.from("user_roles").select("role").eq("user_id", uid),
-      supabase
-        .from("study_sessions")
-        .select("*")
-        .eq("user_id", uid)
-        .order("date", { ascending: false }),
-      supabase.from("marks").select("*").eq("user_id", uid).order("date", { ascending: true }),
-      supabase
-        .from("chapters")
-        .select("*")
-        .eq("user_id", uid)
-        .order("position", { ascending: true }),
-      (supabase as any)
-        .from("wasted_time")
-        .select("*")
-        .eq("user_id", uid)
-        .order("date", { ascending: false }),
+      fetchAllPages((from, to) => supabase.from("study_sessions").select("*").eq("user_id", uid)
+        .order("date", { ascending: false }).order("id", { ascending: true }).range(from, to)),
+      fetchAllPages((from, to) => supabase.from("marks").select("*").eq("user_id", uid)
+        .order("date", { ascending: true }).order("id", { ascending: true }).range(from, to)),
+      fetchAllPages((from, to) => supabase.from("chapters").select("*").eq("user_id", uid)
+        .order("position", { ascending: true }).order("id", { ascending: true }).range(from, to)),
+      fetchAllPages((from, to) => (supabase as any).from("wasted_time").select("*").eq("user_id", uid)
+        .order("date", { ascending: false }).order("id", { ascending: true }).range(from, to)),
     ]);
 
     const failures = [
@@ -531,8 +524,13 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
           saveAdminPersonalPreview(userId, adminPreviewTrack, next);
           return;
         }
-        const { error } = await supabase.from("study_sessions").delete().eq("id", id).eq("user_id", userId);
+        const { data: deleted, error } = await supabase.from("study_sessions")
+          .delete().eq("id", id).eq("user_id", userId).select("id").maybeSingle();
         if (!check(error, "delete that session")) return;
+        if (!deleted) {
+          toast.error("That study entry was not found for your account.");
+          return;
+        }
         await load(userId);
       },
       addWaste: async (w) => {
@@ -607,8 +605,13 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
           saveAdminPersonalPreview(userId, adminPreviewTrack, next);
           return;
         }
-        const { error } = await (supabase as any).from("wasted_time").delete().eq("id", id).eq("user_id", userId);
+        const { data: deleted, error } = await (supabase as any).from("wasted_time")
+          .delete().eq("id", id).eq("user_id", userId).select("id").maybeSingle();
         if (!check(error, "delete that entry")) return;
+        if (!deleted) {
+          toast.error("That wasted-time entry was not found for your account.");
+          return;
+        }
         await load(userId);
       },
       addMark: async (m) => {
