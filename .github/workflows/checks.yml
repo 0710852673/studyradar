@@ -17,7 +17,7 @@ jobs:
           cache: npm
       - uses: oven-sh/setup-bun@v2
       - run: npm install --no-audit --no-fund
-      - run: npm run lint -- --rule 'prettier/prettier: off' --rule '@typescript-eslint/no-explicit-any: off'
+      - run: "npm run lint -- --rule 'prettier/prettier: off' --rule '@typescript-eslint/no-explicit-any: off'"
       - run: bun test tests
       - run: npx tsc --noEmit
       - run: npm run build
