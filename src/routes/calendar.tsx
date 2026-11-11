@@ -11,10 +11,13 @@ import {
   startOfMonth,
   startOfWeek,
 } from "date-fns";
-import { ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pencil, Trash2 } from "lucide-react";
 import { AppShell } from "@/components/studyos/AppShell";
 import { EmptyState, Panel } from "@/components/studyos/Primitives";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { useStudyOS } from "@/lib/studyos/store";
 import { fmtHours, minutesByDay, toKey } from "@/lib/studyos/analytics";
@@ -39,9 +42,15 @@ export const Route = createFileRoute("/calendar")({
 });
 
 function CalendarPage() {
-  const { data, profile, removeSession, removeWaste } = useStudyOS();
+  const { data, profile, updateSession, removeSession, updateWaste, removeWaste } = useStudyOS();
   const [month, setMonth] = useState(startOfMonth(new Date()));
   const [selected, setSelected] = useState(toKey(new Date()));
+  const [editing, setEditing] = useState<
+    | { kind: "study"; id: string; date: string; subject: string; minutes: string; note: string }
+    | { kind: "waste"; id: string; date: string; minutes: string; reason: string }
+    | null
+  >(null);
+  const [savingEdit, setSavingEdit] = useState(false);
 
   if (!profile) return null;
   const byDay = minutesByDay(data.sessions);
@@ -52,6 +61,31 @@ function CalendarPage() {
   });
   const daySessions = data.sessions.filter((s) => s.date === selected);
   const dayWaste = data.wasted.filter((entry) => entry.date === selected);
+
+  const saveEdit = async () => {
+    if (!editing || savingEdit) return;
+    setSavingEdit(true);
+    try {
+      const saved = editing.kind === "study"
+        ? await updateSession(editing.id, {
+            date: editing.date,
+            subject: editing.subject,
+            minutes: Number(editing.minutes),
+            note: editing.note.trim() || undefined,
+          })
+        : await updateWaste(editing.id, {
+            date: editing.date,
+            minutes: Number(editing.minutes),
+            reason: editing.reason.trim() || undefined,
+          });
+      if (saved) {
+        setSelected(editing.date);
+        setEditing(null);
+      }
+    } finally {
+      setSavingEdit(false);
+    }
+  };
 
   return (
     <AppShell title="Calendar" subtitle="Your study history, day by day">
@@ -141,17 +175,48 @@ function CalendarPage() {
                     </span>
                   </div>
                   {s.note ? <p className="mt-1 text-xs text-muted-foreground">{s.note}</p> : null}
-                  <div className="mt-2 flex justify-end"><button type="button" aria-label="Delete this study entry" className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-[11px] text-muted-foreground hover:bg-destructive/10 hover:text-destructive" onClick={() => { if (window.confirm("Delete this study entry? This cannot be undone.")) void removeSession(s.id); }}><Trash2 className="h-3.5 w-3.5" />Delete entry</button></div>
+                  <div className="mt-2 flex justify-end gap-2"><button type="button" aria-label="Edit this study entry" className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-[11px] text-muted-foreground hover:bg-accent hover:text-foreground" onClick={() => setEditing({ kind: "study", id: s.id, date: s.date, subject: s.subject, minutes: String(s.minutes), note: s.note ?? "" })}><Pencil className="h-3.5 w-3.5" />Edit</button><button type="button" aria-label="Delete this study entry" className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-[11px] text-muted-foreground hover:bg-destructive/10 hover:text-destructive" onClick={() => { if (window.confirm("Delete this study entry? This cannot be undone.")) void removeSession(s.id); }}><Trash2 className="h-3.5 w-3.5" />Delete entry</button></div>
                 </div>
               ))
             )}
           </div>
           <div className="mt-5 border-t border-border pt-4">
             <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Wasted-time entries · {dayWaste.length}</h3>
-            {dayWaste.length ? <div className="space-y-2">{dayWaste.map((entry) => <div key={entry.id} className="flex items-center justify-between gap-3 rounded-xl border border-border bg-elevated p-3"><div className="min-w-0"><p className="text-sm">{entry.reason || "No reason recorded"}</p><p className="num text-xs text-muted-foreground">{fmtHours(entry.minutes)}</p></div><button type="button" aria-label="Delete this wasted-time entry" className="rounded-lg p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive" onClick={() => { if (window.confirm("Delete this wasted-time entry? This cannot be undone.")) void removeWaste(entry.id); }}><Trash2 className="h-4 w-4" /></button></div>)}</div> : <p className="text-xs text-muted-foreground">No wasted-time entries on this day.</p>}
+            {dayWaste.length ? <div className="space-y-2">{dayWaste.map((entry) => <div key={entry.id} className="flex items-center justify-between gap-3 rounded-xl border border-border bg-elevated p-3"><div className="min-w-0"><p className="text-sm">{entry.reason || "No reason recorded"}</p><p className="num text-xs text-muted-foreground">{fmtHours(entry.minutes)}</p></div><div className="flex items-center gap-1"><button type="button" aria-label="Edit this wasted-time entry" className="rounded-lg p-2 text-muted-foreground hover:bg-accent hover:text-foreground" onClick={() => setEditing({ kind: "waste", id: entry.id, date: entry.date, minutes: String(entry.minutes), reason: entry.reason ?? "" })}><Pencil className="h-4 w-4" /></button><button type="button" aria-label="Delete this wasted-time entry" className="rounded-lg p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive" onClick={() => { if (window.confirm("Delete this wasted-time entry? This cannot be undone.")) void removeWaste(entry.id); }}><Trash2 className="h-4 w-4" /></button></div></div>)}</div> : <p className="text-xs text-muted-foreground">No wasted-time entries on this day.</p>}
           </div>
         </Panel>
       </div>
+
+      <Dialog open={Boolean(editing)} onOpenChange={(next) => { if (!next) setEditing(null); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{editing?.kind === "study" ? "Edit study entry" : "Edit wasted-time entry"}</DialogTitle>
+          </DialogHeader>
+          {editing ? (
+            <div className="space-y-3">
+              <Input type="date" value={editing.date} onChange={(event) => setEditing({ ...editing, date: event.target.value })} />
+              <Input type="number" min={1} max={1440} step={1} value={editing.minutes} onChange={(event) => setEditing({ ...editing, minutes: event.target.value })} placeholder="Minutes" />
+              {editing.kind === "study" ? (
+                <>
+                  <select
+                    value={editing.subject}
+                    onChange={(event) => setEditing({ ...editing, subject: event.target.value })}
+                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                  >
+                    {profile.subjects.map((subject) => <option key={subject} value={subject}>{subject}</option>)}
+                  </select>
+                  <Textarea maxLength={1000} value={editing.note} onChange={(event) => setEditing({ ...editing, note: event.target.value })} placeholder="Optional note" />
+                </>
+              ) : (
+                <Input maxLength={500} value={editing.reason} onChange={(event) => setEditing({ ...editing, reason: event.target.value })} placeholder="Optional reason" />
+              )}
+              <Button className="w-full" onClick={() => void saveEdit()} disabled={savingEdit}>
+                {savingEdit ? "Saving…" : "Save changes"}
+              </Button>
+            </div>
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </AppShell>
   );
 }

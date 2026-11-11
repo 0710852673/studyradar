@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Plus, Trash2, TrendingDown, TrendingUp } from "lucide-react";
+import { toast } from "sonner";
+import { Pencil, Plus, Trash2, TrendingDown, TrendingUp } from "lucide-react";
 import {
   CartesianGrid,
   Line,
@@ -18,6 +19,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { cn } from "@/lib/utils";
 import { useStudyOS } from "@/lib/studyos/store";
 import { markStats, toKey } from "@/lib/studyos/analytics";
+import { validateMarkEntry } from "@/lib/studyos/validation";
 
 export const Route = createFileRoute("/marks")({
   head: () => ({
@@ -38,9 +40,11 @@ export const Route = createFileRoute("/marks")({
 });
 
 function MarksPage() {
-  const { data, profile, addMark, removeMark } = useStudyOS();
+  const { data, profile, addMark, updateMark, removeMark } = useStudyOS();
   const [subject, setSubject] = useState(profile?.subjects[0] ?? "");
   const [open, setOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     examName: "",
     date: toKey(new Date()),
@@ -53,13 +57,49 @@ function MarksPage() {
   const marks = data.marks.filter((m) => m.subject === active);
   const stats = markStats(marks);
 
-  const save = () => {
-    const m = Number(form.marks);
-    const t = Number(form.total);
-    if (!form.examName || !t || Number.isNaN(m)) return;
-    addMark({ subject: active, examName: form.examName, date: form.date, marks: m, total: t });
+  const openAdd = () => {
+    setEditingId(null);
     setForm({ examName: "", date: toKey(new Date()), marks: "", total: "100" });
-    setOpen(false);
+    setOpen(true);
+  };
+
+  const openEdit = (entry: (typeof data.marks)[number]) => {
+    setEditingId(entry.id);
+    setForm({
+      examName: entry.examName,
+      date: entry.date,
+      marks: String(entry.marks),
+      total: String(entry.total),
+    });
+    setOpen(true);
+  };
+
+  const save = async () => {
+    if (saving) return;
+    const entry = {
+      subject: active,
+      examName: form.examName,
+      date: form.date,
+      marks: Number(form.marks),
+      total: Number(form.total),
+    };
+    const validationError = validateMarkEntry(entry);
+    if (validationError) {
+      toast.error(validationError);
+      return;
+    }
+    setSaving(true);
+    try {
+      const saved = editingId
+        ? await updateMark(editingId, entry)
+        : await addMark(entry);
+      if (!saved) return;
+      setForm({ examName: "", date: toKey(new Date()), marks: "", total: "100" });
+      setEditingId(null);
+      setOpen(false);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -117,7 +157,7 @@ function MarksPage() {
         title={`${active} results`}
         className="mt-4"
         action={
-          <Button size="sm" variant="secondary" onClick={() => setOpen(true)}>
+          <Button size="sm" variant="secondary" onClick={openAdd}>
             <Plus className="h-4 w-4" /> Add exam
           </Button>
         }
@@ -179,6 +219,16 @@ function MarksPage() {
                         {Math.round((m.marks / m.total) * 100)}%
                       </span>
                       <button
+                        type="button"
+                        aria-label={`Edit ${m.examName} result`}
+                        onClick={() => openEdit(m)}
+                        className="text-muted-foreground transition-colors hover:text-foreground"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        aria-label={`Delete ${m.examName} result`}
                         onClick={() => { if (window.confirm(`Delete the ${m.examName} result for ${m.subject}? This cannot be undone.`)) void removeMark(m.id); }}
                         className="text-muted-foreground transition-colors hover:text-destructive"
                       >
@@ -192,14 +242,16 @@ function MarksPage() {
         )}
       </Panel>
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={(next) => { setOpen(next); if (!next) setEditingId(null); }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Add exam result — {active}</DialogTitle>
+            <DialogTitle>{editingId ? "Edit exam result" : "Add exam result"} — {active}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <Input
               placeholder="Exam name (e.g. Term 2 Paper)"
+              maxLength={120}
+              required
               value={form.examName}
               onChange={(e) => setForm({ ...form, examName: e.target.value })}
             />
@@ -211,19 +263,24 @@ function MarksPage() {
             <div className="flex gap-3">
               <Input
                 type="number"
+                min={0}
+                max={Number(form.total) || undefined}
+                step="any"
                 placeholder="Marks"
                 value={form.marks}
                 onChange={(e) => setForm({ ...form, marks: e.target.value })}
               />
               <Input
                 type="number"
+                min={0.01}
+                step="any"
                 placeholder="Total"
                 value={form.total}
                 onChange={(e) => setForm({ ...form, total: e.target.value })}
               />
             </div>
-            <Button className="w-full" onClick={save}>
-              Save result
+            <Button className="w-full" onClick={() => void save()} disabled={saving}>
+              {saving ? "Saving…" : "Save result"}
             </Button>
           </div>
         </DialogContent>

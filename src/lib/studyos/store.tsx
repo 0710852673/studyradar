@@ -9,6 +9,7 @@ import {
 } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { toast } from "sonner";
+import { validateMarkEntry, validateStudyEntry, validateWasteEntry } from "@/lib/studyos/validation";
 import { supabase } from "@/integrations/supabase/client";
 import { logSecurityIpEvent, syncConsent } from "./security";
 import { recordActivity } from "./telemetry";
@@ -114,6 +115,7 @@ function throttled(): boolean {
 
 interface Store {
   ready: boolean;
+  loadError: string | null;
   user: User | null;
   session: Session | null;
   isAdmin: boolean;
@@ -128,11 +130,14 @@ interface Store {
   refreshSettings: () => Promise<void>;
   updateProfile: (p: Partial<Profile>) => Promise<void>;
   uploadAvatar: (file: File) => Promise<void>;
-  addSession: (s: Omit<StudySession, "id" | "createdAt">) => Promise<void>;
+  addSession: (s: Omit<StudySession, "id" | "createdAt">) => Promise<boolean>;
+  updateSession: (id: string, s: Omit<StudySession, "id" | "createdAt">) => Promise<boolean>;
   removeSession: (id: string) => Promise<void>;
-  addWaste: (w: Omit<WasteEntry, "id">) => Promise<void>;
+  addWaste: (w: Omit<WasteEntry, "id">) => Promise<boolean>;
+  updateWaste: (id: string, w: Omit<WasteEntry, "id">) => Promise<boolean>;
   removeWaste: (id: string) => Promise<void>;
-  addMark: (m: Omit<MarkEntry, "id">) => Promise<void>;
+  addMark: (m: Omit<MarkEntry, "id">) => Promise<boolean>;
+  updateMark: (id: string, m: Omit<MarkEntry, "id">) => Promise<boolean>;
   removeMark: (id: string) => Promise<void>;
   addChapter: (subject: string, title: string) => Promise<void>;
   setChapterStatus: (id: string, status: ChapterStatus) => Promise<void>;
@@ -145,6 +150,7 @@ const Ctx = createContext<Store | null>(null);
 export function StudyOSProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [ready, setReady] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -177,6 +183,7 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
 
 
   const load = useCallback(async (uid: string) => {
+    setLoadError(null);
     const [p, roles, sessions, marks, chapters, wasted] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", uid).maybeSingle(),
       supabase.from("user_roles").select("role").eq("user_id", uid),
@@ -198,7 +205,23 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
         .order("date", { ascending: false }),
     ]);
 
-    check(p.error, "load your profile");
+    const failures = [
+      p.error && `profile: ${p.error.message}`,
+      roles.error && `roles: ${roles.error.message}`,
+      sessions.error && `study sessions: ${sessions.error.message}`,
+      marks.error && `marks: ${marks.error.message}`,
+      chapters.error && `syllabus: ${chapters.error.message}`,
+      wasted.error && `wasted time: ${wasted.error.message}`,
+    ].filter((message): message is string => Boolean(message));
+    if (failures.length) {
+      const message = failures.join(" · ");
+      console.error("[StudyRadar] Account data load failed:", message);
+      setLoadError(message);
+      toast.error("Your saved data could not be loaded", {
+        description: "Your records have not been changed. Retry in a moment.",
+      });
+      return;
+    }
 
     const prof = p.data ? rowToProfile(p.data as ProfileRow) : null;
 
@@ -324,6 +347,7 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
         setAvatarSrc(null);
         setIsAdmin(false);
         setIsAdminPreviewData(false);
+        setLoadError(null);
         setData(EMPTY_DATA);
         setReady(true);
       }
@@ -353,6 +377,7 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
   const value = useMemo<Store>(
     () => ({
       ready,
+      loadError,
       session,
       user: session?.user ?? null,
       isAdmin,
@@ -434,23 +459,68 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
         toast.success("Profile picture updated");
       },
       addSession: async (s) => {
-        if (throttled()) return;
-        if (!userId) return;
+        if (throttled() || !userId) return false;
+        const validationError = validateStudyEntry(s);
+        if (validationError) {
+          toast.error(validationError);
+          return false;
+        }
         if (isAdminPreviewData && adminPreviewTrack) {
           const next = { ...data, sessions: [...data.sessions, { ...s, id: `admin-preview:session:${Date.now()}`, createdAt: Date.now() }] };
           setData(next);
           saveAdminPersonalPreview(userId, adminPreviewTrack, next);
-          return;
+          return true;
         }
         const { error } = await supabase.from("study_sessions").insert({
           user_id: userId,
           date: s.date,
-          subject: s.subject,
+          subject: s.subject.trim(),
           minutes: s.minutes,
-          note: s.note ?? null,
+          note: s.note?.trim() || null,
         });
-        if (!check(error, "save that study session")) return;
+        if (!check(error, "save that study session")) return false;
         await load(userId);
+        return true;
+      },
+      updateSession: async (id, s) => {
+        if (throttled() || !userId) return false;
+        const validationError = validateStudyEntry(s);
+        if (validationError) {
+          toast.error(validationError);
+          return false;
+        }
+        if (isAdminPreviewData && adminPreviewTrack) {
+          let found = false;
+          const next = {
+            ...data,
+            sessions: data.sessions.map((row) => {
+              if (row.id !== id) return row;
+              found = true;
+              return { ...row, ...s, subject: s.subject.trim(), note: s.note?.trim() || undefined };
+            }),
+          };
+          if (!found) {
+            toast.error("That study entry could not be found in this preview.");
+            return false;
+          }
+          setData(next);
+          saveAdminPersonalPreview(userId, adminPreviewTrack, next);
+          return true;
+        }
+        const { data: updated, error } = await supabase
+          .from("study_sessions")
+          .update({ date: s.date, subject: s.subject.trim(), minutes: s.minutes, note: s.note?.trim() || null })
+          .eq("id", id)
+          .eq("user_id", userId)
+          .select("id")
+          .maybeSingle();
+        if (!check(error, "update that study session")) return false;
+        if (!updated) {
+          toast.error("That study entry was not found for your account.");
+          return false;
+        }
+        await load(userId);
+        return true;
       },
       removeSession: async (id) => {
         if (throttled()) return;
@@ -466,22 +536,67 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
         await load(userId);
       },
       addWaste: async (w) => {
-        if (throttled()) return;
-        if (!userId) return;
+        if (throttled() || !userId) return false;
+        const validationError = validateWasteEntry(w);
+        if (validationError) {
+          toast.error(validationError);
+          return false;
+        }
         if (isAdminPreviewData && adminPreviewTrack) {
           const next = { ...data, wasted: [...data.wasted, { ...w, id: `admin-preview:waste:${Date.now()}` }] };
           setData(next);
           saveAdminPersonalPreview(userId, adminPreviewTrack, next);
-          return;
+          return true;
         }
         const { error } = await (supabase as any).from("wasted_time").insert({
           user_id: userId,
           date: w.date,
           minutes: w.minutes,
-          reason: w.reason ?? null,
+          reason: w.reason?.trim() || null,
         });
-        if (!check(error, "save that wasted time")) return;
+        if (!check(error, "save that wasted time")) return false;
         await load(userId);
+        return true;
+      },
+      updateWaste: async (id, w) => {
+        if (throttled() || !userId) return false;
+        const validationError = validateWasteEntry(w);
+        if (validationError) {
+          toast.error(validationError);
+          return false;
+        }
+        if (isAdminPreviewData && adminPreviewTrack) {
+          let found = false;
+          const next = {
+            ...data,
+            wasted: data.wasted.map((row) => {
+              if (row.id !== id) return row;
+              found = true;
+              return { ...row, ...w, reason: w.reason?.trim() || undefined };
+            }),
+          };
+          if (!found) {
+            toast.error("That wasted-time entry could not be found in this preview.");
+            return false;
+          }
+          setData(next);
+          saveAdminPersonalPreview(userId, adminPreviewTrack, next);
+          return true;
+        }
+        const { data: updated, error } = await (supabase as any)
+          .from("wasted_time")
+          .update({ date: w.date, minutes: w.minutes, reason: w.reason?.trim() || null })
+          .eq("id", id)
+          .eq("user_id", userId)
+          .select("id")
+          .maybeSingle();
+        if (!check(error, "update that wasted-time entry")) return false;
+        if (!updated) {
+          toast.error("That wasted-time entry was not found for your account.");
+          return false;
+        }
+        await load(userId);
+        return true;
       },
       removeWaste: async (id) => {
         if (throttled()) return;
@@ -497,24 +612,69 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
         await load(userId);
       },
       addMark: async (m) => {
-        if (throttled()) return;
-        if (!userId) return;
+        if (throttled() || !userId) return false;
+        const validationError = validateMarkEntry(m);
+        if (validationError) {
+          toast.error(validationError);
+          return false;
+        }
         if (isAdminPreviewData && adminPreviewTrack) {
           const next = { ...data, marks: [...data.marks, { ...m, id: `admin-preview:mark:${Date.now()}` }] };
           setData(next);
           saveAdminPersonalPreview(userId, adminPreviewTrack, next);
-          return;
+          return true;
         }
         const { error } = await supabase.from("marks").insert({
           user_id: userId,
-          subject: m.subject,
-          exam_name: m.examName,
+          subject: m.subject.trim(),
+          exam_name: m.examName.trim(),
           marks: m.marks,
           total: m.total,
           date: m.date,
         });
-        if (!check(error, "save that result")) return;
+        if (!check(error, "save that result")) return false;
         await load(userId);
+        return true;
+      },
+      updateMark: async (id, m) => {
+        if (throttled() || !userId) return false;
+        const validationError = validateMarkEntry(m);
+        if (validationError) {
+          toast.error(validationError);
+          return false;
+        }
+        if (isAdminPreviewData && adminPreviewTrack) {
+          let found = false;
+          const next = {
+            ...data,
+            marks: data.marks.map((row) => {
+              if (row.id !== id) return row;
+              found = true;
+              return { ...row, ...m, examName: m.examName.trim(), subject: m.subject.trim() };
+            }),
+          };
+          if (!found) {
+            toast.error("That result could not be found in this preview.");
+            return false;
+          }
+          setData(next);
+          saveAdminPersonalPreview(userId, adminPreviewTrack, next);
+          return true;
+        }
+        const { data: updated, error } = await supabase
+          .from("marks")
+          .update({ subject: m.subject.trim(), exam_name: m.examName.trim(), marks: m.marks, total: m.total, date: m.date })
+          .eq("id", id)
+          .eq("user_id", userId)
+          .select("id")
+          .maybeSingle();
+        if (!check(error, "update that result")) return false;
+        if (!updated) {
+          toast.error("That result was not found for your account.");
+          return false;
+        }
+        await load(userId);
+        return true;
       },
       removeMark: async (id) => {
         if (throttled()) return;
@@ -553,7 +713,7 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
           saveAdminPersonalPreview(userId, adminPreviewTrack, next);
           return;
         }
-        const { error } = await supabase.from("chapters").update({ status }).eq("id", id);
+        const { error } = await supabase.from("chapters").update({ status }).eq("id", id).eq("user_id", userId);
         if (!check(error, "update that chapter")) return;
         await load(userId);
       },
@@ -576,6 +736,7 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
     }),
     [
       ready,
+      loadError,
       session,
       isAdmin,
       isAdminPreviewData,

@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { useStudyOS } from "@/lib/studyos/store";
 import { fmtHours, toKey } from "@/lib/studyos/analytics";
+import { validateMinutes } from "@/lib/studyos/validation";
 
 const ADD = [
   { label: "+15m", minutes: 15 },
@@ -73,8 +74,13 @@ export function LogForm({
   }, [subject, subjects]);
 
   const addMinutes = (amount: number) => {
-    if (kind === "study") setStudyMinutes((current) => current + amount);
-    else setWasteMinutes((current) => current + amount);
+    const current = kind === "study" ? studyMinutes : wasteMinutes;
+    if (current + amount > 1440) {
+      toast.error("A single entry cannot exceed 24 hours.");
+      return;
+    }
+    if (kind === "study") setStudyMinutes((value) => value + amount);
+    else setWasteMinutes((value) => value + amount);
   };
 
   const clearMinutes = () => {
@@ -83,26 +89,36 @@ export function LogForm({
   };
 
   const save = async () => {
-    if (minutes <= 0 || saving) return;
-    if (kind === "waste") {
-      setSaving(true);
-      await addWaste({ date: toKey(new Date()), minutes, reason: note.trim() || undefined });
-      toast.success(`${fmtHours(minutes)} of wasted time logged — honesty helps you improve`);
-      setSaving(false);
-      onDone();
+    if (saving) return;
+    const validationError = validateMinutes(minutes);
+    if (validationError) {
+      toast.error(validationError);
       return;
     }
-    if (!subject) return;
+    if (kind === "study" && !subject) {
+      toast.error("Choose a subject first.");
+      return;
+    }
     setSaving(true);
-    await addSession({
-      date: toKey(new Date()),
-      subject,
-      minutes,
-      note: note.trim() || undefined,
-    });
-    toast.success(`${fmtHours(minutes)} of ${subject} logged`);
-    setSaving(false);
-    onDone();
+    try {
+      const saved = kind === "waste"
+        ? await addWaste({ date: toKey(new Date()), minutes, reason: note.trim() || undefined })
+        : await addSession({
+            date: toKey(new Date()),
+            subject,
+            minutes,
+            note: note.trim() || undefined,
+          });
+      if (!saved) return;
+      toast.success(
+        kind === "waste"
+          ? `${fmtHours(minutes)} of wasted time logged — honesty helps you improve`
+          : `${fmtHours(minutes)} of ${subject} logged`,
+      );
+      onDone();
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (

@@ -171,19 +171,20 @@ function Interstitial({
 }
 
 function Gate() {
-  const { ready, session, profile, isAdmin, isAdminPreviewData, settings, signOut } = useStudyOS();
+  const { ready, session, profile, isAdmin, isAdminPreviewData, settings, signOut, loadError, refresh } = useStudyOS();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const isPublic = PUBLIC_PATHS.includes(pathname);
   const onAuth = pathname === "/auth";
   const onAdmin = pathname === "/admin";
+  const hiddenRoute = HIDDEN_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
 
   useEffect(() => {
     if (!ready) return;
     if (!session && !isPublic) void navigate({ to: "/auth", replace: true });
     if (session && onAuth) void navigate({ to: "/dashboard", replace: true });
-    if (HIDDEN_PATHS.includes(pathname)) void navigate({ to: "/dashboard", replace: true });
-  }, [ready, session, isPublic, onAuth, pathname, navigate]);
+    if (hiddenRoute) void navigate({ to: "/dashboard", replace: true });
+  }, [ready, session, isPublic, onAuth, pathname, hiddenRoute, navigate]);
 
   // Disclosed activity logging — see the Privacy Policy.
   useEffect(() => {
@@ -194,6 +195,20 @@ function Gate() {
   // Always render <Outlet /> so the SSR tree matches the first client render;
   // the session only exists in the browser and arrives after hydration.
   const authedArea = ready && session && !isPublic;
+
+  if (authedArea && loadError) {
+    return (
+      <Interstitial
+        title="Your saved data could not be loaded"
+        body="Your records have not been changed. Retry the connection, or sign out and try again later."
+      >
+        <div className="mt-5 flex justify-center gap-2">
+          <button onClick={() => void refresh()} className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90">Retry</button>
+          <button onClick={() => void signOut()} className="rounded-md border border-border px-4 py-2 text-sm hover:bg-accent">Sign out</button>
+        </div>
+      </Interstitial>
+    );
+  }
 
   if (authedArea && profile?.suspended) {
     return (
