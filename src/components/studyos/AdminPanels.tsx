@@ -10,7 +10,7 @@ import { fmtHours } from "@/lib/studyos/analytics";
 import {
   activeWithin, countBy, dailyMinutes, dailySignups, download, sumMinutes,
   summarizeActivity, toCsv, withinDays,
-  type AdminAchievement, type AdminAudit, type AdminChapter, type AdminDevice, type AdminEvent, type type AdminMark, type AdminProfile, type AdminReferral, type AdminSession,
+  type AdminAchievement, type AdminAudit, type AdminChapter, type AdminDevice, type AdminEvent, type AdminMark, type AdminProfile, type AdminReferral, type AdminSession,
   type AdminSnapshot, type AdminWaste,
 } from "@/lib/studyos/admin-data";
 import { cn } from "@/lib/utils";
