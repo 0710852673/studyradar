@@ -241,7 +241,7 @@ export function dailyMinutes<T extends { date: string; minutes: number }>(sessio
 }
 export function dailySignups(profiles: AdminProfile[], days: number) {
   const map = new Map<string, number>();
-  for (const p of profiles) map.set(p.created_at.slice(0, 10), (map.get(p.created_at.slice(0, 10)) ?? 0) + 1);
+  for (const p of profiles) { const date = dayKey(p.created_at); if (date) map.set(date, (map.get(date) ?? 0) + 1); }
   return Array.from({ length: days }, (_, i) => {
     const date = dayKey(new Date(Date.now() - (days - 1 - i) * 864e5));
     return { date, count: map.get(date) ?? 0 };
