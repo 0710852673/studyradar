@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllPages } from "./pagination";
 
 export type SavedKind = "Guide" | "Video" | "Reel" | "Opportunity" | "Answer" | "Resource";
 
@@ -27,12 +28,11 @@ export function useSaved(userId: string | null | undefined) {
     }
     setLoading(true);
     setError(null);
-    const { data, error: loadError } = await supabase
-      .from("saved_items")
-      .select("item_key,title,kind,note,href,created_at")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false })
-      .limit(200);
+    const { data, error: loadError } = await fetchAllPages((from, to) =>
+      supabase.from("saved_items").select("item_key,title,kind,note,href,created_at")
+        .eq("user_id", userId).order("created_at", { ascending: false })
+        .order("id", { ascending: true }).range(from, to),
+    );
     if (loadError) {
       setItems([]);
       setError(loadError.message);
