@@ -58,7 +58,7 @@ const SECTIONS: { h: string; p: string[]; list?: string[] }[] = [
       "Our infrastructure providers process technical data that is necessary to deliver and secure the Service:",
     ],
     list: [
-      "Source IP address recorded by the server for authentication security events only; it is not used for product analytics or location enrichment",
+      "Network information, including IP address, may be processed by hosting and authentication providers to deliver and protect the Service",
       "Browser and device type",
       "Login, session and token-refresh timestamps",
       "Authentication and security logs, including failed sign-in attempts",
@@ -75,13 +75,13 @@ const SECTIONS: { h: string; p: string[]; list?: string[] }[] = [
   {
     h: "6. Essential processing and optional choices",
     p: [
-      "Account authentication, saving your study records, and essential security processing are needed to deliver the service and are not optional analytics. Accepting the Terms and Privacy acknowledgement does not opt you into product analytics. Qualified Sri Lankan privacy review is still needed, including the applicable legal grounds and protections for minors; we do not claim legal compliance.",
+      "Account authentication, saving your study records, and essential security processing are needed to deliver the Service. Study Radar currently has no optional in-app activity tracking switch or browser-based product activity collection. Qualified Sri Lankan privacy review is still needed, including applicable legal grounds and protections for minors; we do not claim legal compliance.",
     ],
   },
   {
     h: "7. Service providers",
     p: [
-      "Lovable Cloud provides authentication, database hosting and file storage; Lovable delivers the application. Google handles Google sign-in and serves the fonts loaded by this site. These providers receive the network information needed to deliver their services and may process information outside Sri Lanka. Provider-side operational logging and retention require review before launch. We do not sell personal data. The app no longer calls ipapi.co for IP or location lookup.",
+      "Lovable Cloud provides authentication, database hosting and file storage; Lovable delivers the application. The hosting platform also provides the site owner with aggregate traffic metrics such as visitors, page views, popular pages, traffic sources, device classes and country-level breakdowns. These are provider-side metrics, not the disabled in-app activity logger. Hosting and authentication providers receive network information needed to deliver their services and may process it outside Sri Lanka. Provider-side logging, analytics methods and retention require review before launch. We do not sell personal data. The app no longer calls ipapi.co for IP or location lookup.",
     ],
   },
   {
@@ -91,10 +91,10 @@ const SECTIONS: { h: string; p: string[]; list?: string[] }[] = [
     ],
   },
   {
-    h: "9. Optional product analytics",
+    h: "9. Product and site analytics",
     p: [
-      "Optional app activity analytics is off by default. In Profile → Privacy you can choose to share visit/login events, coarse page categories, event timestamps, and broad browser family and mobile/desktop class for product improvement. New activity events do not include your account identifier, email, raw IP, city, region, country, exact screen size, timezone, language or referrer. We do not add fingerprinting, hidden pixels, keystroke tracking or session replay.",
-      "The choice is stored separately for each account in this browser. Other browsers start with analytics off. Turn it off anytime to stop future optional app activity events; core study functionality remains available. Withdrawal does not delete historical records. Existing administrator reports also summarize stored study and account data for operating the service; this switch does not change those reports or essential authentication/security logs.",
+      "Study Radar currently does not collect optional page-visit or login analytics through its browser app code. The previous Profile privacy switch has been removed and new client-side device_events tracking is disabled. Site traffic reporting is provided separately by the hosting platform to the site owner in aggregate form, including visitor and page-view counts, popular pages, traffic sources, device classes and country-level summaries. The hosting provider may process network information to produce and operate these reports; we do not promise that provider-side analytics contains no IP-derived or location information.",
+      "Historical device activity records are not deleted by disabling new tracking. Some older records may contain account identifiers, email, IP address or location fields. Essential authentication and security processing remains separate from product analytics and is not controlled by a student-facing analytics switch.",
     ],
   },
   {
@@ -106,7 +106,7 @@ const SECTIONS: { h: string; p: string[]; list?: string[] }[] = [
   {
     h: "11. Retention",
     p: [
-      "Account and study data are retained while your account exists. New server-observed authentication IP security events are restricted to administrators and have a 30-day retention target, with scheduled and write-triggered cleanup. This does not retroactively remove historical activity or security records, which may include IP/location and email collected under earlier implementations. Provider backups and legacy records may follow separate retention periods and require review.",
+      "Account and study data are retained while your account exists. The application-level IP security logging function is currently disabled. Historical device activity records may still contain IP/location and email collected by earlier implementations; those records have not been removed and their retention requires review. Provider backups and operational logs may follow separate retention periods.",
     ],
   },
   {
@@ -124,7 +124,7 @@ const SECTIONS: { h: string; p: string[]; list?: string[] }[] = [
   {
     h: "14. Students and minors",
     p: [
-      "Study Radar is used by school students, including minors. Optional activity analytics is off by default and declining it does not affect studying. Do not put sensitive information in study notes, wasted-time reasons, or your biography. School, mobile and guardian details are optional. No verified parental-consent mechanism is currently implemented. Age-appropriate notices, the necessity of optional profile fields, administrator access, and any required guardian consent need qualified Sri Lankan review before launch.",
+      "Study Radar is used by school students, including minors. The app currently has no optional in-app activity tracking switch. Do not put sensitive information in study notes, wasted-time reasons, or your biography. School, mobile and guardian details are optional. No verified parental-consent mechanism is currently implemented. Age-appropriate notices, the necessity of optional profile fields, administrator access, and provider-side analytics require qualified Sri Lankan review before launch.",
     ],
   },
   {
