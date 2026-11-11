@@ -159,7 +159,7 @@ function PrivacyPage() {
           Privacy Policy
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Updated 10 November 2026 · Study Radar, Sri Lanka
+          Updated 11 November 2026 · Study Radar, Sri Lanka
         </p>
 
         <div className="mt-10 space-y-8">
