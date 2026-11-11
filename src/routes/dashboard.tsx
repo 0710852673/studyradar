@@ -31,6 +31,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useStudyOS } from "@/lib/studyos/store";
+import { buildReferralSignupUrl } from "@/lib/studyos/referrals";
 import {
   bySubject,
   dailySeries,
@@ -133,9 +134,7 @@ function Dashboard() {
       });
       return;
     }
-    const url = new URL("/auth", window.location.origin);
-    url.searchParams.set("ref", referralCode);
-    const inviteUrl = url.toString();
+    const inviteUrl = buildReferralSignupUrl(window.location.origin, referralCode);
 
     if (navigator.share) {
       try {
