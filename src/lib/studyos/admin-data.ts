@@ -137,7 +137,7 @@ const DEVICE_COLUMNS = "id,user_id,kind,path,platform,created_at";
 
 /** All admin reads are checked together; partial data is never presented as a complete platform snapshot. */
 export async function loadSnapshot(): Promise<AdminSnapshot> {
-  const [p, s, w, m, c, e, d, ip, r, a, audit, contacts, feedback, suggestions, resources, referrals] = await Promise.all([
+  const [p, s, w, m, c, e, d, r, a, audit, contacts, feedback, suggestions, resources, referrals] = await Promise.all([
     supabase.from("profiles").select(PROFILE_COLUMNS).order("created_at", { ascending: false }),
     supabase.from("study_sessions").select("*"),
     supabase.from("wasted_time").select("*"),
@@ -154,8 +154,26 @@ export async function loadSnapshot(): Promise<AdminSnapshot> {
     supabase.from("resources").select("id,status,created_at"),
     supabase.from("referral_signups").select("id,referrer_id,referred_user_id,created_at"),
   ]);
-  const results = { profiles: p, sessions: s, wasted: w, marks: m, chapters: c, security: e, activity: d, roles: r, achievements: a, audit, contacts, feedback, suggestions, resources, referrals };
-  const failures = Object.entries(results).filter(([name, result]) => result.error).map(([name, result]) => `${name}: ${result.error?.message ?? "unknown error"}`);
+  const results = [
+    ["profiles", p],
+    ["sessions", s],
+    ["wasted time", w],
+    ["marks", m],
+    ["chapters", c],
+    ["security events", e],
+    ["activity", d],
+    ["roles", r],
+    ["achievements", a],
+    ["admin audit", audit],
+    ["contacts", contacts],
+    ["feedback", feedback],
+    ["suggestions", suggestions],
+    ["resources", resources],
+    ["referrals", referrals],
+  ] as const;
+  const failures = results
+    .filter(([, result]) => result.error)
+    .map(([name, result]) => `${name}: ${result.error?.message ?? "unknown error"}`);
   if (failures.length) throw new Error(`Some admin data could not be loaded. ${failures.join(" · ")}`);
   return {
     profiles: (p.data ?? []) as AdminProfile[],
