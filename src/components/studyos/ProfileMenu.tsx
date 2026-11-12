@@ -13,7 +13,7 @@ import { useStudyOS } from "@/lib/studyos/store";
 
 export function initialsFor(name?: string | null, email?: string | null): string {
   const source = (name ?? "").trim() || (email ?? "").split("@")[0] || "";
-  const parts = source.split(/[\\s._-]+/).filter(Boolean);
+  const parts = source.split(/[\s._-]+/).filter(Boolean);
   if (parts.length === 0) return "?";
   const first = parts[0] ?? "";
   const last = parts[parts.length - 1] ?? "";
