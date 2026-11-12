@@ -15,7 +15,9 @@ export function initialsFor(name?: string | null, email?: string | null): string
   const source = (name ?? "").trim() || (email ?? "").split("@")[0] || "";
   const parts = source.split(/[\s._-]+/).filter(Boolean);
   if (parts.length === 0) return "?";
-  const letters = parts.length === 1 ? parts[0].slice(0, 2) : parts[0][0] + parts[parts.length - 1][0];
+  const first = parts[0] ?? "";
+  const last = parts[parts.length - 1] ?? "";
+  const letters = parts.length === 1 ? first.slice(0, 2) : (first[0] ?? "") + (last[0] ?? "");
   return letters.toUpperCase();
 }
 
