@@ -1,48 +1,40 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowRight, CheckCircle2, ClipboardList, GraduationCap, LineChart, Target, Timer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHero, PublicHeader } from "@/components/studyos/PublicHeader";
 import { SiteFooter } from "@/components/studyos/Footer";
 
 export const Route = createFileRoute("/how-it-works")({
-  head: () => ({
-    meta: [
-      { title: "How Study Radar 1.0 works" },
-      { name: "description", content: "Set up your Sri Lankan GCE O/L or A/L profile, track study and wasted time separately, manage syllabus and marks, and review progress." },
-      { property: "og:title", content: "How Study Radar works" },
-      { property: "og:description", content: "A practical six-step workflow for tracking exam preparation." },
-    ],
-  }),
+  head: () => ({ meta: [
+    { title: "How Study Radar works — Study Radar 1.0" },
+    { name: "description", content: "See how to set up your O/L or A/L profile, record study time, track syllabus and marks, and review progress." },
+    { property: "og:title", content: "How Study Radar works" },
+    { property: "og:description", content: "A step-by-step guide to using Study Radar for exam preparation." },
+  ] }),
   component: HowPage,
 });
 
 const STEPS = [
-  { title: "Create your account", body: "Sign up with email or use Google sign-in when it is enabled." },
-  { title: "Set up your exam profile", body: "Choose O/L or A/L, your exam year, subjects and stream where relevant." },
-  { title: "Set a realistic target", body: "Choose a daily study goal and keep it adjustable as school and tuition change." },
-  { title: "Log study and wasted time", body: "Record each separately so your study totals never get mixed with distractions." },
-  { title: "Track syllabus and marks", body: "Update chapter progress and record term-test or model-paper results." },
-  { title: "Review and adjust", body: "Use your progress, streaks, subject balance and exam countdown to decide what needs attention next." },
-] as const;
+  { icon: ClipboardList, n:"01", title:"Create your account", body:"Register with your email or use Google sign-in when available. Your workspace is connected to your account." },
+  { icon: GraduationCap, n:"02", title:"Set up your exam profile", body:"Choose GCE O/L or A/L, set your exam year and select the subjects you are studying." },
+  { icon: Target, n:"03", title:"Choose a realistic goal", body:"Set a daily study target that fits around school, tuition, rest and other responsibilities. You can adjust it later." },
+  { icon: Timer, n:"04", title:"Record your time", body:"Log study sessions under the right subject. Record wasted time separately so the two totals never get mixed." },
+  { icon: CheckCircle2, n:"05", title:"Update syllabus and marks", body:"Mark chapters as you progress and add test or model-paper results to keep your preparation record current." },
+  { icon: LineChart, n:"06", title:"Review and adjust", body:"Use your summaries, subject balance and mark history to decide what deserves attention next." },
+];
 
 function HowPage() {
-  return (
-    <div className="min-h-screen bg-background">
-      <PublicHeader />
-      <main>
-        <PageHero eyebrow="How it works" title="Six steps to a clearer study record" lead="Start small. Study Radar becomes more useful as you log sessions and keep your subjects, syllabus and marks up to date." />
-        <section className="mx-auto max-w-3xl px-5 py-14 sm:px-8">
-          <ol className="relative space-y-6 border-l border-border pl-8">
-            {STEPS.map((step, index) => (
-              <li key={step.title} className="relative">
-                <span className="absolute -left-[41px] flex h-7 w-7 items-center justify-center rounded-full border border-border bg-elevated text-xs font-semibold text-primary">{String(index + 1).padStart(2, "0")}</span>
-                <div className="panel p-4"><h2 className="text-sm font-semibold">{step.title}</h2><p className="mt-1 text-sm text-muted-foreground">{step.body}</p></div>
-              </li>
-            ))}
-          </ol>
-          <div className="mt-10 text-center"><Button asChild size="lg"><Link to="/auth" search={{ mode: "signup" }}>Get Started</Link></Button></div>
-        </section>
-      </main>
-      <SiteFooter />
-    </div>
-  );
+  return <div className="min-h-screen bg-background"><PublicHeader/><main>
+    <PageHero eyebrow="A simple workflow" title="From first log to a clearer plan." lead="Study Radar works best when you use it consistently. Start with the basics, keep your records current and use what you learn to adjust your routine."/>
+    <section className="mx-auto max-w-5xl px-5 py-14 sm:px-8 sm:py-20">
+      <div className="grid gap-4 md:grid-cols-2">
+        {STEPS.map((s,i)=><article key={s.n} className="panel relative flex gap-4 p-5 sm:p-6">
+          <div className="flex shrink-0 flex-col items-center"><span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-soft text-primary"><s.icon className="h-5 w-5"/></span><span className="mt-2 num text-[10px] text-muted-foreground">{s.n}</span></div>
+          <div><h2 className="font-display text-base font-semibold">{s.title}</h2><p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{s.body}</p></div>
+        </article>)}
+      </div>
+      <div className="mt-10 rounded-2xl border border-border bg-elevated/60 p-6 sm:p-8"><p className="text-xs font-semibold uppercase tracking-wider text-primary">Your ongoing routine</p><div className="mt-5 grid gap-4 sm:grid-cols-3">{[{t:"Record",d:"Log sessions and update your syllabus."},{t:"Review",d:"Check your hours, marks and subject balance."},{t:"Adjust",d:"Make a practical change for the next week."}].map((x,i)=><div key={x.t} className="flex gap-3"><span className="num text-sm text-primary">0{i+1}</span><div><p className="text-sm font-semibold">{x.t}</p><p className="mt-1 text-xs text-muted-foreground">{x.d}</p></div></div>)}</div></div>
+    </section>
+    <section className="border-t border-border px-5 py-14 text-center sm:px-8 sm:py-20"><h2 className="font-display text-2xl font-semibold sm:text-3xl">Keep your preparation in view.</h2><p className="mx-auto mt-3 max-w-lg text-sm text-muted-foreground">Set up your exam profile and start with your next study session.</p><Button asChild size="lg" className="mt-6"><Link to="/auth" search={{mode:"signup"}}>Get started <ArrowRight className="ml-2 h-4 w-4"/></Link></Button></section>
+  </main><SiteFooter/></div>;
 }

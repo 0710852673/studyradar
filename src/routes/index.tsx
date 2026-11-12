@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
-  BarChart3,
+  ArrowRight,
   BookOpenCheck,
   CalendarDays,
   CheckCircle2,
@@ -14,6 +14,8 @@ import {
   Target,
   Timer,
   Trophy,
+  TrendingUp,
+  ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SiteFooter } from "@/components/studyos/Footer";
@@ -206,7 +208,7 @@ const SUBJECT_PREVIEW = [
 function DashboardPreview() {
   const bars = [45, 70, 38, 88, 62, 96, 74];
   return (
-    <div className="panel relative overflow-hidden p-4 shadow-2xl sm:p-6">
+    <div className="panel relative overflow-hidden rounded-[1.75rem] p-4 shadow-2xl shadow-primary/10 sm:p-6 lg:p-7">
       <div
         aria-hidden
         className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-primary/20 blur-3xl"
@@ -216,20 +218,20 @@ function DashboardPreview() {
           <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <Radar className="h-3.5 w-3.5" />
           </span>
-          <span className="text-sm font-medium">Today</span>
+          <span className="text-sm font-semibold tracking-tight">Your study overview</span>
         </div>
         <span className="rounded-full bg-brand-soft px-2.5 py-1 text-[11px] text-primary">
-          Example dashboard
+          SAMPLE DASHBOARD
         </span>
       </div>
 
-      <div className="relative mt-4 grid grid-cols-3 gap-2.5">
+      <div className="relative mt-5 grid grid-cols-3 gap-2 sm:gap-3">
         {[
           { k: "Today", v: <Counter to={3.3} decimals={1} suffix="h" />, s: "of 5h target" },
           { k: "This week", v: <Counter to={21} suffix="h" />, s: "of 35h" },
           { k: "Streak", v: <Counter to={12} suffix="d" />, s: "personal best" },
         ].map((c) => (
-          <div key={c.k} className="rounded-xl border border-border bg-elevated p-3">
+          <div key={c.k} className="rounded-xl border border-border/80 bg-elevated p-2.5 sm:p-3.5">
             <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{c.k}</p>
             <p className="mt-1.5 text-lg font-semibold">{c.v}</p>
             <p className="mt-0.5 text-[10px] text-muted-foreground">{c.s}</p>
@@ -237,7 +239,7 @@ function DashboardPreview() {
         ))}
       </div>
 
-      <div className="relative mt-4 rounded-xl border border-border bg-elevated p-4">
+      <div className="relative mt-4 rounded-2xl border border-border/80 bg-elevated p-4 sm:p-5">
         <div className="flex items-center justify-between">
           <p className="text-xs text-muted-foreground">Example weekly activity</p>
           <p className="text-xs text-primary">Study trend</p>
@@ -254,9 +256,9 @@ function DashboardPreview() {
         </div>
       </div>
 
-      <div className="relative mt-3 space-y-2">
+      <div className="relative mt-3 grid gap-2 sm:grid-cols-3">
         {SUBJECT_PREVIEW.map((s, i) => (
-          <div key={s.s} className="rounded-xl border border-border bg-elevated p-3">
+          <div key={s.s} className="rounded-xl border border-border/80 bg-elevated p-3">
             <div className="flex items-center justify-between text-xs">
               <span className="font-medium">{s.s}</span>
               <span className="num text-muted-foreground">{s.h}</span>
@@ -285,7 +287,7 @@ function Landing() {
 
       <main>
         {/* HERO */}
-        <section className="relative overflow-hidden px-5 pb-20 pt-14 sm:px-8 sm:pb-28 sm:pt-20">
+        <section className="relative isolate overflow-hidden px-5 pb-14 pt-12 sm:px-8 sm:pb-20 sm:pt-16 lg:pb-24 lg:pt-24">
           <div
             aria-hidden
             className="pointer-events-none absolute left-1/2 top-[-6rem] h-[26rem] w-[46rem] -translate-x-1/2 rounded-full bg-primary/15 blur-[130px] motion-safe:animate-[drift_14s_ease-in-out_infinite]"
@@ -295,7 +297,7 @@ function Landing() {
             className="pointer-events-none absolute inset-0 opacity-[0.35] [background-image:linear-gradient(to_right,color-mix(in_oklab,var(--foreground)_5%,transparent)_1px,transparent_1px),linear-gradient(to_bottom,color-mix(in_oklab,var(--foreground)_5%,transparent)_1px,transparent_1px)] [background-size:56px_56px] [mask-image:radial-gradient(ellipse_at_top,black,transparent_65%)]"
           />
 
-          <div className="relative mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]">
+          <div className="relative mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[1fr_0.92fr] lg:gap-14">
             <div className="text-center lg:text-left">
               <Reveal>
                 <span className="inline-flex items-center gap-2 rounded-full border border-border bg-elevated/70 px-3.5 py-1.5 text-xs text-muted-foreground backdrop-blur">
@@ -305,16 +307,16 @@ function Landing() {
               </Reveal>
 
               <Reveal delay={90}>
-                <h1 className="mt-6 font-display text-4xl font-semibold leading-[1.05] tracking-tight sm:text-6xl">
+                <h1 className="mt-6 font-display text-[2.65rem] font-semibold leading-[1.02] tracking-[-0.045em] sm:text-6xl lg:text-[4.35rem]">
                   See where your study time goes.
                   <span className="block bg-gradient-to-r from-primary to-chart-2 bg-clip-text text-transparent">
-                    Make progress visible.
+                    Make every hour count.
                   </span>
                 </h1>
               </Reveal>
 
               <Reveal delay={170}>
-                <p className="mx-auto mt-5 max-w-xl text-base text-muted-foreground sm:text-lg lg:mx-0">
+                <p className="mx-auto mt-6 max-w-xl text-[0.95rem] leading-7 text-muted-foreground sm:text-lg sm:leading-8 lg:mx-0">
                   Study Radar brings your study sessions, wasted time, subjects, syllabus, marks and
                   progress into one clear workspace, built around Sri Lankan GCE O/L and A/L
                   preparation.
@@ -326,10 +328,10 @@ function Landing() {
                   <Button
                     asChild
                     size="lg"
-                    className="w-full transition-transform hover:scale-[1.03] sm:w-auto"
+                    className="group w-full shadow-lg shadow-primary/15 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/20 sm:w-auto"
                   >
                     <Link to={session ? "/dashboard" : "/auth"} search={session ? {} : { mode: "signup" }}>
-                      {session ? "Open your dashboard" : "Get Started"}
+                      <span>{session ? "Open your dashboard" : "Get Started"}</span><ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </Link>
                   </Button>
                   <Button asChild variant="secondary" size="lg" className="w-full sm:w-auto">
@@ -352,9 +354,26 @@ function Landing() {
               </Reveal>
             </div>
 
-            <Reveal delay={200} className="motion-safe:animate-[float_7s_ease-in-out_infinite]">
+            <Reveal delay={200} className="relative motion-safe:animate-[float_7s_ease-in-out_infinite]">
+              <div className="pointer-events-none absolute -inset-5 -z-10 rounded-[2.5rem] bg-primary/[0.08] blur-2xl" />
               <DashboardPreview />
             </Reveal>
+          </div>
+        </section>
+
+        <section className="relative z-10 px-5 pb-14 sm:px-8 sm:pb-20">
+          <div className="mx-auto grid max-w-7xl grid-cols-2 gap-3 rounded-2xl border border-border bg-card/80 p-4 shadow-sm backdrop-blur sm:grid-cols-4 sm:p-5">
+            {[
+              { icon: Timer, title: "Study + break tracking", detail: "Kept separate" },
+              { icon: GraduationCap, title: "O/L and A/L", detail: "Built for both paths" },
+              { icon: TrendingUp, title: "Progress insights", detail: "See your patterns" },
+              { icon: ShieldCheck, title: "Private by design", detail: "Your account, your data" },
+            ].map((item) => (
+              <div key={item.title} className="flex min-w-0 items-center gap-3 px-1 py-2 sm:px-3">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-primary"><item.icon className="h-4 w-4" /></span>
+                <span className="min-w-0"><span className="block text-xs font-semibold sm:text-sm">{item.title}</span><span className="mt-0.5 block text-[10px] text-muted-foreground sm:text-xs">{item.detail}</span></span>
+              </div>
+            ))}
           </div>
         </section>
 
@@ -493,7 +512,7 @@ function Landing() {
                   About us
                 </span>
                 <h2 className="mt-5 font-display text-2xl font-semibold tracking-tight sm:text-4xl">
-                  Built by students, for students sitting the same exams.
+                  A study workspace shaped around Sri Lankan students.
                 </h2>
                 <p className="mt-4 text-sm text-muted-foreground sm:text-base">
                   Study Radar started with a simple frustration: hours of work with nothing to show
@@ -507,7 +526,7 @@ function Landing() {
                 </p>
 
                 <div className="panel mt-7 p-5">
-                  <p className="text-sm font-semibold">A small independent team in Sri Lanka</p>
+                  <p className="text-sm font-semibold">Built around the Sri Lankan exam journey</p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     We build alongside the students who use Study Radar — tell us what to fix next
                     on the contact page.
@@ -595,6 +614,42 @@ function Landing() {
                   </Reveal>
                 ))}
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* PUBLIC FAQ */}
+        <section className="border-t border-border px-5 py-16 sm:px-8 sm:py-24">
+          <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.8fr_1.2fr]">
+            <Reveal>
+              <span className="inline-flex items-center gap-2 rounded-full border border-border bg-elevated px-3 py-1.5 text-xs text-muted-foreground">
+                <Sparkles className="h-3.5 w-3.5 text-primary" /> Quick answers
+              </span>
+              <h2 className="mt-5 font-display text-2xl font-semibold tracking-tight sm:text-4xl">
+                Before you get started
+              </h2>
+              <p className="mt-3 max-w-sm text-sm text-muted-foreground">
+                A few things students usually want to know before setting up their workspace.
+              </p>
+              <Link to="/help" className="mt-5 inline-flex items-center text-sm text-primary hover:underline">
+                Visit the Help Centre <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Reveal>
+            <div className="space-y-3">
+              {[
+                { q: "Is Study Radar for O/L or A/L?", a: "Both. During setup, choose your exam path and configure the subjects that apply to you." },
+                { q: "Are study time and wasted time combined?", a: "No. They are recorded separately, so adding time to one does not change the other." },
+                { q: "Can I use it on my phone?", a: "Yes. The public site and student workspace are designed to adapt to mobile, tablet and desktop screens." },
+                { q: "Can I change my subjects or correct a log?", a: "You can manage your own study records and profile settings from your account. Check the Help Centre for guidance." },
+              ].map((item) => (
+                <details key={item.q} className="panel group p-4 open:border-primary/40 sm:p-5">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-medium">
+                    {item.q}
+                    <span className="text-lg leading-none text-primary transition-transform group-open:rotate-45">+</span>
+                  </summary>
+                  <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">{item.a}</p>
+                </details>
+              ))}
             </div>
           </div>
         </section>
