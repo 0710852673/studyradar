@@ -102,6 +102,16 @@ export function AdminResourceRequests() {
     setBusy(null);
   };
 
+  const deleteResource = async (resource: Resource) => {
+    if (!window.confirm(`Permanently delete ${resource.name}? This cannot be undone. Archive instead if you may need it later.`)) return;
+    setBusy(resource.id);
+    const { data: removed, error } = await supabase.from("resources").delete().eq("id", resource.id).select("id");
+    if (error) toast.error("Could not delete resource", { description: error.message });
+    else if (!removed?.length) toast.error("Resource was not deleted", { description: "You may not have permission, or it was already removed." });
+    else { toast.success("Resource deleted"); await load(); }
+    setBusy(null);
+  };
+
   const toggleFeatured = async (resource: Resource) => {
     setBusy(resource.id);
     const { error } = await supabase.from("resources").update({ featured: !resource.featured }).eq("id", resource.id);
@@ -163,6 +173,7 @@ export function AdminResourceRequests() {
               <Button size="sm" variant="outline" onClick={()=>void toggleFeatured(r)} disabled={busy!==null}><Star className="mr-1 h-3.5 w-3.5"/>{r.featured ? "Unfeature" : "Feature"}</Button>
               {r.status !== "published" ? <Button size="sm" onClick={()=>void setResourceStatus(r,"published")} disabled={busy!==null}>Publish</Button> : <Button size="sm" variant="outline" onClick={()=>void setResourceStatus(r,"draft")} disabled={busy!==null}>Unpublish</Button>}
               {r.status !== "archived" ? <Button size="sm" variant="ghost" onClick={()=>void setResourceStatus(r,"archived")} disabled={busy!==null}><Archive className="h-3.5 w-3.5"/></Button> : null}
+              <Button size="sm" variant="ghost" aria-label={`Delete ${r.name}`} className="text-destructive" onClick={()=>void deleteResource(r)} disabled={busy!==null}>Delete</Button>
             </div>
           </div>
         </article>)}</div>}

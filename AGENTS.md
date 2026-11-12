@@ -11,3 +11,4 @@
 
 - Optional activity metrics use device-local per-account affirmative consent and existing nullable activity columns with coarse labels only; security audit logging stays separate to protect core authentication.
 - Pending signup consent uses versioned, short-lived session storage; legacy silently recorded consent must never authorize a new consent write.
+- Client API roles never get TRUNCATE/REFERENCES/TRIGGER; event/audit tables are server- or policy-written only, because RLS does not cover those privileges.
