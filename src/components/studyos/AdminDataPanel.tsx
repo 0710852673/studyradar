@@ -83,7 +83,7 @@ export function PreviewPanel({ onPreview }: { onPreview: (track: "OL" | "AL") =>
     <div className="rounded-2xl border border-primary/20 bg-primary/[0.06] p-5 sm:p-6">
       <div className="flex items-start gap-3"><ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary" /><div><p className="text-sm font-semibold">Isolated preview laboratory</p><p className="mt-1 max-w-3xl text-xs leading-relaxed text-muted-foreground">Each track has its own browser-local sample dataset. It includes a rolling 180-day study history, separate wasted-time entries, marks and syllabus progress. Preview edits remain local to this browser and are never written to the production database.</p></div></div>
     </div>
-    <div className="grid gap-4 xl:grid-cols-2">
+    <div className="grid items-stretch gap-4 lg:grid-cols-2">
       {previews.map((item) => <section key={item.track} className="overflow-hidden rounded-2xl border border-border bg-elevated">
         <div className="border-b border-border bg-gradient-to-br from-primary/[0.10] to-transparent p-5">
           <div className="flex items-center justify-between gap-3"><span className="rounded-lg border border-primary/25 bg-primary/10 px-2.5 py-1 text-[10px] font-bold tracking-wider text-primary">{item.short} PREVIEW</span><span className="inline-flex items-center gap-1.5 text-[10px] text-emerald-400"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />LOCAL ONLY</span></div>
@@ -93,7 +93,12 @@ export function PreviewPanel({ onPreview }: { onPreview: (track: "OL" | "AL") =>
         <div className="p-5">
           <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Sample subject setup</p>
           <p className="mt-2 text-xs leading-relaxed">{item.subjects}</p>
-          <div className="mt-5 grid grid-cols-3 gap-2">
+          <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {["Study dashboard", "Subject analysis", "Marks tracking", "Syllabus progress"].map((feature) => (
+              <span key={feature} className="rounded-lg border border-border bg-background/50 px-2 py-2 text-center text-[9px] font-medium text-muted-foreground">{feature}</span>
+            ))}
+          </div>
+          <div className="mt-4 grid grid-cols-3 gap-2">
             <div className="rounded-xl border border-border bg-background/60 p-3"><p className="font-display text-lg font-semibold">180d</p><p className="mt-1 text-[9px] text-muted-foreground">Study history</p></div>
             <div className="rounded-xl border border-border bg-background/60 p-3"><p className="font-display text-lg font-semibold">Separate</p><p className="mt-1 text-[9px] text-muted-foreground">Wasted time</p></div>
             <div className="rounded-xl border border-border bg-background/60 p-3"><p className="font-display text-lg font-semibold">Sample</p><p className="mt-1 text-[9px] text-muted-foreground">Marks & syllabus</p></div>
