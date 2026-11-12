@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { BarChart3, BookOpen, Bookmark, CalendarDays, CheckCircle2, GraduationCap, Lock, Target, Timer, Trophy, TrendingUp } from "lucide-react";
+import { BarChart3, BookOpen, Bookmark, CheckCircle2, GraduationCap, Lock, Target, Timer, Trophy, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHero, PublicHeader } from "@/components/studyos/PublicHeader";
 import { SiteFooter } from "@/components/studyos/Footer";
