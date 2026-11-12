@@ -24,7 +24,6 @@ export function initialsFor(name?: string | null, email?: string | null): string
 export function ProfileMenu() {
   const { profile, user, avatarSrc, signOut } = useStudyOS();
   const navigate = useNavigate();
-  const navigate = useNavigate();
   const name = profile?.name || user?.email?.split("@")[0] || "Account";
   const email = user?.email ?? profile?.email ?? "";
 
