@@ -25,6 +25,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "
 import { useStudyOS } from "@/lib/studyos/store";
 import { Button } from "@/components/ui/button";
 import { NotificationBell } from "./Notifications";
+import { ProfileMenu } from "./ProfileMenu";
 import { AssistantWidget } from "./AssistantWidget";
 import { ProfileNudge } from "./ProfileNudge";
 
@@ -124,6 +125,7 @@ export function AppShell({
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <NotificationBell />
+            <ProfileMenu />
             <div className="hidden sm:block">
               <QuickLogButton />
             </div>
