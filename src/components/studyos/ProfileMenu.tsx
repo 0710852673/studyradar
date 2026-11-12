@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { LogOut, Settings } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -23,6 +23,7 @@ export function initialsFor(name?: string | null, email?: string | null): string
 
 export function ProfileMenu() {
   const { profile, user, avatarSrc, signOut } = useStudyOS();
+  const navigate = useNavigate();
   const name = profile?.name || user?.email?.split("@")[0] || "Account";
   const email = user?.email ?? profile?.email ?? "";
 
@@ -54,6 +55,7 @@ export function ProfileMenu() {
         <DropdownMenuItem
           onSelect={async () => {
             await signOut();
+            await navigate({ to: "/auth" });
           }}
         >
           <LogOut className="mr-2 h-4 w-4" /> Sign out
