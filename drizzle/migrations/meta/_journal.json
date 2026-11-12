@@ -36,6 +36,13 @@
       "when": 1794281049842,
       "tag": "0004_safe_resource_review_and_local_achievements",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794455278030,
+      "tag": "0005_migration",
+      "breakpoints": true
     }
   ]
 }
