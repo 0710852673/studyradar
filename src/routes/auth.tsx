@@ -88,11 +88,8 @@ function AuthPage() {
     let active = true;
     const loadAuthSettings = async () => {
       try {
-        const { data, error: settingsLoadError } = await supabase
-          .from("site_settings")
-          .select("signups_enabled,google_login_enabled")
-          .eq("id", true)
-          .maybeSingle();
+        const { data: rows, error: settingsLoadError } = await supabase.rpc("get_public_auth_settings");
+        const data = Array.isArray(rows) ? rows[0] : rows;
         if (!active) return;
         if (settingsLoadError || !data) {
           setAuthSettings({ signupsEnabled: false, googleLoginEnabled: false });
