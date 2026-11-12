@@ -14,6 +14,9 @@ import {
   Timer,
   Trophy,
   User,
+  UserRound,
+  Settings,
+  LogOut,
   MessageSquare,
   LibraryBig,
 } from "lucide-react";
@@ -27,6 +30,15 @@ import { Button } from "@/components/ui/button";
 import { NotificationBell } from "./Notifications";
 import { AssistantWidget } from "./AssistantWidget";
 import { ProfileNudge } from "./ProfileNudge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const PRIMARY = [
   { to: "/dashboard", label: "Home", icon: Home },
@@ -61,7 +73,7 @@ export function AppShell({
   children: ReactNode;
 }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { isAdmin, isAdminPreviewData, adminPreviewTrack, setAdminPreviewTrack } = useStudyOS();
+  const { isAdmin, isAdminPreviewData, adminPreviewTrack, setAdminPreviewTrack, profile, avatarSrc, user, signOut } = useStudyOS();
   const navigate = useNavigate();
   const [logOpen, setLogOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
@@ -124,6 +136,45 @@ export function AppShell({
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <NotificationBell />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="Open profile and settings"
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  <Avatar className="h-9 w-9">
+                    {avatarSrc ? <AvatarImage src={avatarSrc} alt={profile?.name ?? "Profile"} /> : null}
+                    <AvatarFallback className="text-xs font-semibold">
+                      {(profile?.name || user?.email || "U").slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" sideOffset={8} className="w-56">
+                <DropdownMenuLabel className="max-w-full">
+                  <span className="block truncate text-sm">{profile?.name || "Your account"}</span>
+                  <span className="block truncate text-xs font-normal text-muted-foreground">{user?.email}</span>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={() => void navigate({ to: "/settings" })}>
+                  <UserRound className="mr-2 h-4 w-4" /> Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => void navigate({ to: "/settings" })}>
+                  <Settings className="mr-2 h-4 w-4" /> Settings
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onSelect={async () => {
+                    await signOut();
+                    await navigate({ to: "/", replace: true });
+                  }}
+                >
+                  <LogOut className="mr-2 h-4 w-4" /> Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <div className="hidden sm:block">
               <QuickLogButton />
             </div>
