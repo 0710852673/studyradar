@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowRight,
-  BarChart3,
   BookOpenCheck,
   CalendarDays,
   CheckCircle2,
