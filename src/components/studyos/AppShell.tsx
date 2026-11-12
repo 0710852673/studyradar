@@ -132,7 +132,7 @@ export function AppShell({
           </div>
         </header>
 
-        <main className="px-4 pb-28 pt-5 sm:px-6 lg:pb-10">
+        <main className="mx-auto w-full max-w-[1680px] px-4 pb-28 pt-5 sm:px-6 lg:px-8 lg:pb-10 2xl:px-10">
           {isAdminPreviewData ? (
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/25 bg-primary/5 px-3 py-3 text-xs text-muted-foreground">
               <div><p className="font-semibold text-primary">{adminPreviewTrack === "OL" ? "O/L" : "A/L"} sample preview is active</p><p className="mt-1">Changes are saved only in this browser and never enter member or platform data.</p></div>
