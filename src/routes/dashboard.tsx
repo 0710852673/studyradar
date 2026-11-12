@@ -9,8 +9,12 @@ import {
   Sparkles,
   TrendingUp,
   Share2,
+  ArrowUpRight,
+  BookOpenCheck,
+  CalendarDays,
+  Timer,
 } from "lucide-react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Area,
   AreaChart,
@@ -215,7 +219,53 @@ function Dashboard() {
         </div> : <span className="rounded-full border border-primary/20 bg-primary/5 px-3 py-2 text-[10px] font-medium text-primary">Sample student preview</span>}
       </section>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <section className="mb-4 grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
+        <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/[0.13] via-elevated to-elevated p-5 sm:p-6">
+          <div aria-hidden className="pointer-events-none absolute -right-12 -top-16 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />
+          <div className="relative flex flex-wrap items-start justify-between gap-4">
+            <div className="min-w-0">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-background/40 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary">
+                <Sparkles className="h-3 w-3" /> Today&apos;s focus
+              </span>
+              <h2 className="mt-3 font-display text-xl font-semibold tracking-tight sm:text-2xl">
+                Make today count.
+              </h2>
+              <p className="mt-1 max-w-md text-xs leading-relaxed text-muted-foreground sm:text-sm">
+                You&apos;ve logged {fmtHours(today)} of your {profile.dailyGoalHours}h daily goal. Keep the next session focused and intentional.
+              </p>
+            </div>
+            <div className="relative flex h-20 w-20 shrink-0 items-center justify-center rounded-full border-[5px] border-primary/20 sm:h-24 sm:w-24" style={{ background: `conic-gradient(var(--brand) ${goalPct * 3.6}deg, var(--muted) 0deg)` }}>
+              <div className="flex h-[calc(100%-8px)] w-[calc(100%-8px)] flex-col items-center justify-center rounded-full bg-background">
+                <span className="num text-lg font-semibold">{goalPct}%</span>
+                <span className="text-[9px] text-muted-foreground">complete</span>
+              </div>
+            </div>
+          </div>
+          <Progress value={goalPct} className="relative mt-5 h-2" />
+          <div className="relative mt-2 flex items-center justify-between text-[10px] text-muted-foreground">
+            <span>{fmtHours(today)} completed</span>
+            <span>{Math.max(0, profile.dailyGoalHours - today / 60).toFixed(1)}h to go</span>
+          </div>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
+          {[
+            { to: "/subjects" as const, icon: BookOpenCheck, label: "Review subjects", detail: "Pick up where you left off" },
+            { to: "/timer" as const, icon: Timer, label: "Start a focus session", detail: "Turn your next block into progress" },
+            { to: "/calendar" as const, icon: CalendarDays, label: "Plan your week", detail: `${daysLeft} days until your exam` },
+          ].map((action) => (
+            <Link key={action.to} to={action.to} className="group flex min-w-0 items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-all hover:-translate-y-0.5 hover:border-primary/35 hover:bg-elevated">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-primary"><action.icon className="h-5 w-5" /></span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-semibold">{action.label}</span>
+                <span className="mt-0.5 block truncate text-[11px] text-muted-foreground">{action.detail}</span>
+              </span>
+              <ArrowUpRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" />
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
         <StatCard
           label="Today"
           value={fmtHours(today)}
