@@ -222,7 +222,7 @@ function DashboardPreview() {
           <span className="text-sm font-semibold tracking-tight">Your study overview</span>
         </div>
         <span className="rounded-full bg-brand-soft px-2.5 py-1 text-[11px] text-primary">
-          LIVE PREVIEW
+          SAMPLE DASHBOARD
         </span>
       </div>
 
@@ -513,7 +513,7 @@ function Landing() {
                   About us
                 </span>
                 <h2 className="mt-5 font-display text-2xl font-semibold tracking-tight sm:text-4xl">
-                  Built by students, for students sitting the same exams.
+                  A study workspace shaped around Sri Lankan students.
                 </h2>
                 <p className="mt-4 text-sm text-muted-foreground sm:text-base">
                   Study Radar started with a simple frustration: hours of work with nothing to show
@@ -527,7 +527,7 @@ function Landing() {
                 </p>
 
                 <div className="panel mt-7 p-5">
-                  <p className="text-sm font-semibold">A small independent team in Sri Lanka</p>
+                  <p className="text-sm font-semibold">Built around the Sri Lankan exam journey</p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     We build alongside the students who use Study Radar — tell us what to fix next
                     on the contact page.
@@ -615,6 +615,42 @@ function Landing() {
                   </Reveal>
                 ))}
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* PUBLIC FAQ */}
+        <section className="border-t border-border px-5 py-16 sm:px-8 sm:py-24">
+          <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.8fr_1.2fr]">
+            <Reveal>
+              <span className="inline-flex items-center gap-2 rounded-full border border-border bg-elevated px-3 py-1.5 text-xs text-muted-foreground">
+                <Sparkles className="h-3.5 w-3.5 text-primary" /> Quick answers
+              </span>
+              <h2 className="mt-5 font-display text-2xl font-semibold tracking-tight sm:text-4xl">
+                Before you get started
+              </h2>
+              <p className="mt-3 max-w-sm text-sm text-muted-foreground">
+                A few things students usually want to know before setting up their workspace.
+              </p>
+              <Link to="/help" className="mt-5 inline-flex items-center text-sm text-primary hover:underline">
+                Visit the Help Centre <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Reveal>
+            <div className="space-y-3">
+              {[
+                { q: "Is Study Radar for O/L or A/L?", a: "Both. During setup, choose your exam path and configure the subjects that apply to you." },
+                { q: "Are study time and wasted time combined?", a: "No. They are recorded separately, so adding time to one does not change the other." },
+                { q: "Can I use it on my phone?", a: "Yes. The public site and student workspace are designed to adapt to mobile, tablet and desktop screens." },
+                { q: "Can I change my subjects or correct a log?", a: "You can manage your own study records and profile settings from your account. Check the Help Centre for guidance." },
+              ].map((item) => (
+                <details key={item.q} className="panel group p-4 open:border-primary/40 sm:p-5">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-medium">
+                    {item.q}
+                    <span className="text-lg leading-none text-primary transition-transform group-open:rotate-45">+</span>
+                  </summary>
+                  <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">{item.a}</p>
+                </details>
+              ))}
             </div>
           </div>
         </section>
