@@ -1,5 +1,5 @@
-import { useNavigate } from "@tanstack/react-router";
-import { LogOut, Settings, Shield, User as UserIcon } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { LogOut, Settings } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -13,7 +13,7 @@ import { useStudyOS } from "@/lib/studyos/store";
 
 export function initialsFor(name?: string | null, email?: string | null): string {
   const source = (name ?? "").trim() || (email ?? "").split("@")[0] || "";
-  const parts = source.split(/[\s._-]+/).filter(Boolean);
+  const parts = source.split(/[\\s._-]+/).filter(Boolean);
   if (parts.length === 0) return "?";
   const first = parts[0] ?? "";
   const last = parts[parts.length - 1] ?? "";
@@ -22,8 +22,7 @@ export function initialsFor(name?: string | null, email?: string | null): string
 }
 
 export function ProfileMenu() {
-  const { profile, user, avatarSrc, isAdmin, signOut } = useStudyOS();
-  const navigate = useNavigate();
+  const { profile, user, avatarSrc, signOut } = useStudyOS();
   const name = profile?.name || user?.email?.split("@")[0] || "Account";
   const email = user?.email ?? profile?.email ?? "";
 
@@ -46,22 +45,15 @@ export function ProfileMenu() {
           {email ? <p className="truncate text-xs text-muted-foreground">{email}</p> : null}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={() => void navigate({ to: "/settings" })}>
-          <UserIcon className="mr-2 h-4 w-4" /> Profile
+        <DropdownMenuItem asChild>
+          <Link to="/settings">
+            <Settings className="mr-2 h-4 w-4" /> Settings
+          </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => void navigate({ to: "/settings" })}>
-          <Settings className="mr-2 h-4 w-4" /> Settings
-        </DropdownMenuItem>
-        {isAdmin ? (
-          <DropdownMenuItem onSelect={() => void navigate({ to: "/admin" })}>
-            <Shield className="mr-2 h-4 w-4" /> Admin
-          </DropdownMenuItem>
-        ) : null}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onSelect={async () => {
             await signOut();
-            await navigate({ to: "/auth" });
           }}
         >
           <LogOut className="mr-2 h-4 w-4" /> Sign out
