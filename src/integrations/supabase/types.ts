@@ -693,6 +693,13 @@ export type Database = {
         }[]
       }
       get_my_referral_code: { Args: never; Returns: string }
+      get_public_auth_settings: {
+        Args: never
+        Returns: {
+          google_login_enabled: boolean
+          signups_enabled: boolean
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
