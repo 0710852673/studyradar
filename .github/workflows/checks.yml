@@ -19,6 +19,14 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - name: Block tracked environment files
+        shell: bash
+        run: |
+          tracked_env_files="$(git ls-files | grep -E '(^|/)\.env($|\.)' | grep -Ev '(^|/)\.env(\..+)?\.example$' || true)"
+          if [ -n "$tracked_env_files" ]; then
+            echo "::error::Tracked environment files are not allowed. Remove them from Git and use ignored local files."
+            exit 1
+          fi
       - uses: actions/setup-node@v4
         with:
           node-version: 22
