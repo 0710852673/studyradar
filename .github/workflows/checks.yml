@@ -6,9 +6,17 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: study-radar-checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test-and-build:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -16,7 +24,9 @@ jobs:
           node-version: 22
           cache: npm
       - uses: oven-sh/setup-bun@v2
-      - run: npm install --no-audit --no-fund
+      - run: npm ci --no-fund
+      - name: Audit production and development dependencies
+        run: npm audit --audit-level=high
       - run: "npm run lint -- --rule 'prettier/prettier: off' --rule '@typescript-eslint/no-explicit-any: off'"
       - run: bun test tests
       - run: npx tsc --noEmit
