@@ -700,6 +700,18 @@ export type Database = {
           signups_enabled: boolean
         }[]
       }
+      get_public_site_settings: {
+        Args: never
+        Returns: {
+          announcement: string | null
+          announcement_active: boolean
+          google_login_enabled: boolean
+          maintenance_message: string
+          maintenance_mode: boolean
+          max_writes_per_minute: number
+          signups_enabled: boolean
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
