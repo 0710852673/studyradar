@@ -213,26 +213,28 @@ function AuthPage() {
         /* ignore */
       }
     }
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-    });
-    const err = (result as { error?: unknown }).error;
-    if (err) {
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      const err = (result as { error?: unknown }).error;
+      if (err) throw err instanceof Error ? err : new Error(String(err));
+      if (result.redirected) return;
+      void navigate({ to: "/dashboard", replace: true });
+    } catch (cause) {
       try {
         sessionStorage.removeItem("sr_pending_referral");
       } catch {
         /* ignore */
       }
-      fail(err instanceof Error ? err.message : "Google sign-in failed.");
+      const detail = cause instanceof Error ? cause.message : String(cause);
+      fail(detail || "Google sign-in failed. Please try again.");
       void logSecurityEvent("google_sign_in_failed", {
         severity: "warning",
-        detail: err instanceof Error ? err.message : "unknown",
+        detail: detail || "unknown",
       });
       setBusy(false);
-      return;
     }
-    if (result.redirected) return;
-    void navigate({ to: "/dashboard", replace: true });
   };
 
   return (
