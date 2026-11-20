@@ -163,9 +163,9 @@ export function StudyOSProvider({ children }: { children: ReactNode }) {
   const userId = session?.user?.id ?? null;
 
   const refreshSettings = useCallback(async () => {
-    const { data: s } = await supabase.from("site_settings").select("*").maybeSingle();
-    if (!s) return;
-    const r = s as Record<string, unknown>;
+    const { data, error } = await supabase.rpc("get_public_site_settings");
+    if (error || !data?.length) return;
+    const r = data[0] as Record<string, unknown>;
     setSettings({
       maintenanceMode: Boolean(r["maintenance_mode"]),
       maintenanceMessage: String(r["maintenance_message"] ?? DEFAULT_SETTINGS.maintenanceMessage),
